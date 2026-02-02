@@ -12,7 +12,7 @@ export async function repliersFetch<T>(
 ): Promise<T> {
   const apiKey = process.env.REPLIERS_API_KEY;
   if (!apiKey) {
-    throw new Error("Missing REPLIERS_API_KEY");
+    throw new Error("Missing REPLIERS_API_KEY (not set in env)");
   }
 
   const { method = "GET", body, headers = {} } = options;
@@ -20,7 +20,7 @@ export async function repliersFetch<T>(
     method,
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "X-API-KEY": apiKey,
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,

@@ -8,6 +8,14 @@ export async function GET(request: Request) {
   const location = searchParams.get("location") ?? "Nantucket, MA";
 
   try {
+    const apiKey = process.env.REPLIERS_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Missing REPLIERS_API_KEY on the server" },
+        { status: 500 }
+      );
+    }
+
     // This payload uses the Repliers Listings Search with aggregates to compute market stats.
     const body = {
       filters: {
