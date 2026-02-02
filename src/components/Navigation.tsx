@@ -1,4 +1,5 @@
 import { Menu, X } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 
 export function Navigation() {
@@ -10,7 +11,14 @@ export function Navigation() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h3 className="text-[#0A1A2F] tracking-tight">NantucketHouses</h3>
+            <Image
+              src="/Nantucket Houses_Master_logo.png"
+              alt="Nantucket Houses"
+              width={180}
+              height={48}
+              priority
+              className="h-12 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}
