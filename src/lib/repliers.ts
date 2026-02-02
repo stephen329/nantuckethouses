@@ -16,7 +16,12 @@ export async function repliersFetch<T>(
   }
 
   const { method = "GET", body, headers = {} } = options;
-  const res = await fetch(`${REPLIERS_BASE_URL}${path}`, {
+
+  // Add api_key as a query param (some gateways are strict on header parsing).
+  const url = new URL(`${REPLIERS_BASE_URL}${path}`);
+  url.searchParams.set("api_key", apiKey);
+
+  const res = await fetch(url, {
     method,
     headers: {
       "Content-Type": "application/json",
