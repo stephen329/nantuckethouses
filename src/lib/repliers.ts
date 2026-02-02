@@ -20,6 +20,8 @@ export async function repliersFetch<T>(
     method,
     headers: {
       "Content-Type": "application/json",
+      // Send both casings to be safe with upstream header handling.
+      "x-api-key": apiKey,
       "X-API-KEY": apiKey,
       ...headers,
     },
