@@ -1,36 +1,115 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+"use client";
+
+import { useEffect, useState } from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+
+type StatCard = {
+  label: string;
+  value: string;
+  change?: string;
+  isPositive?: boolean;
+  period?: string;
+};
+
+type MarketStatsResponse = {
+  data?: {
+    aggregates?: Record<string, unknown>;
+  };
+  error?: string;
+};
+
+const FALLBACK_STATS: StatCard[] = [
+  {
+    label: "Median Sale Price",
+    value: "$3.2M",
+    change: "+12.3%",
+    isPositive: true,
+    period: "YoY",
+  },
+  {
+    label: "Days on Market",
+    value: "42",
+    change: "-8 days",
+    isPositive: true,
+    period: "vs. prior",
+  },
+  {
+    label: "Active Listings",
+    value: "187",
+    change: "-15.2%",
+    isPositive: false,
+    period: "YoY",
+  },
+  {
+    label: "Sales Volume",
+    value: "$89M",
+    change: "+18.4%",
+    isPositive: true,
+    period: "Recent Period",
+  },
+];
 
 export function MarketStats() {
-  const stats = [
-    {
-      label: 'Median Sale Price',
-      value: '$3.2M',
-      change: '+12.3%',
-      isPositive: true,
-      period: 'YoY'
-    },
-    {
-      label: 'Days on Market',
-      value: '42',
-      change: '-8 days',
-      isPositive: true,
-      period: 'vs. 2025'
-    },
-    {
-      label: 'Active Listings',
-      value: '187',
-      change: '-15.2%',
-      isPositive: false,
-      period: 'YoY'
-    },
-    {
-      label: 'Sales Volume',
-      value: '$89M',
-      change: '+18.4%',
-      isPositive: true,
-      period: 'Q1 2026'
+  const [stats, setStats] = useState<StatCard[]>(FALLBACK_STATS);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/market-stats?location=Nantucket, MA", {
+          cache: "no-store",
+        });
+        const json = (await res.json()) as MarketStatsResponse;
+
+        if (!res.ok || json.error) {
+          throw new Error(json.error || "Failed to load stats");
+        }
+
+        // NOTE: shape depends on Repliers aggregates response; adjust mapping as needed.
+        const aggregates =
+          (json.data as { aggregates?: Record<string, unknown> } | undefined)
+            ?.aggregates ?? {};
+        const nextStats: StatCard[] = [
+          {
+            label: "Median List Price",
+            value: formatCurrency(aggregates.medianListPrice),
+            period: "Latest",
+          },
+          {
+            label: "Median Days on Market",
+            value: formatNumber(aggregates.medianDaysOnMarket),
+            period: "Latest",
+          },
+          {
+            label: "Active Listings",
+            value: formatNumber(aggregates.activeListingCount),
+            period: "Current",
+          },
+          {
+            label: "Sales Volume",
+            value: formatCurrency(aggregates.totalSalesVolume),
+            period: "Latest",
+          },
+        ].filter((s) => s.value !== "N/A");
+
+        if (!cancelled && nextStats.length) {
+          setStats(nextStats);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Unable to load stats");
+        }
+      }
     }
-  ];
+
+    loadStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <section id="market-insights" className="py-24 bg-[#E8E8E8]">
@@ -40,6 +119,11 @@ export function MarketStats() {
           <p className="text-xl max-w-2xl opacity-75">
             Exclusive access to real-time data and proprietary insights that give you an edge in Nantucket's competitive market.
           </p>
+          {error && (
+            <p className="mt-2 text-sm text-[#F28F7D]">
+              Showing fallback figures (live data unavailable): {error}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -77,4 +161,20 @@ export function MarketStats() {
       </div>
     </section>
   );
+}
+
+function formatCurrency(value: unknown) {
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num)) return "N/A";
+  return num.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+}
+
+function formatNumber(value: unknown) {
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num)) return "N/A";
+  return num.toLocaleString("en-US");
 }
