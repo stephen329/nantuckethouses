@@ -1,0 +1,67 @@
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
+
+export function Navigation() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#E8E8E8]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <h3 className="text-[#0A1A2F] tracking-tight">NantucketHouses</h3>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#properties" className="text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Properties
+            </a>
+            <a href="#market-insights" className="text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Market Insights
+            </a>
+            <a href="#services" className="text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Services
+            </a>
+            <a href="#about" className="text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              About
+            </a>
+            <button className="bg-[#3A5C7E] text-white px-6 py-2.5 rounded-md hover:bg-[#2d4860] transition-colors">
+              Contact
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-[#0A1A2F]"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="md:hidden pb-6 space-y-4">
+            <a href="#properties" className="block text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Properties
+            </a>
+            <a href="#market-insights" className="block text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Market Insights
+            </a>
+            <a href="#services" className="block text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              Services
+            </a>
+            <a href="#about" className="block text-[#0A1A2F] hover:text-[#3A5C7E] transition-colors">
+              About
+            </a>
+            <button className="w-full bg-[#3A5C7E] text-white px-6 py-2.5 rounded-md hover:bg-[#2d4860] transition-colors">
+              Contact
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
