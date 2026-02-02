@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       limit: 0, // no listings needed, just aggregates
     };
 
-    const data = await repliersFetch<unknown>("/listings/search", {
+    const data = await repliersFetch<unknown>("/v2/listings/search", {
       method: "POST",
       body,
     });
