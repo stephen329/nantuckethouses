@@ -25,9 +25,12 @@ export async function repliersFetch<T>(
     method,
     headers: {
       "Content-Type": "application/json",
-      // Send both casings to be safe with upstream header handling.
+      // Send multiple key headers to satisfy varying API gateway expectations.
       "x-api-key": apiKey,
       "X-API-KEY": apiKey,
+      "api-key": apiKey,
+      Authorization: apiKey,
+      authorization: apiKey,
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,
