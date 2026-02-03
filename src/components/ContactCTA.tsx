@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from 'react';
-import { Mail, Phone, Instagram, Home, TrendingUp, Key, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, Instagram, Home, TrendingUp, Key, ArrowLeft, CheckCircle } from 'lucide-react';
 
 type InterestType = 'buy' | 'sell' | 'rent' | null;
 
 export function ContactCTA() {
   const [step, setStep] = useState<1 | 2>(1);
   const [interest, setInterest] = useState<InterestType>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const handleInterestSelect = (type: InterestType) => {
     setInterest(type);
@@ -18,6 +19,12 @@ export function ContactCTA() {
     setStep(1);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Add actual form submission logic here
+    setSubmitted(true);
+  };
+
   const interestLabels: Record<NonNullable<InterestType>, string> = {
     buy: 'Buying a Property',
     sell: 'Selling a Property',
@@ -25,7 +32,7 @@ export function ContactCTA() {
   };
 
   return (
-    <section className="py-24 bg-[#FAF8F5]">
+    <section id="contact" className="py-24 bg-[#FAF8F5]">
       <div className="max-w-5xl mx-auto px-6 lg:px-8">
         <div className="bg-[#1A2A3A] rounded-sm overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -114,8 +121,23 @@ export function ContactCTA() {
                     </button>
                   </div>
                 </div>
+              ) : submitted ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-[#C9A227]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="w-8 h-8 text-[#C9A227]" />
+                  </div>
+                  <h3 className="text-[#1A2A3A] text-xl font-serif mb-4">
+                    Inquiry Received
+                  </h3>
+                  <p className="text-[#1A2A3A]/70 mb-4">
+                    Your inquiry has been received. Our office will reach out shortly for a private consultation.
+                  </p>
+                  <p className="text-[#1A2A3A]/50 text-sm italic">
+                    Typical response time: within 24 hours
+                  </p>
+                </div>
               ) : (
-                <form className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="flex items-center gap-3 mb-6">
                     <button
                       type="button"
@@ -137,6 +159,7 @@ export function ContactCTA() {
                     <input
                       type="text"
                       id="name"
+                      required
                       className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors"
                       placeholder="John Smith"
                     />
@@ -149,6 +172,7 @@ export function ContactCTA() {
                     <input
                       type="email"
                       id="email"
+                      required
                       className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors"
                       placeholder="john@example.com"
                     />

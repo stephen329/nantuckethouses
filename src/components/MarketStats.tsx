@@ -36,6 +36,7 @@ const FALLBACK_STATS: StatCard[] = [
 export function MarketStats() {
   const [stats, setStats] = useState<StatCard[]>(FALLBACK_STATS);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +76,7 @@ export function MarketStats() {
 
         if (!cancelled && nextStats.length) {
           setStats(nextStats);
+          setLastUpdated(new Date());
         }
       } catch (err) {
         if (!cancelled) {
@@ -126,8 +128,15 @@ export function MarketStats() {
           ))}
         </div>
 
+        {/* Last Updated Timestamp */}
+        <p className="mt-4 text-center text-sm opacity-50">
+          Last updated: {lastUpdated 
+            ? lastUpdated.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : 'February 2026'}
+        </p>
+
         {/* Interpretive Line */}
-        <p className="mt-8 text-center text-lg opacity-70 italic max-w-3xl mx-auto">
+        <p className="mt-6 text-center text-lg opacity-70 italic max-w-3xl mx-auto">
           The value isn't the numbers—it's understanding what they signal before the market reacts.
         </p>
 
@@ -155,15 +164,6 @@ export function MarketStats() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
-          <button className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors">
-            Download Full Market Report
-          </button>
-          <a href="#" className="text-[#1A2A3A] hover:text-[#C9A227] transition-colors flex items-center gap-2 font-medium">
-            What I'm watching right now
-            <span className="text-lg">→</span>
-          </a>
-        </div>
       </div>
     </section>
   );

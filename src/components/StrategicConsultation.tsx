@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Home, Building2, Castle, TrendingUp } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Home, Building2, Castle, TrendingUp, CheckCircle } from 'lucide-react';
 
 type ObjectiveType = 'residential' | 'development' | 'compound' | 'investment' | null;
 
@@ -9,6 +9,13 @@ export function StrategicConsultation() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [objective, setObjective] = useState<ObjectiveType>(null);
   const [technicalNeeds, setTechnicalNeeds] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Add actual form submission logic here
+    setSubmitted(true);
+  };
 
   const objectives = [
     {
@@ -185,8 +192,8 @@ export function StrategicConsultation() {
           )}
 
           {/* Step 3: Contact Information */}
-          {step === 3 && (
-            <form className="space-y-8">
+          {step === 3 && !submitted && (
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div className="flex items-center gap-4">
                 <button
                   type="button"
@@ -217,6 +224,7 @@ export function StrategicConsultation() {
                   </label>
                   <input
                     type="text"
+                    required
                     className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40"
                     placeholder="John Smith"
                   />
@@ -228,6 +236,7 @@ export function StrategicConsultation() {
                   </label>
                   <input
                     type="email"
+                    required
                     className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40"
                     placeholder="john@example.com"
                   />
@@ -259,6 +268,24 @@ export function StrategicConsultation() {
                 All inquiries are handled with complete confidentiality.
               </p>
             </form>
+          )}
+
+          {/* Confirmation State */}
+          {submitted && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-[#C9A227]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-[#C9A227]" />
+              </div>
+              <h3 className="text-[#1A2A3A] text-2xl font-serif mb-4">
+                Inquiry Received
+              </h3>
+              <p className="text-[#1A2A3A]/70 text-lg max-w-md mx-auto mb-6">
+                Your inquiry has been received. Our office will reach out shortly for a private consultation.
+              </p>
+              <p className="text-[#1A2A3A]/50 text-sm italic">
+                Typical response time: within 24 hours
+              </p>
+            </div>
           )}
         </div>
 

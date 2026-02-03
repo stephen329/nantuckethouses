@@ -23,21 +23,15 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#properties" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
-              Properties
-            </a>
-            <a href="#market-insights" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
-              Market Insights
-            </a>
             <a href="#services" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               Services
             </a>
             <a href="#about" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               About
             </a>
-            <button className="bg-[#C9A227] text-white px-6 py-2.5 rounded-md hover:bg-[#B89220] transition-colors">
+            <a href="#contact" className="bg-[#C9A227] text-white px-6 py-2.5 rounded-md hover:bg-[#B89220] transition-colors">
               Contact
-            </button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -52,21 +46,15 @@ export function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden pb-6 space-y-4">
-            <a href="#properties" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
-              Properties
-            </a>
-            <a href="#market-insights" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
-              Market Insights
-            </a>
             <a href="#services" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               Services
             </a>
             <a href="#about" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               About
             </a>
-            <button className="w-full bg-[#C9A227] text-white px-6 py-2.5 rounded-md hover:bg-[#B89220] transition-colors">
+            <a href="#contact" className="block w-full text-center bg-[#C9A227] text-white px-6 py-2.5 rounded-md hover:bg-[#B89220] transition-colors">
               Contact
-            </button>
+            </a>
           </div>
         )}
       </div>

@@ -41,14 +41,11 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors flex items-center gap-2 group">
-            <span>Explore The Collection</span>
+        <div className="flex justify-center">
+          <a href="https://calendly.com/stephen-maury/30min" target="_blank" rel="noopener noreferrer" className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors flex items-center gap-2 group">
+            <span>Request a Private Consultation</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button className="border-2 border-white text-white px-8 py-4 rounded-md hover:bg-white hover:text-[#1A2A3A] transition-all">
-            Get the 2026 Market Forecast
-          </button>
+          </a>
         </div>
       </div>
 

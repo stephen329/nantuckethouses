@@ -29,7 +29,7 @@ export function MarketThinking() {
             </p>
           </div>
 
-          <a href="#" className="inline-flex items-center gap-2 text-[#C9A227] hover:text-[#B89220] transition-colors font-medium">
+          <a href="#contact" className="inline-flex items-center gap-2 text-[#C9A227] hover:text-[#B89220] transition-colors font-medium">
             Discuss current market conditions
             <ArrowRight className="w-4 h-4" />
           </a>

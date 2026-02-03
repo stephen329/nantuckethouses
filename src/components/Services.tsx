@@ -3,6 +3,21 @@ import { FileCheck, Network, MapPin, Search, Landmark } from 'lucide-react';
 export function Services() {
   const services = [
     {
+      icon: Search,
+      title: 'Buyer & Seller Advisory',
+      description: 'I evaluate properties, advise on timing and structure, and negotiate terms that protect your position—whether buying or selling.'
+    },
+    {
+      icon: Landmark,
+      title: 'Strategic Land Use & Acquisition',
+      description: 'I advise on land acquisition strategy, zoning optimization, and long-term asset positioning for developers and investors.'
+    },
+    {
+      icon: MapPin,
+      title: 'Site Feasibility & Repurposing',
+      description: 'From residential subdivisions to brownfield conversions, I identify the hidden potential in complex sites that others overlook.'
+    },
+    {
       icon: FileCheck,
       title: 'Entitlement & Planning Strategy',
       description: 'Leverage firsthand experience representing projects before the Planning Board to navigate the island\'s most rigorous regulatory hurdles.'
@@ -11,21 +26,6 @@ export function Services() {
       icon: Network,
       title: 'The Development Ecosystem',
       description: 'Direct access to a vetted network of island attorneys, engineers, and architects to streamline the pre-construction phase and mitigate risk.'
-    },
-    {
-      icon: MapPin,
-      title: 'Site Feasibility & Repurposing',
-      description: 'From residential subdivisions to brownfield conversions, I identify the hidden potential in complex sites that others overlook.'
-    },
-    {
-      icon: Landmark,
-      title: 'Strategic Land Use & Acquisition',
-      description: 'I advise on land acquisition strategy, zoning optimization, and long-term asset positioning for developers and investors.'
-    },
-    {
-      icon: Search,
-      title: 'Buyer & Seller Advisory',
-      description: 'I evaluate properties, advise on timing and structure, and negotiate terms that protect your position—whether buying or selling.'
     }
   ];
 

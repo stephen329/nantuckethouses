@@ -30,7 +30,7 @@ export function DeveloperEdge() {
             </p>
             <div className="mb-6">
               <p className="text-white text-4xl font-light mb-1">15+</p>
-              <p className="text-white/60 text-sm">Years representing projects before town agencies</p>
+              <p className="text-white/60 text-sm">Years preparing client and personal projects for town review</p>
             </div>
             <ul className="space-y-3 text-white/70 text-sm">
               <li className="flex items-start gap-2">
@@ -48,6 +48,10 @@ export function DeveloperEdge() {
               <li className="flex items-start gap-2">
                 <span className="text-[#C9A227] mt-1">•</span>
                 Zoning Board of Appeals hearings
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#C9A227] mt-1">•</span>
+                12 years Finance Committee fiscal oversight
               </li>
             </ul>
           </div>
@@ -79,10 +83,10 @@ export function DeveloperEdge() {
 
         {/* CTA */}
         <div className="text-center">
-          <button className="bg-[#C9A227] text-[#1A2A3A] px-10 py-5 rounded-md hover:bg-[#B89220] transition-colors inline-flex items-center gap-3 group text-lg font-medium">
+          <a href="https://calendly.com/stephen-maury/30min" target="_blank" rel="noopener noreferrer" className="bg-[#C9A227] text-[#1A2A3A] px-10 py-5 rounded-md hover:bg-[#B89220] transition-colors inline-flex items-center gap-3 group text-lg font-medium">
             <span>Consult on Project Feasibility</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
           <p className="text-white/40 text-sm mt-4">
             For developers, investors, and landowners navigating complex Nantucket projects.
           </p>

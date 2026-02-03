@@ -7,7 +7,6 @@ import { LegacySection } from "@/components/LegacySection";
 import { DeveloperEdge } from "@/components/DeveloperEdge";
 import { CaseStudy } from "@/components/CaseStudy";
 import { Services } from "@/components/Services";
-import { Testimonials } from "@/components/Testimonials";
 import { StrategicConsultation } from "@/components/StrategicConsultation";
 import { MarketThinking } from "@/components/MarketThinking";
 import { About } from "@/components/About";
@@ -23,7 +22,6 @@ export default function Home() {
       <LegacySection />
       <DeveloperEdge />
       <CaseStudy />
-      <Testimonials />
       <Services />
       <StrategicConsultation />
       <MarketThinking />

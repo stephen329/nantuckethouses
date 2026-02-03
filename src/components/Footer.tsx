@@ -42,16 +42,6 @@ export function Footer() {
             <h4 className="text-white mb-4 text-sm uppercase tracking-wider font-semibold">Quick Links</h4>
             <ul className="space-y-3 text-white/70">
               <li>
-                <a href="#properties" className="hover:text-[#D6C8B0] transition-colors">
-                  Browse Properties
-                </a>
-              </li>
-              <li>
-                <a href="#market-insights" className="hover:text-[#D6C8B0] transition-colors">
-                  Market Reports
-                </a>
-              </li>
-              <li>
                 <a href="#services" className="hover:text-[#D6C8B0] transition-colors">
                   Services
                 </a>
@@ -59,6 +49,11 @@ export function Footer() {
               <li>
                 <a href="#about" className="hover:text-[#D6C8B0] transition-colors">
                   About Stephen
+                </a>
+              </li>
+              <li>
+                <a href="https://calendly.com/stephen-maury/30min" target="_blank" rel="noopener noreferrer" className="hover:text-[#D6C8B0] transition-colors">
+                  Request Consultation
                 </a>
               </li>
             </ul>
@@ -84,7 +79,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#D6C8B0] transition-colors">
+                <a href="https://calendly.com/stephen-maury/30min" target="_blank" rel="noopener noreferrer" className="hover:text-[#D6C8B0] transition-colors">
                   Contact
                 </a>
               </li>

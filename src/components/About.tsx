@@ -14,7 +14,7 @@ export function About() {
     },
     {
       icon: TrendingUp,
-      value: 'Decades',
+      value: 'Two Decades',
       label: 'of Market Cycles Navigated'
     }
   ];
@@ -51,26 +51,6 @@ export function About() {
                 A significant portion of my advisory work is never made public.
               </p>
             </div>
-
-            {/* When the Market Isn't Clear */}
-            <div className="mt-10 p-6 bg-white rounded-sm border border-[#D6C8B0]">
-              <h3 className="text-[#1A2A3A] mb-4 text-xl">When the Market Isn't Clear</h3>
-              <p className="text-sm opacity-70 mb-4">I advise on decisions where standard market data falls short:</p>
-              <ul className="space-y-2">
-                {complexityAreas.map((area, index) => (
-                  <li key={index} className="flex items-center gap-3 text-[#1A2A3A]">
-                    <span className="w-1.5 h-1.5 bg-[#C9A227] rounded-full flex-shrink-0"></span>
-                    {area}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-8">
-              <button className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors">
-                Schedule a Confidential Discussion
-              </button>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
@@ -87,6 +67,26 @@ export function About() {
               );
             })}
           </div>
+        </div>
+
+        {/* When the Market Isn't Clear - Full Width */}
+        <div className="mt-16 p-8 md:p-10 bg-white rounded-sm border border-[#D6C8B0]">
+          <h3 className="text-[#1A2A3A] mb-4 text-xl">When the Market Isn't Clear</h3>
+          <p className="text-sm opacity-70 mb-6">I advise on decisions where standard market data falls short:</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {complexityAreas.map((area, index) => (
+              <div key={index} className="flex items-center gap-3 text-[#1A2A3A]">
+                <span className="w-1.5 h-1.5 bg-[#C9A227] rounded-full flex-shrink-0"></span>
+                {area}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10 text-center">
+          <a href="#contact" className="inline-block bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors">
+            Schedule a Confidential Discussion
+          </a>
         </div>
       </div>
     </section>
