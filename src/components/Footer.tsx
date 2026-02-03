@@ -2,7 +2,7 @@ import { Instagram, Linkedin, Mail } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-[#0A1A2F] text-white py-16">
+    <footer className="bg-[#1A2A3A] text-white py-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
@@ -16,7 +16,7 @@ export function Footer() {
                 href="https://instagram.com/stephenmaury_nantucketbroker"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#3A5C7E] transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#C9A227] transition-colors"
               >
                 <Instagram className="w-5 h-5" />
               </a>
@@ -24,13 +24,13 @@ export function Footer() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#3A5C7E] transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#C9A227] transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
                 href="mailto:stephen@nantuckethouses.com"
-                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#3A5C7E] transition-colors"
+                className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#C9A227] transition-colors"
               >
                 <Mail className="w-5 h-5" />
               </a>

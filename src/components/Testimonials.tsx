@@ -1,29 +1,29 @@
 export function Testimonials() {
   const testimonials = [
     {
-      quote: "Stephen's knowledge of the Nantucket market is unparalleled. He helped us navigate a competitive bidding situation with grace and strategy, ultimately securing our dream home.",
+      quote: "We were about to overbid by $400K on a property with undisclosed drainage issues. Stephen identified the problem during a walkthrough, advised us to walk away, and two weeks later found us a better home for $200K less. That single decision saved us from a costly mistake.",
       author: "Elizabeth & Robert M.",
       location: "Siasconset"
     },
     {
-      quote: "When it came time to sell our family estate, we needed someone who understood not just the property value, but the emotional significance. Stephen exceeded every expectation.",
+      quote: "Our family had owned the property for three generations. Stephen advised us to wait six months rather than list immediately—against conventional wisdom. When we did sell, we received $800K more than the original offer. His read on the market was exactly right.",
       author: "The Harrison Family",
       location: "Monomoy"
     },
     {
-      quote: "As first-time island buyers, we were overwhelmed. Stephen's concierge approach made the entire process seamless, from property search to connecting us with island resources.",
+      quote: "We were deciding between two properties and running out of time. Stephen evaluated the zoning implications of each, identified a subdivision restriction on our first choice, and helped us move quickly on the better option before it went to another buyer.",
       author: "Jennifer K.",
       location: "Town Center"
     }
   ];
 
   return (
-    <section className="py-24 bg-[#0A1A2F]">
+    <section className="py-24 bg-[#1A2A3A]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-left mb-16">
           <h2 className="mb-4 text-white">Trusted by Island Families</h2>
           <p className="text-xl max-w-2xl text-white/80">
-            Building lasting relationships through exceptional service and results.
+            Most of this work happens quietly. These are a few public reflections.
           </p>
         </div>
 

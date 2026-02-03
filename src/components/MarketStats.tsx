@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
 
 type StatCard = {
   label: string;
   value: string;
-  change?: string;
-  isPositive?: boolean;
   period?: string;
 };
 
@@ -20,32 +17,19 @@ type MarketStatsResponse = {
 
 const FALLBACK_STATS: StatCard[] = [
   {
-    label: "Median Sale Price",
-    value: "$3.2M",
-    change: "+12.3%",
-    isPositive: true,
-    period: "YoY",
-  },
-  {
-    label: "Days on Market",
-    value: "42",
-    change: "-8 days",
-    isPositive: true,
-    period: "vs. prior",
-  },
-  {
     label: "Active Listings",
-    value: "187",
-    change: "-15.2%",
-    isPositive: false,
-    period: "YoY",
+    value: "83",
+    period: "Current",
   },
   {
-    label: "Sales Volume",
-    value: "$89M",
-    change: "+18.4%",
-    isPositive: true,
-    period: "Recent Period",
+    label: "Median List Price",
+    value: "$3.1M",
+    period: "Latest",
+  },
+  {
+    label: "Median Days on Market",
+    value: "135",
+    period: "Latest",
   },
 ];
 
@@ -73,6 +57,11 @@ export function MarketStats() {
             ?.aggregates ?? {};
         const nextStats: StatCard[] = [
           {
+            label: "Active Listings",
+            value: formatNumber(aggregates.activeListingCount),
+            period: "Current",
+          },
+          {
             label: "Median List Price",
             value: formatCurrency(aggregates.medianListPrice),
             period: "Latest",
@@ -80,16 +69,6 @@ export function MarketStats() {
           {
             label: "Median Days on Market",
             value: formatNumber(aggregates.medianDaysOnMarket),
-            period: "Latest",
-          },
-          {
-            label: "Active Listings",
-            value: formatNumber(aggregates.activeListingCount),
-            period: "Current",
-          },
-          {
-            label: "Sales Volume",
-            value: formatCurrency(aggregates.totalSalesVolume),
             period: "Latest",
           },
         ].filter((s) => s.value !== "N/A");
@@ -115,9 +94,9 @@ export function MarketStats() {
     <section id="market-insights" className="py-24 bg-[#E8E8E8]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-left mb-16">
-          <h2 className="mb-4">Live Market Intelligence</h2>
+          <h2 className="mb-4">The Nantucket Index</h2>
           <p className="text-xl max-w-2xl opacity-75">
-            Exclusive access to real-time data and proprietary insights that give you an edge in Nantucket's competitive market.
+            Interpreted through local judgment, not algorithms.
           </p>
           {error && (
             <p className="mt-2 text-sm text-[#F28F7D]">
@@ -126,37 +105,64 @@ export function MarketStats() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {stats.map((stat, index) => (
             <div
               key={index}
               className="bg-white p-8 border border-[#D6C8B0] rounded-sm hover:shadow-lg transition-shadow"
             >
-              <div className="mb-4">
+              <div>
                 <p className="text-sm uppercase tracking-wider opacity-60 mb-2">
                   {stat.label}
                 </p>
-                <h3 className="text-[#0A1A2F]">{stat.value}</h3>
+                <h3 className="text-[#1A2A3A]">{stat.value}</h3>
               </div>
-              <div className="flex items-center gap-2 pt-4 border-t border-[#E8E8E8]">
-                {stat.isPositive ? (
-                  <TrendingUp className="w-4 h-4 text-[#A8D5C2]" />
-                ) : (
-                  <TrendingDown className="w-4 h-4 text-[#F28F7D]" />
-                )}
-                <span className={`text-sm ${stat.isPositive ? 'text-[#A8D5C2]' : 'text-[#F28F7D]'}`}>
-                  {stat.change}
-                </span>
-                <span className="text-sm opacity-50">{stat.period}</span>
-              </div>
+              {stat.period && (
+                <div className="pt-4 mt-4 border-t border-[#E8E8E8]">
+                  <span className="text-sm opacity-50">{stat.period}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <button className="bg-[#3A5C7E] text-white px-8 py-4 rounded-md hover:bg-[#2d4860] transition-colors">
+        {/* Interpretive Line */}
+        <p className="mt-8 text-center text-lg opacity-70 italic max-w-3xl mx-auto">
+          The value isn't the numbers—it's understanding what they signal before the market reacts.
+        </p>
+
+        {/* Planning & Regulatory Update */}
+        <div className="mt-12 bg-white p-8 border border-[#D6C8B0] rounded-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <p className="text-[#C9A227] text-sm uppercase tracking-wider font-medium mb-2">
+                Planning & Regulatory Update
+              </p>
+              <h4 className="text-[#1A2A3A] text-xl font-medium mb-2">
+                Q1 2026: Zoning Review in Progress
+              </h4>
+              <p className="text-[#1A2A3A]/70 leading-relaxed max-w-2xl">
+                The Planning Board is currently reviewing proposed amendments to residential density requirements in the Mid-Island zone. I'm monitoring implications for development feasibility and advising clients accordingly.
+              </p>
+            </div>
+            <a 
+              href="#" 
+              className="shrink-0 text-[#C9A227] hover:text-[#B89220] transition-colors flex items-center gap-2 font-medium whitespace-nowrap"
+            >
+              View Current Planning Updates
+              <span className="text-lg">→</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
+          <button className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors">
             Download Full Market Report
           </button>
+          <a href="#" className="text-[#1A2A3A] hover:text-[#C9A227] transition-colors flex items-center gap-2 font-medium">
+            What I'm watching right now
+            <span className="text-lg">→</span>
+          </a>
         </div>
       </div>
     </section>

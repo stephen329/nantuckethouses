@@ -2,32 +2,52 @@ import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
   return (
-    <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+    <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1578338402915-bd6a1838b746?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxOYW50dWNrZXQlMjBhZXJpYWwlMjBjb2FzdGxpbmV8ZW58MXx8fHwxNzA0MDQ0NzEwfDA&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="Aerial view of Nantucket coastline"
+          src="/nantucket-houses-hp.webp"
+          alt="Nantucket Houses"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-[#0A1A2F] opacity-50"></div>
+        <div className="absolute inset-0 bg-[#1A2A3A] opacity-50"></div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 text-center text-white">
-        <h1 className="mb-6">
-          The Nantucket Real Estate<br />Experience You Deserve
+        <h1 className="mb-4">
+          The Only Market Knowledge That Matters<br />is the Kind You Can't Google
         </h1>
-        <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-10 font-light tracking-wide opacity-95">
-          Proprietary market insights, decades of island expertise, and a commitment to exceptional service for discerning buyers and sellers.
+        
+        <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-8 font-light tracking-wide opacity-95">
+          Market intelligence is everywhere. Judgment is not.
         </p>
+
+        {/* Personal Authority Block */}
+        <div className="flex flex-col items-center mb-10">
+          <div className="flex items-center gap-4 mb-4">
+            <img
+              src="/stephen maury.webp"
+              alt="Stephen Maury"
+              className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+            />
+            <div className="text-left">
+              <p className="text-lg font-semibold">Led by Stephen Maury</p>
+              <p className="text-sm opacity-80">Owner & Principal Broker, Congdon & Coleman Real Estate</p>
+            </div>
+          </div>
+          <p className="text-base max-w-2xl opacity-80 italic">
+            Born and raised on Nantucket, I advise buyers, sellers, and families through complex, high-stakes real estate decisions.
+          </p>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button className="bg-[#3A5C7E] text-white px-8 py-4 rounded-md hover:bg-[#2d4860] transition-colors flex items-center gap-2 group">
-            <span>Explore Available Properties</span>
+          <button className="bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors flex items-center gap-2 group">
+            <span>Explore The Collection</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
-          <button className="border-2 border-white text-white px-8 py-4 rounded-md hover:bg-white hover:text-[#0A1A2F] transition-all">
-            Request Market Analysis
+          <button className="border-2 border-white text-white px-8 py-4 rounded-md hover:bg-white hover:text-[#1A2A3A] transition-all">
+            Get the 2026 Market Forecast
           </button>
         </div>
       </div>

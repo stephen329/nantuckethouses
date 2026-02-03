@@ -17,20 +17,13 @@ export async function repliersFetch<T>(
 
   const { method = "GET", body, headers = {} } = options;
 
-  // Add api_key as a query param (some gateways are strict on header parsing).
   const url = new URL(`${REPLIERS_BASE_URL}${path}`);
-  url.searchParams.set("api_key", apiKey);
 
   const res = await fetch(url, {
     method,
     headers: {
       "Content-Type": "application/json",
-      // Send multiple key headers to satisfy varying API gateway expectations.
-      "x-api-key": apiKey,
-      "X-API-KEY": apiKey,
-      "api-key": apiKey,
-      Authorization: apiKey,
-      authorization: apiKey,
+      "REPLIERS-API-KEY": apiKey,
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,
