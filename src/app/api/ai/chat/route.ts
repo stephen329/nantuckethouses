@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
+// Force dynamic rendering - no caching for fresh MLS data
+export const dynamic = "force-dynamic";
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? "" });
 
 const SYSTEM_PROMPT = `You are a helpful assistant for Nantucket real estate market data. You have access to live MLS data via tools.
 
 Use the tools to answer questions about:
-- How many listings are on the market in a given area (e.g. Dionis, Naushop, Madaket, Sconset, Town, Tom Nevers) → use get_neighborhood_stats and find the matching neighborhood.
-- Median or average list price by area → use get_neighborhood_stats.
-- Average or median price paid (sold prices) in an area over a time period (e.g. past 6 months, past year) → use get_neighborhood_sales with the appropriate months (e.g. 6 for 6 months, 12 for 1 year).
+- How many listings are on the market in a given area → use get_neighborhood_stats
+- Median or average list price by area → use get_neighborhood_stats
+- Average or median price paid (sold prices) over a time period → use get_neighborhood_sales
+- Browse or search individual listings → use search_listings with filters (area, price range, bedrooms, property type)
+- Find specific properties or get listing details → use search_listings
+- Newest listings or most recently added → use search_listings with sortBy: "newest"
+- Cheapest or lowest priced → use search_listings with sortBy: "priceAsc"
+- Most expensive → use search_listings with sortBy: "priceDesc"
 
-Area names in the data may appear as: Town, Sconset, Dionis, Naushop, Madaket, Monomoy, Cliff, Brant Point, Surfside, Cisco, Tom Nevers, etc. Match the user's area name to the closest neighborhood name in the data.
+Area names in the data: Town, Sconset, Dionis, Naushop, Madaket, Monomoy, Cliff, Brant Point, Surfside, Cisco, Tom Nevers, Mid Island, etc.
+
+When showing listings, include: address, area, price, bedrooms/baths, sqft, property type, and days on market. Format prices with commas (e.g., $2,500,000).
 
 Answer concisely and cite the numbers. If data for a requested area is not found, say so and list available areas.`;
 
@@ -40,6 +50,51 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
             type: "number",
             description:
               "Number of months to look back (e.g. 6 for past 6 months, 12 for past year). Default 12.",
+          },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_listings",
+      description:
+        "Search and browse individual active listings with optional filters and sorting. Returns listing details including address, price, bedrooms, bathrooms, sqft, property type, and days on market. Use for questions like 'show me listings in Sconset', 'what homes are under $2M', 'find 4 bedroom houses', 'newest listings', 'most recently added', etc.",
+      parameters: {
+        type: "object",
+        properties: {
+          area: {
+            type: "string",
+            description:
+              "Filter by neighborhood/area (e.g., 'Town', 'Sconset', 'Madaket', 'Cliff', 'Surfside'). Leave empty for all areas.",
+          },
+          minPrice: {
+            type: "number",
+            description: "Minimum list price filter (e.g., 1000000 for $1M).",
+          },
+          maxPrice: {
+            type: "number",
+            description: "Maximum list price filter (e.g., 5000000 for $5M).",
+          },
+          bedrooms: {
+            type: "number",
+            description: "Minimum number of bedrooms.",
+          },
+          propertyType: {
+            type: "string",
+            description:
+              "Property type filter: 'Single Family', 'Condo', 'Land', 'Multi-Family', etc.",
+          },
+          sortBy: {
+            type: "string",
+            enum: ["priceDesc", "priceAsc", "newest", "oldest", "bedsDesc"],
+            description:
+              "Sort order: 'priceDesc' (highest price first), 'priceAsc' (lowest price first), 'newest' (most recently listed first - use for 'newest listings' or 'fewest days on market'), 'oldest' (longest on market first), 'bedsDesc' (most bedrooms first). Default is priceDesc.",
+          },
+          limit: {
+            type: "number",
+            description: "Number of listings to return (default 10, max 50).",
           },
         },
       },
@@ -158,6 +213,48 @@ export async function POST(request: NextRequest) {
               tool_call_id: tc.id,
               content: JSON.stringify({
                 error: err instanceof Error ? err.message : "Failed to fetch neighborhood sales",
+              }),
+            });
+          }
+        } else if (tc.function.name === "search_listings") {
+          try {
+            const args = JSON.parse(tc.function.arguments ?? "{}") as {
+              area?: string;
+              minPrice?: number;
+              maxPrice?: number;
+              bedrooms?: number;
+              propertyType?: string;
+              sortBy?: string;
+              limit?: number;
+            };
+            
+            const params = new URLSearchParams();
+            if (args.area) params.set("area", args.area);
+            if (args.minPrice) params.set("minPrice", String(args.minPrice));
+            if (args.maxPrice) params.set("maxPrice", String(args.maxPrice));
+            if (args.bedrooms) params.set("bedrooms", String(args.bedrooms));
+            if (args.propertyType) params.set("propertyType", args.propertyType);
+            if (args.sortBy) params.set("sortBy", args.sortBy);
+            if (args.limit) params.set("limit", String(Math.min(args.limit, 50)));
+            
+            const queryString = params.toString();
+            const url = `/api/listings${queryString ? `?${queryString}` : ""}`;
+            
+            const data = await fetchJson<{ count?: number; listings?: unknown[] }>(
+              origin,
+              url
+            );
+            toolResults.push({
+              role: "tool",
+              tool_call_id: tc.id,
+              content: JSON.stringify(data),
+            });
+          } catch (err) {
+            toolResults.push({
+              role: "tool",
+              tool_call_id: tc.id,
+              content: JSON.stringify({
+                error: err instanceof Error ? err.message : "Failed to search listings",
               }),
             });
           }
