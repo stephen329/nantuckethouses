@@ -3,6 +3,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { MarketStats } from "@/components/MarketStats";
+import { MarketTrendsSection } from "@/components/MarketTrendsSection";
 import { LegacySection } from "@/components/LegacySection";
 import { DeveloperEdge } from "@/components/DeveloperEdge";
 import { CaseStudy } from "@/components/CaseStudy";
@@ -19,6 +20,7 @@ export default function Home() {
       <Navigation />
       <Hero />
       <MarketStats />
+      <MarketTrendsSection />
       <LegacySection />
       <DeveloperEdge />
       <CaseStudy />
