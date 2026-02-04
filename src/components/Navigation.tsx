@@ -1,5 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 export function Navigation() {
@@ -23,6 +24,9 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <Link href="/market-index" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
+              Market Index
+            </Link>
             <a href="#services" className="text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               Services
             </a>
@@ -46,6 +50,9 @@ export function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden pb-6 space-y-4">
+            <Link href="/market-index" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
+              Market Index
+            </Link>
             <a href="#services" className="block text-[#1A2A3A] hover:text-[#3A5C7E] transition-colors">
               Services
             </a>

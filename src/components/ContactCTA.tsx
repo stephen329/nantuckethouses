@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Mail, Phone, Instagram, Home, TrendingUp, Key, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Phone, Instagram, Home, TrendingUp, Key, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 
 type InterestType = 'buy' | 'sell' | 'rent' | null;
 
@@ -9,6 +9,8 @@ export function ContactCTA() {
   const [step, setStep] = useState<1 | 2>(1);
   const [interest, setInterest] = useState<InterestType>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInterestSelect = (type: InterestType) => {
     setInterest(type);
@@ -19,10 +21,37 @@ export function ContactCTA() {
     setStep(1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Add actual form submission logic here
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string || undefined,
+      propertyType: interest === 'buy' ? 'Buying' : interest === 'sell' ? 'Selling' : 'Renting',
+      source: 'Homepage Contact Form',
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit');
+      }
+
+      setSubmitted(true);
+    } catch {
+      setError('Something went wrong. Please try again or call us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const interestLabels: Record<NonNullable<InterestType>, string> = {
@@ -49,14 +78,17 @@ export function ContactCTA() {
               <div className="space-y-4 mb-10">
                 <div className="flex items-center gap-4 text-white/90">
                   <Phone className="w-5 h-5 text-[#C9A227]" />
-                  <a href="tel:+15089901234" className="hover:text-[#C9A227] transition-colors">
-                    (508) 990-1234
-                  </a>
+                  <div>
+                    <a href="tel:+15084510191" className="hover:text-[#C9A227] transition-colors">
+                      (508) 451-0191
+                    </a>
+                    <span className="text-white/50 text-sm ml-2">call or text</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 text-white/90">
                   <Mail className="w-5 h-5 text-[#C9A227]" />
-                  <a href="mailto:stephen@nantuckethouses.com" className="hover:text-[#C9A227] transition-colors">
-                    stephen@nantuckethouses.com
+                  <a href="mailto:stephen@maury.net" className="hover:text-[#C9A227] transition-colors">
+                    stephen@maury.net
                   </a>
                 </div>
                 <div className="flex items-center gap-4 text-white/90">
@@ -159,8 +191,10 @@ export function ContactCTA() {
                     <input
                       type="text"
                       id="name"
+                      name="name"
                       required
-                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors disabled:opacity-50"
                       placeholder="John Smith"
                     />
                   </div>
@@ -172,8 +206,10 @@ export function ContactCTA() {
                     <input
                       type="email"
                       id="email"
+                      name="email"
                       required
-                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors disabled:opacity-50"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -185,16 +221,30 @@ export function ContactCTA() {
                     <input
                       type="tel"
                       id="phone"
-                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors"
+                      name="phone"
+                      disabled={isSubmitting}
+                      className="w-full px-4 py-3 border border-[#E8E8E8] rounded-sm focus:outline-none focus:border-[#C9A227] transition-colors disabled:opacity-50"
                       placeholder="(508) 555-0123"
                     />
                   </div>
 
+                  {error && (
+                    <p className="text-red-600 text-sm">{error}</p>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#C9A227] text-white px-8 py-4 rounded-md hover:bg-[#B89220] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Request Discussion
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Request Discussion'
+                    )}
                   </button>
                 </form>
               )}

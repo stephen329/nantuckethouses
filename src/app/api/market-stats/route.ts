@@ -1,28 +1,40 @@
 import { NextResponse } from "next/server";
-import { repliersFetch } from "@/lib/repliers";
+import { repliersGet } from "@/lib/repliers";
 
-type Listing = {
-  listPrice?: number;
-  daysOnMarket?: number;
-  listDate?: string;
-};
-
-type RepliersResponse = {
+/**
+ * Statistics response from Repliers API
+ * @see https://help.repliers.com/en/article/real-time-market-statistics-implementation-guide-l3b1uy/
+ */
+type StatisticsResponse = {
   count?: number;
   statistics?: {
     listPrice?: {
+      med?: number;
+      avg?: number;
+      min?: number;
+      max?: number;
+    };
+    daysOnMarket?: {
+      med?: number;
+      avg?: number;
       min?: number;
       max?: number;
     };
   };
-  listings?: Listing[];
 };
 
-// Thin API route to fetch market statistics from Repliers.
-// Accepts optional `location` search param (defaults to "Nantucket, MA").
+/**
+ * GET /api/market-stats
+ * 
+ * Fetches real-time market statistics from Repliers using their statistics API.
+ * Returns: activeListingCount, medianListPrice, medianDaysOnMarket
+ * 
+ * Note: Days on market stats require sold listings (status=U), 
+ * so we make two separate calls.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const location = searchParams.get("location") ?? "Nantucket, MA";
+  const city = searchParams.get("city") ?? "Nantucket";
 
   try {
     const apiKey = process.env.REPLIERS_API_KEY;
@@ -33,61 +45,55 @@ export async function GET(request: Request) {
       );
     }
 
-    // Fetch active listings to calculate market stats
-    const body = {
-      city: location,
+    // Fetch ACTIVE listing stats (count and list prices)
+    // Note: daysOnMarket stats require status=U (sold listings)
+    // Use county filter to capture ALL Nantucket neighborhoods
+    const activeData = await repliersGet<StatisticsResponse>("/listings", {
+      county: "Nantucket",      // County captures all island neighborhoods
       status: "A", // Active listings
-      pageNum: 1,
-      resultsPerPage: 100, // Get listings to calculate stats
-    };
-
-    const data = await repliersFetch<RepliersResponse>("/listings", {
-      method: "POST",
-      body,
+      statistics: "med-listPrice,avg-listPrice",
+      listings: "false",
     });
 
-    // Calculate market statistics from the response
-    const listings = data.listings || [];
-    const prices = listings
-      .map((l) => l.listPrice)
-      .filter((p): p is number => typeof p === "number" && p > 0)
-      .sort((a, b) => a - b);
+    // Fetch SOLD listing stats for days on market
+    // Using last 12 months for representative DOM data
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    const minSoldDate = oneYearAgo.toISOString().split("T")[0];
 
-    // Calculate days on market from listDate
-    const now = new Date();
-    const daysOnMarket = listings
-      .map((l) => {
-        if (!l.listDate) return null;
-        const listDate = new Date(l.listDate);
-        const days = Math.floor(
-          (now.getTime() - listDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        return days >= 0 ? days : null;
-      })
-      .filter((d): d is number => d !== null)
-      .sort((a, b) => a - b);
-
-    // Calculate median
-    const median = (arr: number[]) => {
-      if (arr.length === 0) return null;
-      const mid = Math.floor(arr.length / 2);
-      return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
-    };
+    let medianDaysOnMarket: number | null = null;
+    try {
+      const soldData = await repliersGet<StatisticsResponse>("/listings", {
+        county: "Nantucket",  // County captures all island neighborhoods
+        status: "U",  // Unavailable (completed transactions)
+        minSoldDate: minSoldDate,
+        statistics: "med-daysOnMarket,avg-daysOnMarket",
+        listings: "false",
+      });
+      medianDaysOnMarket = soldData.statistics?.daysOnMarket?.med ?? null;
+    } catch (e) {
+      console.log("Failed to fetch DOM stats:", e);
+    }
 
     const stats = {
-      activeListingCount: data.count || listings.length,
-      medianListPrice: median(prices),
-      medianDaysOnMarket: median(daysOnMarket),
+      activeListingCount: activeData.count ?? 0,
+      medianListPrice: activeData.statistics?.listPrice?.med ?? null,
+      avgListPrice: activeData.statistics?.listPrice?.avg ?? null,
+      medianDaysOnMarket: medianDaysOnMarket,
     };
 
-    return NextResponse.json({ data: { aggregates: stats } });
+    return NextResponse.json({ 
+      data: { aggregates: stats },
+      source: "repliers-statistics-api"
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Market stats API error:", message);
+    
     return NextResponse.json(
       { error: message },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

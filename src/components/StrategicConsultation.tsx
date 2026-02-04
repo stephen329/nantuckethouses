@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Home, Building2, Castle, TrendingUp, CheckCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Home, Building2, Castle, TrendingUp, CheckCircle, Loader2 } from 'lucide-react';
 
 type ObjectiveType = 'residential' | 'development' | 'compound' | 'investment' | null;
 
@@ -10,11 +10,48 @@ export function StrategicConsultation() {
   const [objective, setObjective] = useState<ObjectiveType>(null);
   const [technicalNeeds, setTechnicalNeeds] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const objectiveLabels: Record<NonNullable<ObjectiveType>, string> = {
+    residential: 'Residential Sanctuary',
+    development: 'Development / Subdivision',
+    compound: 'Compound / Historic Restoration',
+    investment: 'Strategic Investment',
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Add actual form submission logic here
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string || undefined,
+      propertyType: objective ? objectiveLabels[objective] : undefined,
+      message: technicalNeeds || undefined,
+      source: 'Strategic Consultation Form',
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit');
+      }
+
+      setSubmitted(true);
+    } catch {
+      setError('Something went wrong. Please try again or call us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const objectives = [
@@ -56,13 +93,6 @@ export function StrategicConsultation() {
   const handleBack = () => {
     if (step === 2) setStep(1);
     if (step === 3) setStep(2);
-  };
-
-  const objectiveLabels: Record<NonNullable<ObjectiveType>, string> = {
-    residential: 'Residential Sanctuary',
-    development: 'Development / Subdivision',
-    compound: 'Compound / Historic Restoration',
-    investment: 'Strategic Investment',
   };
 
   return (
@@ -224,8 +254,10 @@ export function StrategicConsultation() {
                   </label>
                   <input
                     type="text"
+                    name="name"
                     required
-                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40"
+                    disabled={isSubmitting}
+                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40 disabled:opacity-50"
                     placeholder="John Smith"
                   />
                 </div>
@@ -236,8 +268,10 @@ export function StrategicConsultation() {
                   </label>
                   <input
                     type="email"
+                    name="email"
                     required
-                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40"
+                    disabled={isSubmitting}
+                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40 disabled:opacity-50"
                     placeholder="john@example.com"
                   />
                 </div>
@@ -248,19 +282,35 @@ export function StrategicConsultation() {
                   </label>
                   <input
                     type="tel"
-                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40"
+                    name="phone"
+                    disabled={isSubmitting}
+                    className="w-full px-0 py-3 border-0 border-b-2 border-[#E8E8E8] focus:border-[#C9A227] focus:outline-none transition-colors bg-transparent text-[#1A2A3A] placeholder:text-[#1A2A3A]/40 disabled:opacity-50"
                     placeholder="(508) 555-0123"
                   />
                 </div>
               </div>
 
+              {error && (
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              )}
+
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="w-full bg-[#C9A227] text-white px-8 py-5 rounded-md hover:bg-[#B89220] transition-colors flex items-center justify-center gap-2 group text-lg"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#C9A227] text-white px-8 py-5 rounded-md hover:bg-[#B89220] transition-colors flex items-center justify-center gap-2 group text-lg disabled:opacity-50"
                 >
-                  <span>Request a Preliminary Consultation</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Request a Preliminary Consultation</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </button>
               </div>
 

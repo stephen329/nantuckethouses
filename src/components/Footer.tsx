@@ -29,7 +29,7 @@ export function Footer() {
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
-                href="mailto:stephen@nantuckethouses.com"
+                href="mailto:stephen@maury.net"
                 className="w-10 h-10 bg-white/10 rounded-sm flex items-center justify-center hover:bg-[#C9A227] transition-colors"
               >
                 <Mail className="w-5 h-5" />
