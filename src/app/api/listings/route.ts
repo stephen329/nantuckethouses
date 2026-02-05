@@ -136,6 +136,20 @@ export async function GET(request: Request) {
 
     const data = await repliersGet<ListingResponse>("/listings", params);
 
+    // Helper to calculate days on market from listDate
+    const calculateDaysOnMarket = (listDate?: string): number | null => {
+      if (!listDate) return null;
+      try {
+        const listed = new Date(listDate);
+        const now = new Date();
+        const diffMs = now.getTime() - listed.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 ? diffDays : null;
+      } catch {
+        return null;
+      }
+    };
+
     // Simplify listing data for AI consumption
     const listings: SimplifiedListing[] = (data.listings || []).map((l) => {
       const addressParts = [
@@ -143,6 +157,9 @@ export async function GET(request: Request) {
         l.address?.streetName,
         l.address?.unitNumber ? `Unit ${l.address.unitNumber}` : null,
       ].filter(Boolean);
+
+      // Use API daysOnMarket if available, otherwise calculate from listDate
+      const dom = l.daysOnMarket ?? calculateDaysOnMarket(l.listDate);
 
       return {
         mlsNumber: l.mlsNumber,
@@ -154,7 +171,7 @@ export async function GET(request: Request) {
         sqft: l.details?.sqft ?? null,
         propertyType: l.details?.propertyType ?? null,
         lotAcres: l.lot?.acres ?? null,
-        daysOnMarket: l.daysOnMarket ?? null,
+        daysOnMarket: dom,
         photoCount: l.photoCount ?? 0,
       };
     });
