@@ -22,7 +22,11 @@ export function middleware(request: NextRequest) {
       // Already on buy subdomain; allow /buy and /buy/* (e.g. API calls in same origin)
       return NextResponse.next();
     }
-    // Any other path on buy subdomain (e.g. /something) → show buy content at root
+    // Allow static assets (images, fonts, etc.) so the hero image and other public files load
+    if (/\.(webp|png|jpg|jpeg|gif|svg|ico|woff2?|css|js)$/i.test(pathname)) {
+      return NextResponse.next();
+    }
+    // Any other path on buy subdomain → show buy content at root
     return NextResponse.rewrite(new URL("/buy", request.url));
   }
 
