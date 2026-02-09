@@ -51,12 +51,15 @@ const NANTUCKET_AREA_ALIASES: Record<string, string> = {
 
 /**
  * GET /api/neighborhood-sales
- * 
+ *
  * Fetches sold transaction data aggregated by neighborhood.
+ * Query params: startDate & endDate (YYYY-MM-DD), or years (number, default 1).
  * Returns: name, salesCount, avgSalePrice, totalVolume
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const startParam = searchParams.get("startDate");
+  const endParam = searchParams.get("endDate");
   const years = parseInt(searchParams.get("years") ?? "1");
 
   try {
@@ -68,11 +71,18 @@ export async function GET(request: Request) {
       );
     }
 
-    // Calculate date range
-    const startDate = new Date();
-    startDate.setFullYear(startDate.getFullYear() - years);
-    const minSoldDate = startDate.toISOString().split("T")[0];
-    const maxSoldDate = new Date().toISOString().split("T")[0];
+    // Date range: prefer startDate/endDate, else last N years
+    let minSoldDate: string;
+    let maxSoldDate: string;
+    if (startParam && endParam) {
+      minSoldDate = startParam;
+      maxSoldDate = endParam;
+    } else {
+      const startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - years);
+      minSoldDate = startDate.toISOString().split("T")[0];
+      maxSoldDate = new Date().toISOString().split("T")[0];
+    }
 
     // Fetch sold listings aggregated by neighborhood
     // Note: status=U required when using soldPrice statistics

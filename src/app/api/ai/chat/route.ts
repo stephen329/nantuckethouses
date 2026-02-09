@@ -6,7 +6,15 @@ export const dynamic = "force-dynamic";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? "" });
 
-const SYSTEM_PROMPT = `You are a helpful assistant for Nantucket real estate market data. You have access to live MLS data via tools.
+const getSystemPrompt = () => {
+  const today = new Date();
+  const dateStr = today.toISOString().split("T")[0];
+  const year = today.getFullYear();
+  return `You are a helpful assistant for Nantucket real estate market data. You have access to live MLS data via tools.
+
+**Current date: ${dateStr} (year ${year}).** Use this when interpreting user requests: e.g. "2025" or "last year" means the calendar year or 12 months of past data; do not say data is "in the future" or "only available up to 2023".
+
+**Data scope:** Geography is by neighborhood/area (Town, Sconset, Dionis, etc.), not by zoning district. Sales data is for all property types combined per neighborhood; you cannot get "average price for vacant land by neighborhood" from the sales tool (it does not filter by property type). For active listings only, you can filter by propertyType "Land" via search_listings.
 
 **When to ask clarifying questions**
 If the user's request is ambiguous, ask a short clarifying question before calling tools or giving a long answer. Examples of ambiguity:
@@ -31,7 +39,8 @@ Area names in the data: Town, Sconset, Dionis, Naushop, Madaket, Monomoy, Cliff,
 
 When showing listings, include: address, area, price, bedrooms/baths, sqft, property type, and days on market. Format prices with commas (e.g., $2,500,000).
 
-Answer concisely and cite the numbers. If data for a requested area is not found, say so and list available areas.`;
+Answer concisely and cite the numbers. If data for a requested area is not found, say so and list available areas. If the user asks for zoning district or sales by property type (e.g. vacant land only), explain that the data is by neighborhood/area and all property types combined, and offer the closest available (e.g. sales by neighborhood, or active Land listings by area).`;
+};
 
 const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
@@ -51,14 +60,22 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     function: {
       name: "get_neighborhood_sales",
       description:
-        "Get sold transaction data by neighborhood: sales count, median/avg sale price, total volume. Use for 'average price paid' or 'sales in X over the past N months'.",
+        "Get sold transaction data by neighborhood: sales count, median/avg sale price, total volume. Use for 'average price paid', 'sales in 2025', or 'sales over the past N months'. Prefer startDate/endDate for a specific calendar year (e.g. 2025-01-01 to 2025-12-31); use months for relative periods like 'past 6 months'.",
       parameters: {
         type: "object",
         properties: {
           months: {
             type: "number",
             description:
-              "Number of months to look back (e.g. 6 for past 6 months, 12 for past year). Default 12.",
+              "Number of months to look back from today (e.g. 6 for past 6 months, 12 for past year). Ignored if startDate/endDate are provided.",
+          },
+          startDate: {
+            type: "string",
+            description: "Start of date range (YYYY-MM-DD). Use with endDate for a calendar year or custom range (e.g. 2025-01-01 for full year 2025).",
+          },
+          endDate: {
+            type: "string",
+            description: "End of date range (YYYY-MM-DD). Use with startDate (e.g. 2025-12-31 for full year 2025).",
           },
         },
       },
@@ -147,7 +164,7 @@ export async function POST(request: NextRequest) {
     const origin = request.nextUrl.origin;
 
     const modelMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: getSystemPrompt() },
       ...messages,
     ];
 
@@ -193,19 +210,34 @@ export async function POST(request: NextRequest) {
           }
         } else if (tc.function.name === "get_neighborhood_sales") {
           let months = 12;
+          let start = "";
+          let end = "";
           try {
-            const args = JSON.parse(tc.function.arguments ?? "{}") as { months?: number };
-            if (typeof args.months === "number" && args.months > 0) {
-              months = args.months;
+            const args = JSON.parse(tc.function.arguments ?? "{}") as {
+              months?: number;
+              startDate?: string;
+              endDate?: string;
+            };
+            if (typeof args.startDate === "string" && typeof args.endDate === "string") {
+              start = args.startDate;
+              end = args.endDate;
+            } else {
+              if (typeof args.months === "number" && args.months > 0) {
+                months = args.months;
+              }
+              const endDate = new Date();
+              const startDate = new Date();
+              startDate.setMonth(startDate.getMonth() - months);
+              start = startDate.toISOString().split("T")[0];
+              end = endDate.toISOString().split("T")[0];
             }
           } catch {
-            // use default
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - months);
+            start = startDate.toISOString().split("T")[0];
+            end = endDate.toISOString().split("T")[0];
           }
-          const endDate = new Date();
-          const startDate = new Date();
-          startDate.setMonth(startDate.getMonth() - months);
-          const start = startDate.toISOString().split("T")[0];
-          const end = endDate.toISOString().split("T")[0];
           try {
             const data = await fetchJson<{ data?: unknown[]; totalSales?: number }>(
               origin,
@@ -214,7 +246,7 @@ export async function POST(request: NextRequest) {
             toolResults.push({
               role: "tool",
               tool_call_id: tc.id,
-              content: JSON.stringify({ ...data, periodMonths: months }),
+              content: JSON.stringify(data),
             });
           } catch (err) {
             toolResults.push({
