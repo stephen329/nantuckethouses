@@ -9,7 +9,10 @@ export type NavPillar = {
   items: NavItem[];
 };
 
-// ─── 4-Pillar Structure ─────────────────────────────────────
+// ─── 6-Pillar Navigation ─────────────────────────────────────
+// Market Pulse (The Stats) | Regulatory Hub (The Boards) |
+// Affordable Housing (The Solutions) | Build & Renovate (The Tech) |
+// Neighborhoods (The Vibe) | Opportunities (CTA Button)
 export const navPillars: NavPillar[] = [
   {
     label: "Market Pulse",
@@ -28,9 +31,18 @@ export const navPillars: NavPillar[] = [
       { label: "HDC Morning After", href: "/regulatory/hdc-morning-after", description: "Weekly 2-minute recaps" },
       { label: "Planning Board", href: "/regulatory/planning-board", description: "Summaries and highlights" },
       { label: "Zoning Board", href: "/regulatory/zoning-board", description: "Appeals and decisions" },
-      { label: "Interactive Zoning Map", href: "/regulatory/zoning-map", description: "Clickable district overlay" },
       { label: "Zoning Lookup", href: "/regulatory/zoning-lookup", description: "Zoning by address tool" },
       { label: "Cheat Sheets", href: "/regulatory/cheat-sheets", description: "Downloadable HDC & zoning guides" },
+    ],
+  },
+  {
+    label: "Affordable Housing",
+    items: [
+      { label: "Overview", href: "/affordable-housing", description: "2026 live intelligence hub" },
+      { label: "Safe Harbor Status", href: "/affordable-housing#safe-harbor", description: "40B protection through Dec 2027" },
+      { label: "Covenant Program", href: "/affordable-housing#covenant", description: "2026 income limits and pricing" },
+      { label: "Lease to Locals", href: "/affordable-housing#lease-to-locals", description: "Landlord incentive program" },
+      { label: "Project Pipeline", href: "/affordable-housing#pipeline", description: "Active development tracker" },
     ],
   },
   {
@@ -62,15 +74,22 @@ export const navPillars: NavPillar[] = [
   },
 ];
 
-// Standalone links (not in pillars)
+// Standalone links (not in pillars — Articles, About stay as flat links)
 export const standaloneNavItems: NavItem[] = [
   { label: "Articles", href: "/articles" },
   { label: "About", href: "/about" },
 ];
+
+// CTA link for the nav (Opportunities as a button, not a pillar)
+export const navCta = {
+  label: "Opportunities",
+  href: "/opportunities",
+};
 
 // Flat list of all nav items (for footer, sitemap, etc.)
 export const allNavItems: NavItem[] = [
   { label: "Home", href: "/" },
   ...navPillars.flatMap((p) => p.items),
   ...standaloneNavItems,
+  { label: "Opportunities", href: "/opportunities" },
 ];

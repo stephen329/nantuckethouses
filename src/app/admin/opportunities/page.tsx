@@ -10,6 +10,7 @@ const categoryLabels: Record<OpportunityCategory, string> = {
   "wanted-to-buy": "Buyer",
   "wanted-to-rent": "Renter",
   services: "Services",
+  "workforce-housing": "Housing",
 };
 
 const statusColors: Record<string, string> = {
@@ -74,6 +75,7 @@ export default function AdminOpportunitiesPage() {
             <option value="wanted-to-buy">Wanted to Buy</option>
             <option value="wanted-to-rent">Wanted to Rent</option>
             <option value="services">Services</option>
+            <option value="workforce-housing">Workforce Housing</option>
           </select>
           <button
             onClick={fetchData}

@@ -1,0 +1,40 @@
+{
+  "updatedAt": "2026-04-07",
+  "safeHarbor": {
+    "status": "Protected",
+    "expiresDate": "December 10, 2027",
+    "currentShi": "8%",
+    "previousShi": "7%",
+    "keyProjects": "Ticcoma Green (64 units) and The Meadows",
+    "stephensTake": "Safe Harbor means the Town now has a 'shield' against unfriendly 40B developments. For developers, this means 'Friendly 40B' projects — those that align with the Town's Strategic Plan — are the only viable path forward for the next two years."
+  },
+  "covenantProgram": {
+    "year": 2026,
+    "medianFamilyIncome": 163500,
+    "maxSalesPrice": 854171,
+    "householdIncomeLimit": 245250,
+    "assetLimit": 427085,
+    "note": "Up significantly due to 2026 interest rate adjustments."
+  },
+  "leaseToLocals": {
+    "lastUpdated": "February 2026",
+    "maxIncentive": 27000,
+    "unitType": "2BR+",
+    "rentCaps": {
+      "1BR": 2700,
+      "2BR": 3500,
+      "3BR+": 4000
+    }
+  },
+  "projectPipeline": [
+    { "project": "Ticcoma Green", "type": "Rental", "units": 64, "status": "Under Construction (Occ. 2027)" },
+    { "project": "Sandpiper Place", "type": "Lottery", "units": "15+", "status": "Active Lottery Applications" },
+    { "project": "Habitat (Wake Dr)", "type": "Ownership", "units": 12, "status": "Families moving in" }
+  ],
+  "housingTiers": [
+    { "tier": "80% AMI", "label": "Very Low Income", "income": "$130,800", "typical": "Year-round workers, service industry" },
+    { "tier": "100% AMI", "label": "Low Income", "income": "$163,500", "typical": "Teachers, firefighters, tradespeople" },
+    { "tier": "150% AMI", "label": "Moderate Income (Covenant)", "income": "$245,250", "typical": "Professionals, small business owners" },
+    { "tier": "200% AMI", "label": "Workforce", "income": "$327,000", "typical": "Dual-income professionals, managers" }
+  ]
+}

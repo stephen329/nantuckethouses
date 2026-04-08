@@ -69,7 +69,8 @@ export type OpportunityCategory =
   | "for-rent-by-owner"
   | "wanted-to-buy"
   | "wanted-to-rent"
-  | "services";
+  | "services"
+  | "workforce-housing";
 
 export type OpportunitySubmission = {
   id: string;

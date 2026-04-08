@@ -23,6 +23,7 @@ const VALID_CATEGORIES: OpportunityCategory[] = [
   "wanted-to-buy",
   "wanted-to-rent",
   "services",
+  "workforce-housing",
 ];
 
 /**
@@ -129,6 +130,7 @@ function categoryLabel(cat: OpportunityCategory): string {
     "wanted-to-buy": "Wanted to Buy",
     "wanted-to-rent": "Wanted to Rent",
     services: "Services",
+    "workforce-housing": "Workforce Housing",
   };
   return labels[cat] ?? cat;
 }

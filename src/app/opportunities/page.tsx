@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Key, Search, Building, Wrench } from "lucide-react";
+import { Home, Key, Search, Building, Wrench, Users } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 
 const categories = [
@@ -26,6 +26,12 @@ const categories = [
     description: "Private rental request. Stephen matches you directly.",
     href: "/opportunities/wanted-to-rent",
     icon: Building,
+  },
+  {
+    title: "Workforce Housing Inquiry",
+    description: "Covenant Program, Lease to Locals, Friendly 40B, or year-round housing questions.",
+    href: "/opportunities/workforce-housing",
+    icon: Users,
   },
   {
     title: "Services Offered or Needed",

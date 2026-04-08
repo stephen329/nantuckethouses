@@ -5,7 +5,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navPillars, standaloneNavItems } from "@/lib/navigation";
+import { navPillars, standaloneNavItems, navCta } from "@/lib/navigation";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,14 +79,12 @@ export function Navigation() {
             ))}
 
             {/* CTA */}
-            <a
-              href="https://calendly.com/stephen-maury/30min"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={navCta.href}
               className="ml-2 bg-[var(--privet-green)] text-white px-5 py-2 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors"
             >
-              Talk to Stephen
-            </a>
+              {navCta.label}
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
