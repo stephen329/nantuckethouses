@@ -174,25 +174,90 @@ export default function AffordableHousingPage() {
           </div>
         </section>
 
-        {/* ─── Housing Tiers ───────────────────────────────────── */}
+        {/* ─── AMI Income & Rent Limits Table ──────────────────── */}
         <section>
           <div className="bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-2">
               <Users className="w-5 h-5 text-[var(--privet-green)]" />
-              <h2 className="text-lg text-[var(--atlantic-navy)] font-sans font-semibold">Nantucket Housing Tiers (2026)</h2>
+              <h2 className="text-lg text-[var(--atlantic-navy)] font-sans font-semibold">
+                {d.amiTable.fiscalYear} Area Median Income (AMI) Limits
+              </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {d.housingTiers.map((tier) => (
-                <div key={tier.tier} className="bg-[var(--sandstone)] rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-[var(--atlantic-navy)] font-sans">{tier.tier}</span>
-                    <span className="text-xs text-[var(--nantucket-gray)]">{tier.label}</span>
-                  </div>
-                  <p className="text-lg font-serif text-[var(--atlantic-navy)]">{tier.income}</p>
-                  <p className="text-xs text-[var(--atlantic-navy)]/60 mt-1">{tier.typical}</p>
-                </div>
-              ))}
+            <p className="text-xs text-[var(--nantucket-gray)] mb-4">
+              Nantucket Median Family Income: {formatCurrency(d.amiTable.medianFamilyIncome)}
+            </p>
+
+            <div className="overflow-x-auto -mx-6 px-6">
+              <table className="w-full text-xs border-collapse min-w-[640px]">
+                {/* Header rows */}
+                <thead>
+                  <tr className="bg-[var(--atlantic-navy)]">
+                    <th className="text-left text-white font-semibold px-3 py-2 border border-[var(--atlantic-navy)]" rowSpan={2}>
+                      AMI Level
+                    </th>
+                    {d.amiTable.householdSizes.map((size: number, i: number) => (
+                      <th key={i} className="text-center text-white font-semibold px-3 py-2 border border-[var(--atlantic-navy)]/80">
+                        {size} {size === 1 ? "Person" : "Persons"}
+                      </th>
+                    ))}
+                  </tr>
+                  <tr className="bg-[var(--atlantic-navy)]/90">
+                    {d.amiTable.bedroomAssumptions.map((br: string, i: number) => (
+                      <th key={i} className="text-center text-white/70 font-normal px-3 py-1.5 border border-[var(--atlantic-navy)]/60 text-[10px]">
+                        {br}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                {/* Data rows — alternating income + rent for each tier */}
+                <tbody>
+                  {d.amiTable.tiers.map((tier: { level: string; label: string; incomes: number[]; rents: number[] }, idx: number) => (
+                    <>
+                      {/* Income row */}
+                      <tr key={`${tier.level}-income`} className={idx % 2 === 0 ? "bg-[var(--sandstone)]" : "bg-white"}>
+                        <td className="px-3 py-2 font-bold text-[var(--atlantic-navy)] border border-[var(--cedar-shingle)]/15 whitespace-nowrap">
+                          {tier.level}
+                          <span className="font-normal text-[var(--nantucket-gray)] ml-1">({tier.label})</span>
+                        </td>
+                        {tier.incomes.map((inc: number, i: number) => (
+                          <td key={i} className="text-center px-3 py-2 text-[var(--atlantic-navy)] font-semibold border border-[var(--cedar-shingle)]/15">
+                            {formatCurrency(inc)}
+                          </td>
+                        ))}
+                      </tr>
+                      {/* Affordable rent row */}
+                      <tr key={`${tier.level}-rent`} className={idx % 2 === 0 ? "bg-[var(--sandstone)]" : "bg-white"}>
+                        <td className="px-3 py-1.5 text-[var(--nantucket-gray)] italic border border-[var(--cedar-shingle)]/15 pl-6">
+                          Affordable Rent
+                        </td>
+                        {tier.rents.map((rent: number, i: number) => (
+                          <td key={i} className="text-center px-3 py-1.5 text-[var(--nantucket-gray)] border border-[var(--cedar-shingle)]/15">
+                            {formatCurrency(rent)}
+                          </td>
+                        ))}
+                      </tr>
+                    </>
+                  ))}
+
+                  {/* Market rent row */}
+                  <tr className="bg-[var(--atlantic-navy)]/5">
+                    <td className="px-3 py-2 font-semibold text-[var(--atlantic-navy)] border border-[var(--cedar-shingle)]/15 text-[10px] uppercase tracking-wider">
+                      Market Rent
+                    </td>
+                    {d.amiTable.marketRents.map((rent: number | null, i: number) => (
+                      <td key={i} className="text-center px-3 py-2 text-[var(--atlantic-navy)] font-semibold border border-[var(--cedar-shingle)]/15">
+                        {rent ? formatCurrency(rent) : "—"}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
+            <p className="text-[10px] text-[var(--nantucket-gray)] mt-3">
+              {d.amiTable.footnote}
+            </p>
           </div>
         </section>
 
