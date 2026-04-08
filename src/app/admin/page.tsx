@@ -23,6 +23,13 @@ const adminTools = [
     icon: Briefcase,
     category: "Leads",
   },
+  {
+    title: "Partners & Initiatives",
+    description: "Add, edit, or remove featured partners and initiatives displayed across the site.",
+    href: "/admin/partners",
+    icon: Users,
+    category: "Content",
+  },
 ];
 
 const dataFiles = [
@@ -55,6 +62,12 @@ const dataFiles = [
     description: "All 26 zoning district definitions and neighborhood assignments.",
     file: "src/data/zoning-districts.json",
     icon: MapPin,
+  },
+  {
+    title: "Partners & Initiatives",
+    description: "Featured partners and organizations displayed in banners, carousels, and the footer.",
+    file: "src/data/partners.json",
+    icon: Users,
   },
 ];
 

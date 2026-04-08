@@ -2,6 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { navPillars, standaloneNavItems } from "@/lib/navigation";
+import { FooterPartners } from "@/components/partners/FooterPartners";
+import partnersData from "@/data/partners.json";
+import type { Partner } from "@/types";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -150,6 +153,9 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Partners */}
+      <FooterPartners partners={partnersData as Partner[]} />
 
       {/* Bottom Bar */}
       <div className="border-t border-white/10">

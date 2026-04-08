@@ -87,3 +87,17 @@ export type BoardWatchData = {
   updatedAt: string;
   meetings: BoardMeeting[];
 };
+
+// ─── Partners & Initiatives ─────────────────────────────
+export type Partner = {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+  externalUrl?: string;
+  featured: boolean;
+  category: "housing" | "real-estate" | "development";
+  stephenNote?: string;
+};
