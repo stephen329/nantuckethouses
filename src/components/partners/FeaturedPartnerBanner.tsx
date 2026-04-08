@@ -19,6 +19,15 @@ export function FeaturedPartnerBanner({ partner }: { partner: Partner }) {
 
       <div className="p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row gap-6">
+          {partner.image && (
+            <div className="shrink-0 flex items-start">
+              <img
+                src={partner.image}
+                alt={partner.name}
+                className="w-24 h-24 sm:w-32 sm:h-32 object-contain rounded-lg bg-white p-2"
+              />
+            </div>
+          )}
           <div className="flex-1">
             <h3 className="text-lg font-sans font-semibold text-[var(--atlantic-navy)] mb-2">
               {partner.tagline}

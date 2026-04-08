@@ -97,6 +97,7 @@ export type Partner = {
   ctaText: string;
   ctaLink: string;
   externalUrl?: string;
+  image?: string;
   featured: boolean;
   category: "housing" | "real-estate" | "development";
   stephenNote?: string;

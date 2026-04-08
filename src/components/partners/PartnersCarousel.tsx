@@ -14,6 +14,15 @@ function PartnerCard({ partner }: { partner: Partner }) {
 
   return (
     <div className="bg-white rounded-lg p-6 border border-[var(--cedar-shingle)]/10 hover:border-[var(--privet-green)]/30 hover:shadow-md transition-all h-full flex flex-col">
+      {partner.image && (
+        <div className="mb-4">
+          <img
+            src={partner.image}
+            alt={partner.name}
+            className="h-10 object-contain"
+          />
+        </div>
+      )}
       <h3 className="text-lg text-[var(--atlantic-navy)] font-sans font-semibold mb-2">
         {partner.name}
       </h3>
