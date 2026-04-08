@@ -65,6 +65,25 @@ export type BoardMeeting = {
   link?: string;
 };
 
+// ─── Opportunities / Off-Market Desk ─────────────────────
+export type OpportunityCategory =
+  | "for-sale-by-owner"
+  | "for-rent-by-owner"
+  | "wanted-to-buy"
+  | "wanted-to-rent"
+  | "services";
+
+export type OpportunitySubmission = {
+  id: string;
+  category: OpportunityCategory;
+  data: Record<string, unknown>;
+  email: string;
+  name: string;
+  phone?: string;
+  submittedAt: string;
+  status: "new" | "reviewed" | "matched" | "closed";
+};
+
 export type BoardWatchData = {
   updatedAt: string;
   meetings: BoardMeeting[];

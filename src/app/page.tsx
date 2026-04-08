@@ -4,6 +4,7 @@ import { VibeMeter } from "@/components/home/VibeMeter";
 import { WhaleWatch } from "@/components/home/WhaleWatch";
 import { BoardWatch } from "@/components/home/BoardWatch";
 import { Teasers } from "@/components/home/Teasers";
+import { OpportunityDesk } from "@/components/home/OpportunityDesk";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { CTASection } from "@/components/home/CTASection";
 import type { PulseStats, VibeMeterData, WhaleWatchSale, StephensTake, BoardWatchData } from "@/types";
@@ -111,6 +112,7 @@ export default async function Home() {
       />
       <BoardWatch data={boardWatchData} />
       <Teasers />
+      <OpportunityDesk />
       <NewsletterSignup />
       <CTASection />
     </>
