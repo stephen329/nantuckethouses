@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Shield, DollarSign, Home, Building, Users, ArrowRight, Calculator } from "lucide-react";
-import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
+import { HousingHubHero } from "@/components/affordable/HousingHubHero";
+import { FeaturedPartnerBanner } from "@/components/partners/FeaturedPartnerBanner";
 import housingData from "@/data/affordable-housing.json";
+import partnersData from "@/data/partners.json";
+import type { Partner } from "@/types";
 
 function formatCurrency(n: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -9,25 +12,17 @@ function formatCurrency(n: number): string {
 
 export default function AffordableHousingPage() {
   const d = housingData;
+  const hfhn = (partnersData as Partner[]).find((p) => p.id === "hfhn")!;
 
   return (
     <div className="min-h-screen bg-[var(--sandstone)]">
-      {/* Hero */}
-      <section className="bg-[var(--atlantic-navy)] py-10 sm:py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Breadcrumbs items={[{ label: "Affordable Housing" }]} />
-          <p className="text-xs uppercase tracking-[0.25em] font-semibold mb-2 font-sans" style={{ color: "#6dbd8b" }}>
-            Live Intelligence
-          </p>
-          <h1 className="text-white text-3xl sm:text-4xl">Affordable &amp; Workforce Housing</h1>
-          <p className="text-white/50 mt-3 text-sm max-w-2xl leading-relaxed">
-            Nantucket&apos;s most critical issue, tracked in real time. Safe Harbor status, Covenant Program limits,
-            landlord incentives, and the development pipeline — everything developers, year-rounders, and employers need to know.
-          </p>
-        </div>
-      </section>
+      {/* Hero with HFHN branding */}
+      <HousingHubHero />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+        {/* ─── Featured Partner: HFHN ─────────────────────────── */}
+        <FeaturedPartnerBanner partner={hfhn} />
 
         {/* ─── Safe Harbor Status ──────────────────────────────── */}
         <section id="safe-harbor">
@@ -100,7 +95,7 @@ export default function AffordableHousingPage() {
             </div>
             <p className="text-xs text-[var(--atlantic-navy)]/60">{d.covenantProgram.note}</p>
             <div className="mt-4 pt-4 border-t border-[var(--cedar-shingle)]/10">
-              <Link href="/opportunities/for-sale" className="text-sm text-[var(--privet-green)] font-medium hover:underline flex items-center gap-1">
+              <Link href="/opportunities?category=workforce-housing" className="text-sm text-[var(--privet-green)] font-medium hover:underline flex items-center gap-1">
                 Own a lot with a second dwelling? Run a &ldquo;Covenant Lot&rdquo; feasibility study <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -136,7 +131,7 @@ export default function AffordableHousingPage() {
                 ))}
               </div>
             </div>
-            <Link href="/opportunities/for-rent" className="text-sm text-[var(--privet-green)] font-medium hover:underline flex items-center gap-1">
+            <Link href="/opportunities?category=workforce-housing" className="text-sm text-[var(--privet-green)] font-medium hover:underline flex items-center gap-1">
               <Calculator className="w-3.5 h-3.5" /> Calculate your &ldquo;Lease to Locals&rdquo; payout — is your unit eligible?
             </Link>
           </div>
@@ -189,7 +184,6 @@ export default function AffordableHousingPage() {
 
             <div className="overflow-x-auto -mx-6 px-6">
               <table className="w-full text-xs border-collapse min-w-[640px]">
-                {/* Header rows */}
                 <thead>
                   <tr className="bg-[var(--atlantic-navy)]">
                     <th className="text-left text-white font-semibold px-3 py-2 border border-[var(--atlantic-navy)]" rowSpan={2}>
@@ -210,11 +204,9 @@ export default function AffordableHousingPage() {
                   </tr>
                 </thead>
 
-                {/* Data rows — alternating income + rent for each tier */}
                 <tbody>
                   {d.amiTable.tiers.map((tier: { level: string; label: string; incomes: number[]; rents: number[] }, idx: number) => (
                     <>
-                      {/* Income row */}
                       <tr key={`${tier.level}-income`} className={idx % 2 === 0 ? "bg-[var(--sandstone)]" : "bg-white"}>
                         <td className="px-3 py-2 font-bold text-[var(--atlantic-navy)] border border-[var(--cedar-shingle)]/15 whitespace-nowrap">
                           {tier.level}
@@ -226,7 +218,6 @@ export default function AffordableHousingPage() {
                           </td>
                         ))}
                       </tr>
-                      {/* Affordable rent row */}
                       <tr key={`${tier.level}-rent`} className={idx % 2 === 0 ? "bg-[var(--sandstone)]" : "bg-white"}>
                         <td className="px-3 py-1.5 text-[var(--nantucket-gray)] italic border border-[var(--cedar-shingle)]/15 pl-6">
                           Affordable Rent
@@ -240,7 +231,6 @@ export default function AffordableHousingPage() {
                     </>
                   ))}
 
-                  {/* Market rent row */}
                   <tr className="bg-[var(--atlantic-navy)]/5">
                     <td className="px-3 py-2 font-semibold text-[var(--atlantic-navy)] border border-[var(--cedar-shingle)]/15 text-[10px] uppercase tracking-wider">
                       Market Rent
@@ -270,7 +260,7 @@ export default function AffordableHousingPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/opportunities"
+              href="/opportunities?category=workforce-housing"
               className="inline-block bg-[var(--privet-green)] text-white px-6 py-3 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors"
             >
               Submit to Opportunity Desk

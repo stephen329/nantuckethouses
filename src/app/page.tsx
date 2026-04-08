@@ -7,12 +7,14 @@ import { Teasers } from "@/components/home/Teasers";
 import { OpportunityDesk } from "@/components/home/OpportunityDesk";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { CTASection } from "@/components/home/CTASection";
-import type { PulseStats, VibeMeterData, WhaleWatchSale, StephensTake, BoardWatchData } from "@/types";
+import { PartnersCarousel } from "@/components/partners/PartnersCarousel";
+import type { PulseStats, VibeMeterData, WhaleWatchSale, StephensTake, BoardWatchData, Partner } from "@/types";
 
 // Import fallback data
 import vibeMeterFallback from "@/data/vibe-meter.json";
 import whaleWatchFallback from "@/data/whale-watch.json";
 import boardWatchFallback from "@/data/board-watch.json";
+import partnersData from "@/data/partners.json";
 
 export const revalidate = 3600; // 1 hour for market data
 
@@ -114,6 +116,7 @@ export default async function Home() {
       <Teasers />
       <OpportunityDesk />
       <NewsletterSignup />
+      <PartnersCarousel partners={partnersData as Partner[]} />
       <CTASection />
     </>
   );

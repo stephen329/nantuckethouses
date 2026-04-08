@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, MapPin, Briefcase, Upload, Settings, BarChart3, Users, Scale } from "lucide-react";
+import { FileText, MapPin, Briefcase, Upload, Settings, BarChart3, Users, Scale, PenTool } from "lucide-react";
 
 const adminTools = [
   {
@@ -22,6 +22,20 @@ const adminTools = [
     href: "/admin/opportunities",
     icon: Briefcase,
     category: "Leads",
+  },
+  {
+    title: "Partners & Initiatives",
+    description: "Add, edit, or remove featured partners and initiatives displayed across the site.",
+    href: "/admin/partners",
+    icon: Users,
+    category: "Content",
+  },
+  {
+    title: "Articles & Guides",
+    description: "Create, edit, and manage articles with a live markdown preview. Publish or save as drafts.",
+    href: "/admin/articles",
+    icon: PenTool,
+    category: "Content",
   },
 ];
 
@@ -55,6 +69,12 @@ const dataFiles = [
     description: "All 26 zoning district definitions and neighborhood assignments.",
     file: "src/data/zoning-districts.json",
     icon: MapPin,
+  },
+  {
+    title: "Partners & Initiatives",
+    description: "Featured partners and organizations displayed in banners, carousels, and the footer.",
+    file: "src/data/partners.json",
+    icon: Users,
   },
 ];
 

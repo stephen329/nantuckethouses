@@ -43,6 +43,8 @@ export const navPillars: NavPillar[] = [
       { label: "Covenant Program", href: "/affordable-housing#covenant", description: "2026 income limits and pricing" },
       { label: "Lease to Locals", href: "/affordable-housing#lease-to-locals", description: "Landlord incentive program" },
       { label: "Project Pipeline", href: "/affordable-housing#pipeline", description: "Active development tracker" },
+      { label: "HFHN Projects", href: "/affordable-housing/hfhn-projects", description: "Habitat for Humanity Nantucket builds" },
+      { label: "Get Involved", href: "/affordable-housing/get-involved", description: "Volunteer, donate, or apply" },
     ],
   },
   {

@@ -151,6 +151,34 @@ export function listArticles(): ArticleMeta[] {
 }
 
 /**
+ * List ALL articles including drafts, sorted by date (newest first).
+ * Used by the admin editor.
+ */
+export function listAllArticles(): ArticleMeta[] {
+  const dir = path.join(CONTENT_DIR, "articles");
+  if (!fs.existsSync(dir)) return [];
+
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".mdx"));
+
+  return files
+    .map((filename) => {
+      const filePath = path.join(dir, filename);
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const { data, content } = matter(raw);
+      const slug = filename.replace(/\.mdx$/, "");
+      const fm = data as ArticleFrontmatter;
+
+      return {
+        slug,
+        ...fm,
+        author: fm.author ?? "Stephen Maury",
+        readingTime: fm.readingTime ?? calculateReadingTime(content),
+      };
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+/**
  * Get a single article by slug.
  * Returns frontmatter + raw MDX source string.
  */
