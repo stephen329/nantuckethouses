@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { GoogleTagManager, GoogleTagManagerNoscript } from "@/components/GoogleTagManager";
+import { MetaPixel } from "@/components/MetaPixel";
+import { StructuredData } from "@/components/StructuredData";
 import Script from "next/script";
 import "./globals.css";
 
@@ -16,12 +19,21 @@ export const metadata: Metadata = {
       "Live market pulse, regulatory insights, and neighborhood expertise for Nantucket real estate.",
     type: "website",
     siteName: "NantucketHouses.com",
+    url: "https://nantuckethouses.com",
   },
   twitter: {
     card: "summary_large_image",
     title: "NantucketHouses.com",
     description:
       "Nantucket's premier real estate intelligence hub.",
+  },
+  metadataBase: new URL("https://nantuckethouses.com"),
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -33,6 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+        <GoogleTagManager />
+        <GoogleTagManagerNoscript />
+        <MetaPixel />
+        <StructuredData />
         <Navigation />
         <main className="pt-16 lg:pt-20">{children}</main>
         <Footer />

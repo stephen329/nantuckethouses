@@ -68,7 +68,7 @@ export function PulseDashboard({ stats }: Props) {
           >
             Nantucket Pulse
           </p>
-          <h2 className="text-white text-2xl sm:text-3xl">The Big Four</h2>
+          <h1 className="text-white text-2xl sm:text-3xl">The Big Four</h1>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
