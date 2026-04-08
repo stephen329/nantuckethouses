@@ -61,12 +61,22 @@ export default function AdminZoningPage() {
 
   const deleteDistrict = async (code: string) => {
     if (!confirm(`Delete district ${code}? This will also remove it from all neighborhood assignments.`)) return;
+
+    // Optimistic update
+    if (data) {
+      const { [code]: _, ...remainingDistricts } = data.districts;
+      const updatedNeighborhoods = { ...data.neighborhoodDistricts };
+      for (const [name, codes] of Object.entries(updatedNeighborhoods)) {
+        updatedNeighborhoods[name] = codes.filter((d) => d !== code);
+      }
+      setData({ districts: remainingDistricts, neighborhoodDistricts: updatedNeighborhoods });
+    }
+
     await fetch("/api/admin/zoning", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     });
-    fetchData();
   };
 
   const toggleNeighborhoodDistrict = async (neighborhood: string, districtCode: string) => {
@@ -76,12 +86,21 @@ export default function AdminZoningPage() {
       ? current.filter((d) => d !== districtCode)
       : [...current, districtCode];
 
+    // Optimistic update — instant UI feedback
+    setData({
+      ...data,
+      neighborhoodDistricts: {
+        ...data.neighborhoodDistricts,
+        [neighborhood]: updated,
+      },
+    });
+
+    // Persist to server
     await fetch("/api/admin/zoning", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ neighborhood, districts: updated }),
     });
-    fetchData();
   };
 
   if (isLoading || !data) {
