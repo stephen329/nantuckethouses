@@ -13,13 +13,11 @@ type ZoningData = {
 const DISTRICT_FIELDS = [
   { key: "name", label: "District Name", placeholder: "e.g., Residential 1" },
   { key: "minLotSize", label: "Min Lot Size", placeholder: "e.g., 5,000 sq ft" },
+  { key: "frontage", label: "Frontage", placeholder: "e.g., 50 ft" },
   { key: "maxGroundCover", label: "Max Ground Cover", placeholder: "e.g., 30%" },
-  { key: "maxHeight", label: "Max Height", placeholder: "e.g., 30 ft" },
   { key: "frontSetback", label: "Front Setback", placeholder: "e.g., 10 ft" },
-  { key: "sideSetback", label: "Side Setback", placeholder: "e.g., 6 ft" },
-  { key: "rearSetback", label: "Rear Setback", placeholder: "e.g., 15 ft" },
-  { key: "hdcScrutiny", label: "HDC Scrutiny", placeholder: "Low / Moderate / High / Very High" },
-  { key: "typicalPermitLag", label: "Typical Permit Lag", placeholder: "e.g., 3-6 months" },
+  { key: "sideSetback", label: "Side Setback", placeholder: "e.g., 5 ft" },
+  { key: "rearSetback", label: "Rear Setback", placeholder: "e.g., 5 ft" },
   { key: "notes", label: "Notes", placeholder: "Description and context..." },
 ];
 
@@ -204,8 +202,8 @@ export default function AdminZoningPage() {
                     <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-[var(--nantucket-gray)]">
                       <span>Lot: {district.minLotSize}</span>
                       <span>Cover: {district.maxGroundCover}</span>
-                      <span>Height: {district.maxHeight}</span>
-                      <span>HDC: {district.hdcScrutiny}</span>
+                      <span>Front: {district.frontSetback}</span>
+                      <span>Side/Rear: {district.sideSetback} / {district.rearSetback}</span>
                     </div>
                   )}
                 </div>

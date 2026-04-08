@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Shield, Clock, Ruler, TreePine, Waves, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { MapPin, Ruler, TreePine, Waves, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { NEIGHBORHOOD_SLUGS, getNeighborhoodName } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
@@ -173,7 +173,7 @@ export default async function NeighborhoodPage({ params }: Props) {
                 <h3 className="text-sm font-bold text-[var(--atlantic-navy)] font-sans mb-3">
                   {d.code} — {d.name}
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-4">
                   <div className="flex items-start gap-2">
                     <Ruler className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
                     <div>
@@ -188,29 +188,20 @@ export default async function NeighborhoodPage({ params }: Props) {
                       <p className="font-semibold text-[var(--atlantic-navy)]">{d.maxGroundCover}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <Shield className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">HDC Scrutiny</p>
-                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.hdcScrutiny}</p>
-                    </div>
+                  <div>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Front Setback</p>
+                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.frontSetback}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Height</p>
-                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.maxHeight}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Setbacks (F/S/R)</p>
-                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.frontSetback} / {d.sideSetback} / {d.rearSetback}</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">Permit Timeline</p>
-                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.typicalPermitLag}</p>
-                    </div>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Side / Rear Setback</p>
+                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.sideSetback} / {d.rearSetback}</p>
                   </div>
                 </div>
+                {d.frontage && (
+                  <p className="text-xs text-[var(--atlantic-navy)]/50 mb-3">
+                    Frontage: {d.frontage}
+                  </p>
+                )}
                 <p className="text-xs text-[var(--atlantic-navy)]/60 border-t border-[var(--cedar-shingle)]/10 pt-3">
                   {d.notes}
                 </p>

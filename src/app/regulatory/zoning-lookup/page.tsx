@@ -8,14 +8,13 @@ import zoningData from "@/data/zoning-districts.json";
 type DistrictInfo = {
   name: string;
   minLotSize: string;
+  frontage?: string;
   maxGroundCover: string;
-  maxHeight: string;
   frontSetback: string;
   sideSetback: string;
   rearSetback: string;
-  hdcScrutiny: string;
-  typicalPermitLag: string;
   notes: string;
+  [key: string]: string | undefined;
 };
 
 export default function ZoningLookupPage() {
@@ -115,24 +114,19 @@ export default function ZoningLookupPage() {
                     <p className="font-semibold text-[var(--atlantic-navy)]">{result.info.maxGroundCover}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Height</p>
-                    <p className="font-semibold text-[var(--atlantic-navy)]">{result.info.maxHeight}</p>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Front Setback</p>
+                    <p className="font-semibold text-[var(--atlantic-navy)]">{result.info.frontSetback}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">HDC Scrutiny</p>
-                    <p className="font-semibold text-[var(--atlantic-navy)]">{result.info.hdcScrutiny}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Setbacks (F/S/R)</p>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Side / Rear Setback</p>
                     <p className="font-semibold text-[var(--atlantic-navy)]">
-                      {result.info.frontSetback} / {result.info.sideSetback} / {result.info.rearSetback}
+                      {result.info.sideSetback} / {result.info.rearSetback}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Typical Permit Lag</p>
-                    <p className="font-semibold text-[var(--atlantic-navy)]">{result.info.typicalPermitLag}</p>
-                  </div>
                 </div>
+                {result.info.frontage && (
+                  <p className="text-xs text-[var(--atlantic-navy)]/50 mb-3">Frontage: {result.info.frontage}</p>
+                )}
                 <p className="text-xs text-[var(--atlantic-navy)]/70 leading-relaxed border-t border-[var(--cedar-shingle)]/10 pt-3">
                   {result.info.notes}
                 </p>
