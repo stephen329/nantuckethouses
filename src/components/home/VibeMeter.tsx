@@ -26,7 +26,7 @@ export function VibeMeter({ data }: Props) {
             <p className="text-[var(--cedar-shingle)] text-xs uppercase tracking-[0.25em] font-semibold mb-2 font-sans">
               Expert Sentiment
             </p>
-            <h2 className="text-[var(--atlantic-navy)]">Vibe Meter</h2>
+            <h2 className="text-[var(--atlantic-navy)]">Vibe Check</h2>
           </div>
           <p className="text-xs text-[var(--nantucket-gray)] font-sans">
             Week of{" "}
