@@ -1,10 +1,8 @@
 // ─── Vibe Meter (Expert Sentiment) ────────────────────────
-export type VibeStatus = "Steamy" | "Warm" | "Steady" | "Chilly" | "Cold";
 export type VibeTrend = "up" | "down" | "flat";
 
 export type NeighborhoodVibe = {
   neighborhood: string;
-  status: VibeStatus;
   trend: VibeTrend;
   note: string; // Stephen's expert take (required)
 };

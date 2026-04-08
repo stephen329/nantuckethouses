@@ -3,19 +3,7 @@ import { MapPin } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { NEIGHBORHOOD_MAP } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
-import vibeMeterData from "@/data/vibe-meter.json";
 import zoningData from "@/data/zoning-districts.json";
-import type { VibeMeterData, VibeStatus } from "@/types";
-
-const vibe = vibeMeterData as VibeMeterData;
-
-const statusEmoji: Record<VibeStatus, string> = {
-  Steamy: "🟢",
-  Warm: "🟡",
-  Steady: "🟠",
-  Chilly: "🔵",
-  Cold: "⚪",
-};
 
 type Profile = {
   slug: string;
@@ -44,9 +32,6 @@ export default function NeighborhoodsOverviewPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {profiles.map((profile) => {
-              const vibeEntry = vibe.neighborhoods.find(
-                (n) => n.neighborhood.replace("'", "").toLowerCase() === profile.name.replace("'", "").toLowerCase()
-              );
               const district = (zoningData.districts as Record<string, { name: string }>)[profile.zoningDistrict];
 
               return (
@@ -55,19 +40,11 @@ export default function NeighborhoodsOverviewPage() {
                   href={`/neighborhoods/${profile.slug}`}
                   className="group bg-white rounded-lg p-5 border border-[var(--cedar-shingle)]/10 hover:border-[var(--privet-green)]/30 hover:shadow-md transition-all"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-[var(--nantucket-gray)] group-hover:text-[var(--privet-green)] transition-colors" />
-                      <h3 className="text-base font-semibold text-[var(--atlantic-navy)] group-hover:text-[var(--privet-green)] transition-colors font-sans">
-                        {profile.name}
-                      </h3>
-                    </div>
-                    {vibeEntry && (
-                      <span className="text-xs flex items-center gap-1">
-                        {statusEmoji[vibeEntry.status]}
-                        <span className="text-[var(--nantucket-gray)]">{vibeEntry.status}</span>
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="w-4 h-4 text-[var(--nantucket-gray)] group-hover:text-[var(--privet-green)] transition-colors" />
+                    <h3 className="text-base font-semibold text-[var(--atlantic-navy)] group-hover:text-[var(--privet-green)] transition-colors font-sans">
+                      {profile.name}
+                    </h3>
                   </div>
                   <p className="text-xs text-[var(--atlantic-navy)]/70 leading-relaxed mb-3">
                     {profile.description}

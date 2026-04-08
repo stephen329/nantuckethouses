@@ -7,7 +7,7 @@ import { NEIGHBORHOOD_SLUGS, getNeighborhoodName } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
 import vibeMeterData from "@/data/vibe-meter.json";
 import zoningData from "@/data/zoning-districts.json";
-import type { VibeMeterData, VibeStatus, VibeTrend } from "@/types";
+import type { VibeMeterData, VibeTrend } from "@/types";
 
 const vibe = vibeMeterData as VibeMeterData;
 
@@ -57,14 +57,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const statusConfig: Record<string, { emoji: string; color: string }> = {
-  Steamy: { emoji: "🟢", color: "text-[var(--privet-green)]" },
-  Warm: { emoji: "🟡", color: "text-amber-600" },
-  Steady: { emoji: "🟠", color: "text-orange-600" },
-  Chilly: { emoji: "🔵", color: "text-blue-600" },
-  Cold: { emoji: "⚪", color: "text-slate-500" },
-};
-
 const trendIcons: Record<VibeTrend, typeof TrendingUp> = {
   up: TrendingUp,
   down: TrendingDown,
@@ -101,21 +93,11 @@ export default async function NeighborhoodPage({ params }: Props) {
               { label: name },
             ]}
           />
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-white text-3xl sm:text-4xl">{name}</h1>
-              <p className="text-white/50 mt-2 text-sm max-w-xl leading-relaxed">
-                {profile.description}
-              </p>
-            </div>
-            {vibeEntry && (
-              <div className="shrink-0 text-right">
-                <span className="text-2xl">{statusConfig[vibeEntry.status]?.emoji}</span>
-                <p className={`text-xs font-semibold uppercase tracking-wider mt-1 ${statusConfig[vibeEntry.status]?.color ?? "text-white/50"}`}>
-                  {vibeEntry.status}
-                </p>
-              </div>
-            )}
+          <div>
+            <h1 className="text-white text-3xl sm:text-4xl">{name}</h1>
+            <p className="text-white/50 mt-2 text-sm max-w-xl leading-relaxed">
+              {profile.description}
+            </p>
           </div>
         </div>
       </section>
@@ -145,12 +127,8 @@ export default async function NeighborhoodPage({ params }: Props) {
               </p>
               {(() => {
                 const TrendIcon = trendIcons[vibeEntry.trend];
-                const cfg = statusConfig[vibeEntry.status];
-                return (
-                  <span className={`flex items-center gap-1 text-xs font-semibold ${cfg?.color ?? ""}`}>
-                    {vibeEntry.status} <TrendIcon className="w-3 h-3" />
-                  </span>
-                );
+                const trendColor = vibeEntry.trend === "up" ? "text-[var(--privet-green)]" : vibeEntry.trend === "down" ? "text-red-500" : "text-[var(--nantucket-gray)]";
+                return <TrendIcon className={`w-4 h-4 ${trendColor}`} />;
               })()}
             </div>
             <p className="text-sm text-[var(--atlantic-navy)]/80 leading-relaxed italic">

@@ -1,22 +1,20 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { VibeMeterData, VibeStatus, VibeTrend } from "@/types";
+import type { VibeMeterData, VibeTrend } from "@/types";
 
 type Props = {
   data: VibeMeterData;
-};
-
-const statusConfig: Record<VibeStatus, { emoji: string; color: string; bg: string; text: string }> = {
-  Steamy: { emoji: "🟢", color: "text-[var(--privet-green)]", bg: "bg-[var(--privet-green)]/10", text: "Steamy" },
-  Warm: { emoji: "🟡", color: "text-amber-600", bg: "bg-amber-50", text: "Warm" },
-  Steady: { emoji: "🟠", color: "text-orange-600", bg: "bg-orange-50", text: "Steady" },
-  Chilly: { emoji: "🔵", color: "text-blue-600", bg: "bg-blue-50", text: "Chilly" },
-  Cold: { emoji: "⚪", color: "text-slate-500", bg: "bg-slate-50", text: "Cold" },
 };
 
 const trendIcons: Record<VibeTrend, typeof TrendingUp> = {
   up: TrendingUp,
   down: TrendingDown,
   flat: Minus,
+};
+
+const trendColors: Record<VibeTrend, string> = {
+  up: "text-[var(--privet-green)]",
+  down: "text-red-500",
+  flat: "text-[var(--nantucket-gray)]",
 };
 
 export function VibeMeter({ data }: Props) {
@@ -43,29 +41,19 @@ export function VibeMeter({ data }: Props) {
         {/* Neighborhood Sentiment Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {data.neighborhoods.map((hood) => {
-            const config = statusConfig[hood.status];
             const TrendIcon = trendIcons[hood.trend];
+            const trendColor = trendColors[hood.trend];
 
             return (
               <div
                 key={hood.neighborhood}
                 className="bg-white rounded-lg p-4 border border-[var(--cedar-shingle)]/10 hover:border-[var(--cedar-shingle)]/25 transition-colors"
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{config.emoji}</span>
-                    <h3 className="text-sm font-semibold text-[var(--atlantic-navy)] font-sans">
-                      {hood.neighborhood}
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`text-xs font-semibold uppercase tracking-wider ${config.color}`}
-                    >
-                      {config.text}
-                    </span>
-                    <TrendIcon className={`w-3 h-3 ${config.color}`} />
-                  </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-[var(--atlantic-navy)] font-sans">
+                    {hood.neighborhood}
+                  </h3>
+                  <TrendIcon className={`w-4 h-4 ${trendColor}`} />
                 </div>
                 <p className="text-sm text-[var(--atlantic-navy)]/70 leading-relaxed italic">
                   &ldquo;{hood.note}&rdquo;
