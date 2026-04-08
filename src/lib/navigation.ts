@@ -57,7 +57,7 @@ export const navPillars: NavPillar[] = [
       { label: "Brant Point", href: "/neighborhoods/brant-point" },
       { label: "Monomoy", href: "/neighborhoods/monomoy" },
       { label: "Polpis", href: "/neighborhoods/polpis" },
-      { label: "Tom Nevers", href: "/neighborhoods/tom-nevers" },
+      { label: "Madequecham", href: "/neighborhoods/madequecham" },
     ],
   },
 ];
