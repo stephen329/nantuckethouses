@@ -1,0 +1,28 @@
+{
+  "districts": {
+    "R-1": { "name": "Residential 1", "minLotSize": "5,000 sq ft", "maxGroundCover": "30%", "maxHeight": "30 ft", "frontSetback": "10 ft", "sideSetback": "6 ft", "rearSetback": "15 ft", "hdcScrutiny": "High", "typicalPermitLag": "3-6 months", "notes": "Most restrictive residential district. Common in Town and Brant Point." },
+    "R-2": { "name": "Residential 2", "minLotSize": "10,000 sq ft", "maxGroundCover": "25%", "maxHeight": "30 ft", "frontSetback": "15 ft", "sideSetback": "10 ft", "rearSetback": "15 ft", "hdcScrutiny": "High", "typicalPermitLag": "3-6 months", "notes": "Standard residential. Common in Cliff, Sconset, and parts of Surfside." },
+    "R-5": { "name": "Residential 5", "minLotSize": "20,000 sq ft", "maxGroundCover": "15%", "maxHeight": "30 ft", "frontSetback": "25 ft", "sideSetback": "15 ft", "rearSetback": "25 ft", "hdcScrutiny": "Moderate", "typicalPermitLag": "2-4 months", "notes": "Larger lots. Common in Dionis, Polpis, and Monomoy." },
+    "ROH": { "name": "Residential Old Historic", "minLotSize": "5,000 sq ft", "maxGroundCover": "35%", "maxHeight": "30 ft", "frontSetback": "5 ft", "sideSetback": "5 ft", "rearSetback": "10 ft", "hdcScrutiny": "Very High", "typicalPermitLag": "4-8 months", "notes": "Historic core of Town. Strictest HDC review. Material and design standards heavily enforced." },
+    "LUG-1": { "name": "Limited Use General 1", "minLotSize": "40,000 sq ft", "maxGroundCover": "10%", "maxHeight": "30 ft", "frontSetback": "35 ft", "sideSetback": "25 ft", "rearSetback": "35 ft", "hdcScrutiny": "Moderate", "typicalPermitLag": "2-4 months", "notes": "Rural character. Common in outer Madaket, Cisco, and Tom Nevers areas." },
+    "LUG-2": { "name": "Limited Use General 2", "minLotSize": "80,000 sq ft", "maxGroundCover": "5%", "maxHeight": "30 ft", "frontSetback": "50 ft", "sideSetback": "25 ft", "rearSetback": "50 ft", "hdcScrutiny": "Low", "typicalPermitLag": "1-3 months", "notes": "Large rural lots. Mid-Island and outer areas. Workforce housing discussions focused here." },
+    "SR-1": { "name": "Special Residential 1", "minLotSize": "10,000 sq ft", "maxGroundCover": "20%", "maxHeight": "30 ft", "frontSetback": "15 ft", "sideSetback": "10 ft", "rearSetback": "15 ft", "hdcScrutiny": "High", "typicalPermitLag": "3-6 months", "notes": "Transitional residential areas near Town center." },
+    "SR-10": { "name": "Special Residential 10", "minLotSize": "10,000 sq ft", "maxGroundCover": "25%", "maxHeight": "30 ft", "frontSetback": "20 ft", "sideSetback": "10 ft", "rearSetback": "15 ft", "hdcScrutiny": "Moderate", "typicalPermitLag": "2-4 months", "notes": "Mid-density residential. Naushop and planned development areas." },
+    "CI": { "name": "Commercial Industrial", "minLotSize": "20,000 sq ft", "maxGroundCover": "50%", "maxHeight": "35 ft", "frontSetback": "20 ft", "sideSetback": "10 ft", "rearSetback": "20 ft", "hdcScrutiny": "Moderate", "typicalPermitLag": "2-5 months", "notes": "Limited commercial areas. Primarily near airport and industrial park." }
+  },
+  "neighborhoodDefaults": {
+    "Town": "ROH",
+    "Brant Point": "R-1",
+    "'Sconset": "R-2",
+    "Sconset": "R-2",
+    "Cliff": "R-2",
+    "Surfside": "R-2",
+    "Madaket": "LUG-1",
+    "Dionis": "R-5",
+    "Mid-Island": "LUG-2",
+    "Cisco": "LUG-1",
+    "Monomoy": "R-5",
+    "Polpis": "R-5",
+    "Tom Nevers": "LUG-1"
+  }
+}
