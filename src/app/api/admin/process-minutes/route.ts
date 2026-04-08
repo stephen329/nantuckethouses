@@ -45,9 +45,11 @@ export async function POST(request: Request) {
     }
 
     // Extract text from PDF using pdf-parse
+    // Note: importing pdf-parse/lib/pdf-parse.js directly avoids the test file
+    // loading bug in pdf-parse@1.1.1 (ENOENT: 05-versions-space.pdf)
     const buffer = Buffer.from(await file.arrayBuffer());
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require("pdf-parse");
+    const pdfParse = require("pdf-parse/lib/pdf-parse.js");
     const pdfData = await pdfParse(buffer);
     const pdfText: string = pdfData.text;
 
