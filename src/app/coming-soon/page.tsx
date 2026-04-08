@@ -42,7 +42,7 @@ export default function ComingSoonPage() {
           />
           <Feature
             title="Neighborhood Intel"
-            desc="Block-by-block expertise across all 13 neighborhoods"
+            desc="A closer look at neighborhoods across the island"
           />
           <Feature
             title="Building Costs"
