@@ -29,20 +29,22 @@ export default function ZoningLookupPage() {
 
     // Simple neighborhood matching from address
     const lower = address.toLowerCase();
-    let matchedDistrict: string | null = null;
+    const neighborhoodDistricts = (zoningData as any).neighborhoodDistricts ?? {};
+    let matchedCodes: string[] = [];
 
-    for (const [neighborhood, district] of Object.entries(zoningData.neighborhoodDefaults)) {
+    for (const [neighborhood, codes] of Object.entries(neighborhoodDistricts)) {
       if (lower.includes(neighborhood.toLowerCase())) {
-        matchedDistrict = district;
+        matchedCodes = codes as string[];
         break;
       }
     }
 
-    // Default to R-2 if no match
-    if (!matchedDistrict) matchedDistrict = "R-2";
+    // Default to R-1 if no match
+    if (matchedCodes.length === 0) matchedCodes = ["R-1"];
 
-    const info = (zoningData.districts as Record<string, DistrictInfo>)[matchedDistrict];
-    setResult(info ? { district: matchedDistrict, info } : null);
+    const primaryCode = matchedCodes[0];
+    const info = (zoningData.districts as Record<string, DistrictInfo>)[primaryCode];
+    setResult(info ? { district: primaryCode, info } : null);
     setSearched(true);
 
     // Track Klaviyo event

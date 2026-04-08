@@ -80,7 +80,15 @@ export default async function NeighborhoodPage({ params }: Props) {
   const vibeEntry = vibe.neighborhoods.find(
     (n) => n.neighborhood.replace("'", "").toLowerCase() === name.replace("'", "").toLowerCase()
   );
-  const district = (zoningData.districts as Record<string, DistrictInfo>)[profile.zoningDistrict];
+  // Support multiple districts per neighborhood
+  const neighborhoodDistricts = (zoningData as any).neighborhoodDistricts ?? {};
+  const assignedCodes: string[] = neighborhoodDistricts[name] ?? [profile.zoningDistrict];
+  const districts = assignedCodes
+    .map((code: string) => ({
+      code,
+      ...(zoningData.districts as Record<string, DistrictInfo>)[code],
+    }))
+    .filter((d: any) => d.name); // filter out invalid codes
 
   return (
     <div className="min-h-screen bg-[var(--sandstone)]">
@@ -154,54 +162,61 @@ export default async function NeighborhoodPage({ params }: Props) {
           </div>
         )}
 
-        {/* Zoning Highlights */}
-        {district && (
-          <div className="bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-6">
-            <h2 className="text-lg text-[var(--atlantic-navy)] mb-4">
-              Zoning: {profile.zoningDistrict} — {district.name}
+        {/* Zoning Highlights — supports multiple districts */}
+        {districts.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg text-[var(--atlantic-navy)]">
+              Zoning Districts{districts.length > 1 ? ` (${districts.length})` : ""}
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm mb-4">
-              <div className="flex items-start gap-2">
-                <Ruler className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-[var(--nantucket-gray)] font-sans">Min Lot Size</p>
-                  <p className="font-semibold text-[var(--atlantic-navy)]">{district.minLotSize}</p>
+            {districts.map((d: any) => (
+              <div key={d.code} className="bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-6">
+                <h3 className="text-sm font-bold text-[var(--atlantic-navy)] font-sans mb-3">
+                  {d.code} — {d.name}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm mb-4">
+                  <div className="flex items-start gap-2">
+                    <Ruler className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">Min Lot Size</p>
+                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.minLotSize}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <TreePine className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Ground Cover</p>
+                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.maxGroundCover}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Shield className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">HDC Scrutiny</p>
+                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.hdcScrutiny}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Height</p>
+                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.maxHeight}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--nantucket-gray)] font-sans">Setbacks (F/S/R)</p>
+                    <p className="font-semibold text-[var(--atlantic-navy)]">{d.frontSetback} / {d.sideSetback} / {d.rearSetback}</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-[var(--nantucket-gray)] font-sans">Permit Timeline</p>
+                      <p className="font-semibold text-[var(--atlantic-navy)]">{d.typicalPermitLag}</p>
+                    </div>
+                  </div>
                 </div>
+                <p className="text-xs text-[var(--atlantic-navy)]/60 border-t border-[var(--cedar-shingle)]/10 pt-3">
+                  {d.notes}
+                </p>
               </div>
-              <div className="flex items-start gap-2">
-                <TreePine className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Ground Cover</p>
-                  <p className="font-semibold text-[var(--atlantic-navy)]">{district.maxGroundCover}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <Shield className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-[var(--nantucket-gray)] font-sans">HDC Scrutiny</p>
-                  <p className="font-semibold text-[var(--atlantic-navy)]">{district.hdcScrutiny}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-[var(--nantucket-gray)] font-sans">Max Height</p>
-                <p className="font-semibold text-[var(--atlantic-navy)]">{district.maxHeight}</p>
-              </div>
-              <div>
-                <p className="text-xs text-[var(--nantucket-gray)] font-sans">Setbacks (F/S/R)</p>
-                <p className="font-semibold text-[var(--atlantic-navy)]">{district.frontSetback} / {district.sideSetback} / {district.rearSetback}</p>
-              </div>
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-[var(--nantucket-gray)] shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-[var(--nantucket-gray)] font-sans">Permit Timeline</p>
-                  <p className="font-semibold text-[var(--atlantic-navy)]">{district.typicalPermitLag}</p>
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-[var(--atlantic-navy)]/60 border-t border-[var(--cedar-shingle)]/10 pt-3">
-              {district.notes}
-            </p>
-            <Link href="/regulatory/zoning-lookup" className="text-xs text-[var(--privet-green)] hover:underline mt-2 inline-block">
+            ))}
+            <Link href="/regulatory/zoning-lookup" className="text-xs text-[var(--privet-green)] hover:underline">
               Look up zoning for a specific address &rarr;
             </Link>
           </div>
