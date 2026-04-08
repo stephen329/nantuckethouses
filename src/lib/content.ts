@@ -15,7 +15,7 @@ export type ArticleFrontmatter = {
   category: string;
   tags?: string[];
   featured?: boolean;
-  published?: boolean;
+  published?: boolean; // default true — set false for drafts
   author?: string;
   heroImage?: string;
   readingTime?: number;
@@ -23,7 +23,7 @@ export type ArticleFrontmatter = {
 
 export type ArticleMeta = ArticleFrontmatter & {
   slug: string;
-  readingTime: number;
+  readingTime: number; // always present after processing
 };
 
 // ─── Regulatory Recap Types ────────────────────────────────
@@ -107,15 +107,23 @@ export async function renderMarkdown(source: string): Promise<string> {
 
 // ─── Article Functions ──────────────────────────────────────
 
-function calculateReadingTime(text: string): number {
+/**
+ * Calculate reading time in minutes.
+ * Strips code blocks and image tags before counting words.
+ */
+export function calculateReadingTime(text: string): number {
   const stripped = text
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/`[^`]*`/g, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "");
+    .replace(/```[\s\S]*?```/g, "") // remove code blocks
+    .replace(/`[^`]*`/g, "") // remove inline code
+    .replace(/<ArticleImage[^>]*\/>/g, "") // remove image components
+    .replace(/!\[.*?\]\(.*?\)/g, ""); // remove markdown images
   const words = stripped.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 238));
 }
 
+/**
+ * List all published articles, sorted by date (newest first).
+ */
 export function listArticles(): ArticleMeta[] {
   const dir = path.join(CONTENT_DIR, "articles");
   if (!fs.existsSync(dir)) return [];
@@ -142,6 +150,10 @@ export function listArticles(): ArticleMeta[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+/**
+ * List ALL articles including drafts, sorted by date (newest first).
+ * Used by the admin editor.
+ */
 export function listAllArticles(): ArticleMeta[] {
   const dir = path.join(CONTENT_DIR, "articles");
   if (!fs.existsSync(dir)) return [];
@@ -166,6 +178,10 @@ export function listAllArticles(): ArticleMeta[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+/**
+ * Get a single article by slug.
+ * Returns frontmatter + raw MDX source string.
+ */
 export function getArticle(
   slug: string
 ): { meta: ArticleMeta; source: string } | null {
