@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
-import { repliersGet } from "@/lib/repliers";
-
-/**
- * Response type for listings endpoint
- */
-type ListingsResponse = {
-  count?: number;
-  listings?: Array<{
-    listPrice?: number;
-    mlsNumber?: string;
-  }>;
-};
+import { fetchAllListings } from "@/lib/cnc-api";
 
 type PriceBracket = {
   label: string;
@@ -22,36 +11,15 @@ type PriceBracket = {
 
 /**
  * GET /api/price-distribution
- * 
- * Fetches actual active listings from Repliers and calculates real price distribution.
- * This gives accurate counts per price bracket based on current inventory.
+ *
+ * Fetches active listings from the C&C API and calculates price distribution.
  */
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const city = searchParams.get("city") ?? "Nantucket";
-
+export async function GET() {
   try {
-    const apiKey = process.env.REPLIERS_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Missing REPLIERS_API_KEY on the server" },
-        { status: 500 }
-      );
-    }
+    const activeListings = await fetchAllListings({ status: "A" });
 
-    // Fetch active listings - we need actual list prices
-    // Request only the fields we need to minimize response size
-    // Use county filter to capture ALL Nantucket neighborhoods
-    const data = await repliersGet<ListingsResponse>("/listings", {
-      county: "Nantucket",  // County captures all island neighborhoods
-      status: "A", // Active listings only
-      resultsPerPage: 500, // Get all listings
-      fields: "listPrice,mlsNumber", // Only fetch price data
-    });
-
-    const listings = data.listings || [];
-    const prices = listings
-      .map(l => l.listPrice)
+    const prices = activeListings
+      .map((l) => l.ListPrice)
       .filter((p): p is number => typeof p === "number" && p > 0);
 
     const totalCount = prices.length;
@@ -64,8 +32,7 @@ export async function GET(request: Request) {
       { label: "Ultra-Luxury ($10M+)", min: 10000000, max: Infinity, count: 0, percentage: 0 },
     ];
 
-    // Count listings in each bracket
-    prices.forEach(price => {
+    prices.forEach((price) => {
       for (const bracket of brackets) {
         if (price >= bracket.min && price < bracket.max) {
           bracket.count++;
@@ -74,17 +41,16 @@ export async function GET(request: Request) {
       }
     });
 
-    // Calculate percentages
-    brackets.forEach(bracket => {
-      bracket.percentage = totalCount > 0 
-        ? Math.round((bracket.count / totalCount) * 100) 
-        : 0;
+    brackets.forEach((bracket) => {
+      bracket.percentage =
+        totalCount > 0
+          ? Math.round((bracket.count / totalCount) * 100)
+          : 0;
     });
 
-    // Filter out empty brackets and format response
     const distribution = brackets
-      .filter(b => b.count > 0)
-      .map(b => ({
+      .filter((b) => b.count > 0)
+      .map((b) => ({
         range: b.label,
         count: b.count,
         percentage: b.percentage,
@@ -93,15 +59,12 @@ export async function GET(request: Request) {
     return NextResponse.json({
       data: distribution,
       totalListings: totalCount,
-      source: "repliers-active-listings",
+      source: "cnc-api",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Price distribution API error:", message);
 
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

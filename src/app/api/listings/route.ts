@@ -1,43 +1,5 @@
 import { NextResponse } from "next/server";
-import { repliersGet } from "@/lib/repliers";
-
-type ListingResponse = {
-  count: number;
-  numPages: number;
-  listings: Array<{
-    mlsNumber: string;
-    status: string;
-    listPrice: number;
-    soldPrice?: number;
-    soldDate?: string;
-    listDate?: string;
-    daysOnMarket?: number;
-    address: {
-      streetNumber?: string;
-      streetName?: string;
-      unitNumber?: string;
-      area?: string;
-      neighborhood?: string;
-      city?: string;
-      zip?: string;
-    };
-    details?: {
-      numBedrooms?: number;
-      numBathrooms?: number;
-      numBathroomsPlus?: number;
-      sqft?: string;
-      propertyType?: string;
-      style?: string;
-      description?: string;
-    };
-    lot?: {
-      acres?: number;
-      squareFeet?: number;
-    };
-    images?: Array<{ url: string }>;
-    photoCount?: number;
-  }>;
-};
+import { fetchListings, CncListing, daysBetween } from "@/lib/cnc-api";
 
 type SimplifiedListing = {
   mlsNumber: string;
@@ -55,21 +17,21 @@ type SimplifiedListing = {
 
 /**
  * GET /api/listings
- * 
+ *
  * Search and browse active listings with optional filters.
- * 
+ *
  * Query params:
- * - area: Filter by neighborhood/area (e.g., "Town", "Sconset", "Madaket")
+ * - area: Filter by neighborhood/area
  * - minPrice: Minimum list price
  * - maxPrice: Maximum list price
  * - bedrooms: Minimum bedrooms
- * - propertyType: Property type filter (e.g., "Single Family", "Condo", "Land")
+ * - propertyType: Property type filter
  * - limit: Number of results (default 10, max 50)
- * - sortBy: Sort field (price, daysOnMarket, bedrooms) - default: price desc
+ * - sortBy: Sort field (price, priceAsc, newest, oldest, bedrooms)
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  
+
   const area = searchParams.get("area");
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
@@ -79,102 +41,58 @@ export async function GET(request: Request) {
   const sortBy = searchParams.get("sortBy") ?? "price";
 
   try {
-    const apiKey = process.env.REPLIERS_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Missing REPLIERS_API_KEY" },
-        { status: 500 }
-      );
-    }
-
-    // Build query parameters
-    const params: Record<string, string> = {
-      county: "Nantucket",
+    const params: Record<string, string | number> = {
       status: "A",
-      listings: "true",
-      resultsPerPage: String(limit),
+      limit,
+      offset: 0,
     };
 
-    // Area/neighborhood filter
-    if (area) {
-      // Try both area and neighborhood fields
-      params.area = area;
-    }
+    if (area) params.area = area;
+    if (minPrice) params.minPrice = minPrice;
+    if (maxPrice) params.maxPrice = maxPrice;
+    if (bedrooms) params.minBeds = bedrooms;
+    if (propertyType) params.propertyType = propertyType;
 
-    // Price filters
-    if (minPrice) {
-      params.minListPrice = minPrice;
-    }
-    if (maxPrice) {
-      params.maxListPrice = maxPrice;
-    }
-
-    // Bedrooms filter
-    if (bedrooms) {
-      params.minBeds = bedrooms;
-    }
-
-    // Property type filter
-    if (propertyType) {
-      params.propertyType = propertyType;
-    }
-
-    // Sorting - use Repliers valid sort options
-    if (sortBy === "priceDesc" || sortBy === "price") {
-      params.sortBy = "listPriceDesc";
-    } else if (sortBy === "priceAsc") {
-      params.sortBy = "listPriceAsc";
+    // Sorting
+    if (sortBy === "priceAsc") {
+      params.ordering = "ListPrice";
     } else if (sortBy === "newest") {
-      params.sortBy = "createdOnDesc";
+      params.ordering = "-OnMarketDate";
     } else if (sortBy === "oldest") {
-      params.sortBy = "createdOnAsc";
+      params.ordering = "OnMarketDate";
     } else if (sortBy === "bedsDesc" || sortBy === "bedrooms") {
-      params.sortBy = "bedsDesc";
+      params.ordering = "-BedroomsTotal";
     } else {
-      params.sortBy = "listPriceDesc";
+      params.ordering = "-ListPrice";
     }
 
-    const data = await repliersGet<ListingResponse>("/listings", params);
+    const data = await fetchListings(params);
 
-    // Helper to calculate days on market from listDate
-    const calculateDaysOnMarket = (listDate?: string): number | null => {
-      if (!listDate) return null;
-      try {
-        const listed = new Date(listDate);
-        const now = new Date();
-        const diffMs = now.getTime() - listed.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        return diffDays >= 0 ? diffDays : null;
-      } catch {
-        return null;
+    const listings: SimplifiedListing[] = (data.results || []).map(
+      (l: CncListing) => {
+        const addressParts = [l.StreetNumber, l.StreetName].filter(Boolean);
+
+        let dom: number | null = null;
+        if (l.OnMarketDate) {
+          dom = daysBetween(l.OnMarketDate, new Date().toISOString());
+          if (dom < 0) dom = null;
+        }
+
+        return {
+          mlsNumber: String(l.link_id ?? ""),
+          address: addressParts.join(" ") || "Address not available",
+          area: l.MLSAreaMajor || "Unknown",
+          listPrice: l.ListPrice,
+          bedrooms: l.BedroomsTotal ?? null,
+          bathrooms: l.BathroomsTotalDecimal ?? null,
+          sqft: null, // Not available in link-listings-v2 response
+          propertyType: l.PropertyType ?? null,
+          lotAcres: null, // Not available in link-listings-v2 response
+          daysOnMarket: dom,
+          photoCount: 0,
+        };
       }
-    };
-
-    // Simplify listing data for AI consumption
-    const listings: SimplifiedListing[] = (data.listings || []).map((l) => {
-      const addressParts = [
-        l.address?.streetNumber,
-        l.address?.streetName,
-        l.address?.unitNumber ? `Unit ${l.address.unitNumber}` : null,
-      ].filter(Boolean);
-
-      // Use API daysOnMarket if available, otherwise calculate from listDate
-      const dom = l.daysOnMarket ?? calculateDaysOnMarket(l.listDate);
-
-      return {
-        mlsNumber: l.mlsNumber,
-        address: addressParts.join(" ") || "Address not available",
-        area: l.address?.area || l.address?.neighborhood || "Unknown",
-        listPrice: l.listPrice,
-        bedrooms: l.details?.numBedrooms ?? null,
-        bathrooms: l.details?.numBathrooms ?? null,
-        sqft: l.details?.sqft ?? null,
-        propertyType: l.details?.propertyType ?? null,
-        lotAcres: l.lot?.acres ?? null,
-        daysOnMarket: dom,
-        photoCount: l.photoCount ?? 0,
-      };
-    });
+    );
 
     return NextResponse.json(
       {
@@ -200,7 +118,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       { error: message },
-      { 
+      {
         status: 500,
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -210,5 +128,4 @@ export async function GET(request: Request) {
   }
 }
 
-// Force dynamic rendering - no caching
 export const dynamic = "force-dynamic";

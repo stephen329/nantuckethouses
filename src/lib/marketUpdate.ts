@@ -1,5 +1,5 @@
 /**
- * Build a Facebook/Meta-ready market update post from Repliers-derived stats and insights.
+ * Build a Facebook/Meta-ready market update post from C&C API-derived stats and insights.
  * Used by /api/meta-market-update to generate and optionally post to Meta.
  */
 
@@ -52,9 +52,9 @@ export function buildMarketUpdatePost(input: MarketUpdateInput): string {
   const anomaly = insights.find((i) => i.type === "anomaly");
   const insight = trend ?? anomaly;
   if (insight) {
-    // Shorten for social: remove "—based on closed sales from the Repliers MLS feed" if present
+    // Shorten for social: remove "—based on closed sales from the C&C data feed" if present
     let sentence = insight.statement.replace(
-      /—based on closed sales from the Repliers MLS feed\.?$/i,
+      /—based on closed sales from the C&C data feed\.?$/i,
       ""
     ).trim();
     if (sentence && !/\.$/.test(sentence)) sentence += ".";
@@ -65,7 +65,7 @@ export function buildMarketUpdatePost(input: MarketUpdateInput): string {
     parts.push(`Median days on market: ${Math.round(medianDaysOnMarket)}.`);
   }
 
-  parts.push(`Data via Repliers MLS.`);
+  parts.push(`Data via Congdon & Coleman MLS.`);
   parts.push(`${SITE_URL}`);
 
   return parts.filter(Boolean).join(" ");

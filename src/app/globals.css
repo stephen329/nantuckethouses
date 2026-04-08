@@ -1,24 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    /* Nantucket Brand Colors - Coastal Heritage Palette */
-    --nantucket-navy: #1A2A3A;
-    --sandstone: #d6c8b0;
-    --harbor-blue: #3a5c7e;
+    /* "Elements of the Gray Lady" — Nantucket Modern Palette */
+    --atlantic-navy: #1B263B;
+    --nantucket-gray: #8D99AE;
+    --sandstone: #F1F1E6;
+    --privet-green: #2D4635;
+    --cedar-shingle: #6B5E51;
+
+    /* Legacy aliases (for existing UI components) */
+    --nantucket-navy: #1B263B;
+    --parchment: #F1F1E6;
+    --polished-brass: #2D4635;
+    --brass-hover: #234030;
     --fog-gray: #e8e8e8;
-    --parchment: #FAF8F5;
-    --polished-brass: #C9A227;
-    --brass-hover: #B89220;
-    --seafoam: #a8d5c2;
-    --sunset-coral: #f28f7d;
+    --harbor-blue: #8D99AE;
   }
 
   body {
-    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--nantucket-navy);
-    background: var(--parchment);
+    font-family: "Montserrat", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--atlantic-navy);
+    background: var(--sandstone);
   }
 
   h1,
@@ -109,7 +113,7 @@
 @layer base {
   /* Focus ring for keyboard navigation */
   :focus-visible {
-    outline: 2px solid var(--polished-brass);
+    outline: 2px solid var(--privet-green);
     outline-offset: 2px;
   }
   

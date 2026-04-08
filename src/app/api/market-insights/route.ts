@@ -56,10 +56,10 @@ export async function GET(request: Request) {
           {
             type: "trend" as const,
             statement:
-              "Market insights are being updated as more historical data becomes available from the Repliers feed.",
+              "Market insights are being updated as more historical data becomes available from the C&C data feed.",
           },
         ],
-        source: "repliers",
+        source: "cnc-api",
       });
     }
 
@@ -101,14 +101,14 @@ export async function GET(request: Request) {
         if (direction !== "flat") {
           insights.push({
             type: "trend",
-            statement: `Median sold price is ${direction === "up" ? "up" : "down"} ${Math.abs(cappedChange).toFixed(1)}% year-over-year for the same three-month period—based on closed sales from the Repliers MLS feed.`,
+            statement: `Median sold price is ${direction === "up" ? "up" : "down"} ${Math.abs(cappedChange).toFixed(1)}% year-over-year for the same three-month period—based on closed sales from the C&C data feed.`,
           });
         }
       }
     }
 
     // Days on market: recent 3 months vs 12-month average
-    // Only compute when we have reliable DOM data (Repliers often returns 0 for recent months until closed)
+    // Only compute when we have reliable DOM data (API may return 0 for recent months until closed)
     const last12 = sorted.slice(-12);
     const avgDom12 =
       last12.reduce((s, m) => s + m.medianDaysOnMarket, 0) / last12.length;
@@ -208,7 +208,7 @@ export async function GET(request: Request) {
       if (z >= 1.8) {
         insights.push({
           type: "anomaly",
-          statement: `Closed sales in ${m.monthKey} were well above the recent average—an unusually active month in the Repliers data.`,
+          statement: `Closed sales in ${m.monthKey} were well above the recent average—an unusually active month in the C&C data.`,
         });
         break;
       }
@@ -223,7 +223,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       insights,
-      source: "repliers",
+      source: "cnc-api",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -234,7 +234,7 @@ export async function GET(request: Request) {
           {
             type: "trend" as const,
             statement:
-              "Live market insights are temporarily unavailable. Data is powered by the Repliers MLS feed.",
+              "Live market insights are temporarily unavailable. Data is powered by the C&C data feed.",
           },
         ],
         error: message,

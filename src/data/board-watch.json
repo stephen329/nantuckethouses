@@ -1,0 +1,29 @@
+{
+  "updatedAt": "2026-04-07",
+  "meetings": [
+    {
+      "board": "HDC",
+      "nextMeeting": "Tuesday, April 14 @ 4:00 PM",
+      "topic": "\"Old Business\" review for Town historic renovations.",
+      "link": "/regulatory/hdc-morning-after"
+    },
+    {
+      "board": "Planning",
+      "nextMeeting": "Monday, April 13 @ 4:00 PM",
+      "topic": "Public hearing for workforce housing subdivisions.",
+      "link": "/regulatory/planning-board"
+    },
+    {
+      "board": "ConCom",
+      "nextMeeting": "Thursday, April 16 @ 5:00 PM",
+      "topic": "New geotube and dune restoration permit filings.",
+      "link": "/regulatory"
+    },
+    {
+      "board": "ZBA",
+      "nextMeeting": "Thursday, April 9 @ 1:00 PM",
+      "topic": "Variance requests for non-conforming lots.",
+      "link": "/regulatory/zoning-board"
+    }
+  ]
+}

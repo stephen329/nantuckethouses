@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nantucket Houses | Stephen Maury - Strategic Real Estate Advisory",
-  description: "Led by Stephen Maury, Owner of Congdon & Coleman Real Estate (Est. 1931). Private advisory for buyers, sellers, and developers navigating Nantucket's most significant real estate decisions.",
-  keywords: "Nantucket real estate, luxury homes, Stephen Maury, Congdon Coleman, development advisory, off-market properties",
+  title: "NantucketHouses.com | Real Estate Intelligence Hub",
+  description:
+    "Nantucket's premier real estate intelligence hub. Live market pulse, regulatory resources, building costs, and neighborhood expertise — interpreted through local judgment by Stephen Maury.",
+  keywords:
+    "Nantucket real estate, market data, HDC, zoning, building costs, luxury homes, Stephen Maury, Congdon Coleman",
   openGraph: {
-    title: "Nantucket Houses | Stephen Maury",
-    description: "Strategic real estate advisory. Private access to Nantucket's off-market opportunities.",
+    title: "NantucketHouses.com | Real Estate Intelligence Hub",
+    description:
+      "Live market pulse, regulatory insights, and neighborhood expertise for Nantucket real estate.",
     type: "website",
-    siteName: "Nantucket Houses",
+    siteName: "NantucketHouses.com",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nantucket Houses | Stephen Maury",
-    description: "Strategic real estate advisory. Private access to Nantucket's off-market opportunities.",
+    title: "NantucketHouses.com",
+    description:
+      "Nantucket's premier real estate intelligence hub.",
   },
 };
 
@@ -26,7 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
+        <Navigation />
+        <main className="pt-16 lg:pt-20">{children}</main>
+        <Footer />
+        <Script
+          src="https://static.klaviyo.com/onsite/js/WysYSe/klaviyo.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
