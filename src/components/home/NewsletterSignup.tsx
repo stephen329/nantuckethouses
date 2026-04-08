@@ -37,7 +37,7 @@ export function NewsletterSignup() {
                 list: {
                   data: {
                     type: "list",
-                    id: "Wys4Bx", // Replace with actual Klaviyo list ID
+                    id: "V4Jfvn",
                   },
                 },
               },
