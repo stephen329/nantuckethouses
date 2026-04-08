@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, MapPin, Briefcase, Upload, Settings, BarChart3, Users, Scale } from "lucide-react";
+import { FileText, MapPin, Briefcase, Upload, Settings, BarChart3, Users, Scale, PenTool } from "lucide-react";
 
 const adminTools = [
   {
@@ -28,6 +28,13 @@ const adminTools = [
     description: "Add, edit, or remove featured partners and initiatives displayed across the site.",
     href: "/admin/partners",
     icon: Users,
+    category: "Content",
+  },
+  {
+    title: "Articles & Guides",
+    description: "Create, edit, and manage articles with a live markdown preview. Publish or save as drafts.",
+    href: "/admin/articles",
+    icon: PenTool,
     category: "Content",
   },
 ];
