@@ -112,6 +112,11 @@ export function Footer() {
                   Guides & How-Tos
                 </Link>
               </li>
+              <li>
+                <Link href="/opportunities" className="text-sm text-white/70 hover:text-white transition-colors">
+                  Off-Market & Opportunity Desk
+                </Link>
+              </li>
             </ul>
           </div>
 
