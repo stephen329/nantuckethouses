@@ -55,7 +55,15 @@ function getFeatureCenter(feature: ParcelFeature): [number, number] | null {
     }
   };
 
-  collectCoordinates(geometry.coordinates);
+  if ("coordinates" in geometry) {
+    collectCoordinates(geometry.coordinates);
+  } else if ("geometries" in geometry) {
+    for (const subGeometry of geometry.geometries) {
+      if ("coordinates" in subGeometry) {
+        collectCoordinates(subGeometry.coordinates);
+      }
+    }
+  }
   if (coords.length === 0) return null;
 
   let minLng = Infinity;
