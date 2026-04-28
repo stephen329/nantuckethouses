@@ -54,14 +54,6 @@ export default function AffordableHousingPage() {
               <p className="text-xs text-[var(--atlantic-navy)]/60 mb-4">
                 Key projects: {d.safeHarbor.keyProjects}
               </p>
-              <div className="bg-[var(--sandstone)] rounded-lg border-l-4 border-[var(--cedar-shingle)] p-5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cedar-shingle)] mb-2 font-sans">
-                  Stephen&apos;s Take
-                </p>
-                <p className="text-sm text-[var(--atlantic-navy)]/80 leading-relaxed">
-                  {d.safeHarbor.stephensTake}
-                </p>
-              </div>
             </div>
           </div>
         </section>

@@ -79,7 +79,7 @@ export function OpportunityFormWrapper({ category, title, subtitle, submitLabel,
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Contact Info */}
-        <div className="bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-6">
+        <div className="brand-surface p-6">
           <h3 className="text-sm font-semibold text-[var(--atlantic-navy)] mb-4 font-sans">
             Your Contact Information
           </h3>
@@ -91,7 +91,7 @@ export function OpportunityFormWrapper({ category, title, subtitle, submitLabel,
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3 py-2.5 rounded-md border border-[var(--cedar-shingle)]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--privet-green)]"
+                className="brand-input px-3 py-2.5 text-sm"
               />
             </div>
             <div>
@@ -101,7 +101,7 @@ export function OpportunityFormWrapper({ category, title, subtitle, submitLabel,
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2.5 rounded-md border border-[var(--cedar-shingle)]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--privet-green)]"
+                className="brand-input px-3 py-2.5 text-sm"
               />
             </div>
             <div className="sm:col-span-2">
@@ -110,14 +110,14 @@ export function OpportunityFormWrapper({ category, title, subtitle, submitLabel,
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-md border border-[var(--cedar-shingle)]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--privet-green)]"
+                className="brand-input px-3 py-2.5 text-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Form-specific Fields */}
-        <div className="bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-6">
+        <div className="brand-surface p-6">
           <h3 className="text-sm font-semibold text-[var(--atlantic-navy)] mb-4 font-sans">
             Details
           </h3>
@@ -133,7 +133,7 @@ export function OpportunityFormWrapper({ category, title, subtitle, submitLabel,
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="w-full py-3 bg-[var(--atlantic-navy)] text-white text-sm font-medium rounded-md hover:bg-[var(--atlantic-navy)]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-3 brand-btn brand-btn-secondary text-sm disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {status === "submitting" ? (
             <>
@@ -161,5 +161,5 @@ export function FormField({ label, required, children }: { label: string; requir
   );
 }
 
-export const inputClass = "w-full px-3 py-2.5 rounded-md border border-[var(--cedar-shingle)]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--privet-green)] bg-white";
-export const textareaClass = "w-full px-3 py-2.5 rounded-md border border-[var(--cedar-shingle)]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--privet-green)] bg-white min-h-[80px]";
+export const inputClass = "brand-input px-3 py-2.5 text-sm";
+export const textareaClass = "brand-input px-3 py-2.5 text-sm min-h-[80px]";

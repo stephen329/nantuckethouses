@@ -3,9 +3,8 @@ import { Calendar, Scale, MapPin, FileText, Search, Download } from "lucide-reac
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { RecapCard } from "@/components/regulatory/RecapCard";
 import { BoardWatch } from "@/components/home/BoardWatch";
+import { getBoardWatchData } from "@/lib/board-watch";
 import { getLatestPost, listPosts } from "@/lib/content";
-import type { BoardWatchData } from "@/types";
-import boardWatchData from "@/data/board-watch.json";
 
 const quickLinks = [
   { label: "HDC Morning After", description: "Weekly 2-minute recaps", href: "/regulatory/hdc-morning-after", icon: Scale },
@@ -16,10 +15,11 @@ const quickLinks = [
   { label: "Zoning Map", description: "Interactive district overlay", href: "/regulatory/zoning-map", icon: MapPin },
 ];
 
-export default function RegulatoryHubPage() {
+export default async function RegulatoryHubPage() {
   const latestHdc = getLatestPost("hdc-morning-after");
   const latestPlanning = getLatestPost("planning-board");
   const latestZba = getLatestPost("zoning-board");
+  const boardWatchData = await getBoardWatchData();
 
   return (
     <div className="min-h-screen bg-[var(--sandstone)]">
@@ -40,7 +40,7 @@ export default function RegulatoryHubPage() {
       </section>
 
       {/* Board Watch */}
-      <BoardWatch data={boardWatchData as BoardWatchData} />
+      <BoardWatch data={boardWatchData} />
 
       {/* Latest Recaps */}
       <section className="py-10">

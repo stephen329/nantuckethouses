@@ -23,10 +23,7 @@ export function TopReadsSidebar({ articles }: Props) {
             className="block py-4 first:pt-0 hover:bg-[var(--sandstone)]/50 transition-colors -mx-2 px-2 rounded"
           >
             <CategoryBadge category={article.category} />
-            <h4
-              className="text-sm leading-snug text-[var(--atlantic-navy)] mt-2 hover:text-[var(--privet-green)] transition-colors"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}
-            >
+            <h4 className="text-sm leading-snug text-[var(--atlantic-navy)] mt-2 hover:text-[var(--privet-green)] transition-colors font-semibold">
               {article.title}
             </h4>
             <ReadingTime minutes={article.readingTime} className="mt-1" />

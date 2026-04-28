@@ -9,8 +9,7 @@ import { DaysOnMarketChart } from "@/components/charts/DaysOnMarketChart";
 import { PriceDistributionChart } from "@/components/charts/PriceDistributionChart";
 import { NeighborhoodSalesTable } from "@/components/charts/NeighborhoodSalesTable";
 import { WhaleWatch } from "@/components/home/WhaleWatch";
-import type { WhaleWatchSale, StephensTake } from "@/types";
-import whaleWatchFallback from "@/data/whale-watch.json";
+import type { WhaleWatchSale } from "@/types";
 
 type MonthlyData = {
   month: string;
@@ -124,8 +123,6 @@ export default function MarketPulsePage() {
     }
     fetchTimeSensitive();
   }, [years]);
-
-  const stephensTake: StephensTake = whaleWatchFallback.stephensTake as StephensTake;
 
   return (
     <div className="min-h-screen bg-[var(--sandstone)]">
@@ -275,7 +272,6 @@ export default function MarketPulsePage() {
       {!isWhaleLoading && whaleWatchSales.length > 0 && (
         <WhaleWatch
           sales={whaleWatchSales}
-          stephensTake={stephensTake}
           year={new Date().getFullYear()}
         />
       )}

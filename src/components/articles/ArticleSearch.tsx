@@ -33,7 +33,7 @@ export function ArticleSearch({ articles }: Props) {
           placeholder="Search articles by title, topic, or category..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-white rounded-lg border border-[var(--cedar-shingle)]/15 text-sm text-[var(--atlantic-navy)] font-sans placeholder:text-[var(--nantucket-gray)] focus:outline-none focus:border-[var(--privet-green)]/40 focus:ring-1 focus:ring-[var(--privet-green)]/20 transition-colors"
+          className="brand-input pl-10 pr-4 py-3 text-sm font-sans placeholder:text-[var(--nantucket-gray)]"
         />
       </div>
 
