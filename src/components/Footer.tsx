@@ -61,16 +61,19 @@ export function Footer() {
               Navigate
             </h4>
             <ul className="space-y-2">
-              {navPillars.map((pillar) => (
-                <li key={pillar.label}>
-                  <Link
-                    href={pillar.items[0].href}
-                    className="text-sm text-white/70 hover:text-white transition-colors"
-                  >
-                    {pillar.label}
-                  </Link>
-                </li>
-              ))}
+              {navPillars.map((pillar) => {
+                const pillarHref = pillar.items[0]?.href ?? "/";
+                return (
+                  <li key={pillar.label}>
+                    <Link
+                      href={pillarHref}
+                      className="text-sm text-white/70 hover:text-white transition-colors"
+                    >
+                      {pillar.label}
+                    </Link>
+                  </li>
+                );
+              })}
               {standaloneNavItems.map((item) => (
                 <li key={item.href}>
                   <Link

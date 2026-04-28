@@ -7,6 +7,15 @@ type Props = {
 };
 
 export function BoardWatch({ data }: Props) {
+  const parsedUpdatedAt = new Date(data.updatedAt);
+  const updatedLabel = Number.isNaN(parsedUpdatedAt.getTime())
+    ? data.updatedAt
+    : parsedUpdatedAt.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+
   return (
     <section className="py-12 sm:py-16 bg-[var(--sandstone)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +45,7 @@ export function BoardWatch({ data }: Props) {
                   Next Meeting
                 </th>
                 <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wider text-[var(--atlantic-navy)]/60 font-sans">
-                  Current Topic
+                  Agenda
                 </th>
               </tr>
             </thead>
@@ -66,8 +75,19 @@ export function BoardWatch({ data }: Props) {
                       {meeting.nextMeeting}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[var(--nantucket-gray)]">
-                    {meeting.topic}
+                  <td className="px-4 py-3">
+                    {meeting.agendaLink ? (
+                      <a
+                        href={meeting.agendaLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center bg-[var(--privet-green)]/10 text-[var(--privet-green)] hover:bg-[var(--privet-green)]/15 px-2.5 py-1 rounded text-xs font-medium transition-colors"
+                      >
+                        Download Agenda
+                      </a>
+                    ) : (
+                      <span className="text-xs text-[var(--nantucket-gray)]">-</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -76,11 +96,7 @@ export function BoardWatch({ data }: Props) {
         </div>
 
         <p className="mt-3 text-xs text-[var(--nantucket-gray)] font-sans">
-          Updated {new Date(data.updatedAt + "T00:00:00").toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}
+          Updated {updatedLabel}
           . Meeting times subject to change — verify with{" "}
           <a
             href="https://nantucket-ma.civicclerk.com"

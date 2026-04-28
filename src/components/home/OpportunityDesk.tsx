@@ -3,9 +3,9 @@ import { Briefcase } from "lucide-react";
 
 export function OpportunityDesk() {
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    <section className="brand-section bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[var(--atlantic-navy)] rounded-lg p-8 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        <div className="bg-[var(--atlantic-navy)] rounded-[var(--radius-card)] p-8 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6 shadow-[var(--elevation-1)]">
           <div className="p-3 rounded-lg bg-white/10 shrink-0">
             <Briefcase className="w-8 h-8 text-white" />
           </div>
@@ -20,10 +20,7 @@ export function OpportunityDesk() {
             </p>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
-            <Link
-              href="/opportunities"
-              className="inline-block bg-[var(--privet-green)] text-white px-6 py-3 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors text-center"
-            >
+            <Link href="/opportunities" className="inline-block brand-btn brand-btn-primary px-6 py-3 text-sm text-center">
               Submit an Opportunity
             </Link>
             <Link

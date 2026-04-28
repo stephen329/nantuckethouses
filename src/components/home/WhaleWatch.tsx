@@ -1,8 +1,7 @@
-import type { WhaleWatchSale, StephensTake } from "@/types";
+import type { WhaleWatchSale } from "@/types";
 
 type Props = {
   sales: WhaleWatchSale[];
-  stephensTake: StephensTake;
   year: number;
 };
 
@@ -19,7 +18,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function WhaleWatch({ sales, stephensTake, year }: Props) {
+export function WhaleWatch({ sales, year }: Props) {
   return (
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,22 +83,6 @@ export function WhaleWatch({ sales, stephensTake, year }: Props) {
           </table>
         </div>
 
-        {/* Stephen's Take */}
-        <div className="mt-8 bg-[var(--sandstone)] rounded-lg border-l-4 border-[var(--cedar-shingle)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cedar-shingle)] mb-3 font-sans">
-            Stephen&apos;s Take
-          </p>
-          <p className="text-sm text-[var(--atlantic-navy)]/80 leading-relaxed">
-            {stephensTake.body}
-          </p>
-          <p className="text-xs text-[var(--nantucket-gray)] mt-3 font-sans">
-            Updated {new Date(stephensTake.date + "T00:00:00").toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
-        </div>
       </div>
     </section>
   );

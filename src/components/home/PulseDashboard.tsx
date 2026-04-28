@@ -1,4 +1,4 @@
-import { Activity, DollarSign, Ruler, TrendingUp } from "lucide-react";
+import { Activity, DollarSign, TrendingUp } from "lucide-react";
 import type { PulseStats } from "@/types";
 
 type Props = {
@@ -40,13 +40,6 @@ export function PulseDashboard({ stats }: Props) {
       badge: null,
     },
     {
-      label: "Cost to Build",
-      value: stats.costPerSqFtRange,
-      subtitle: "Per sq ft, new construction",
-      icon: Ruler,
-      badge: null,
-    },
-    {
       label: "Absorption Rate",
       value: stats.absorptionRate
         ? `${stats.absorptionRate.toFixed(1)} mo`
@@ -68,10 +61,10 @@ export function PulseDashboard({ stats }: Props) {
           >
             Nantucket Pulse
           </p>
-          <h1 className="text-white text-2xl sm:text-3xl">The Big Four</h1>
+          <h1 className="text-white text-2xl sm:text-3xl">The Big Three</h1>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
           {tickers.map((ticker) => (
             <div
               key={ticker.label}
@@ -103,8 +96,7 @@ export function PulseDashboard({ stats }: Props) {
         </div>
 
         <p className="mt-4 text-xs text-white/25 font-sans">
-          Cost to build reflects estimated range based on 2026 material/labor
-          indexes. Absorption rate = active inventory / avg monthly sales (12mo).
+          Absorption rate = active inventory / avg monthly sales (12mo).
         </p>
       </div>
     </section>

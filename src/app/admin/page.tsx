@@ -41,9 +41,9 @@ const adminTools = [
 
 const dataFiles = [
   {
-    title: "Vibe Meter",
-    description: "Weekly neighborhood sentiment data. Edit to update Stephen's expert reads.",
-    file: "src/data/vibe-meter.json",
+    title: "Market Highlights",
+    description: "Homepage market highlight cards and Stephen's Market Read.",
+    file: "src/data/market-highlights.json",
     icon: BarChart3,
   },
   {
@@ -53,8 +53,8 @@ const dataFiles = [
     icon: Scale,
   },
   {
-    title: "Whale Watch (Stephen's Take)",
-    description: "Editorial commentary for the top YTD luxury sales section.",
+    title: "Whale Watch",
+    description: "Top YTD luxury sales data source.",
     file: "src/data/whale-watch.json",
     icon: FileText,
   },

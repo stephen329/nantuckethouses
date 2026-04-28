@@ -20,7 +20,7 @@ export function ArticleCard({ article }: Props) {
   return (
     <Link
       href={`/articles/${article.slug}`}
-      className="group block bg-white rounded-lg border border-[var(--cedar-shingle)]/15 overflow-hidden hover:border-[var(--privet-green)]/30 hover:shadow-md transition-all"
+      className="group block brand-surface brand-surface-hover overflow-hidden"
     >
       {article.heroImage && (
         <div className="relative w-full aspect-[16/9] bg-[var(--nantucket-gray)]/10">
@@ -38,7 +38,7 @@ export function ArticleCard({ article }: Props) {
           <CategoryBadge category={article.category} />
           <ReadingTime minutes={article.readingTime} />
         </div>
-        <h3 className="text-lg leading-snug text-[var(--atlantic-navy)] mb-2 group-hover:text-[var(--privet-green)] transition-colors" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+        <h3 className="text-lg leading-snug text-[var(--atlantic-navy)] mb-2 group-hover:text-[var(--privet-green)] transition-colors font-semibold">
           {article.title}
         </h3>
         <p className="text-sm text-[var(--atlantic-navy)]/60 leading-relaxed font-sans line-clamp-2">

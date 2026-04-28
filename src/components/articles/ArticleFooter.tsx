@@ -24,13 +24,13 @@ export function ArticleFooter({ relatedArticles }: Props) {
                   <Link
                     key={article.slug}
                     href={`/articles/${article.slug}`}
-                    className="block bg-white rounded-lg border border-[var(--cedar-shingle)]/15 p-4 hover:border-[var(--privet-green)]/30 hover:shadow-md transition-all"
+                    className="block brand-surface brand-surface-hover p-4"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <CategoryBadge category={article.category} />
                       <ReadingTime minutes={article.readingTime} />
                     </div>
-                    <p className="text-sm font-semibold text-[var(--atlantic-navy)]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    <p className="text-sm font-semibold text-[var(--atlantic-navy)]">
                       {article.title}
                     </p>
                   </Link>

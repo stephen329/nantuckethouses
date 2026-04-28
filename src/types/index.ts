@@ -13,6 +13,19 @@ export type VibeMeterData = {
   stephenNote?: string;
 };
 
+// ─── Market Highlights (replaces Vibe Check on homepage) ─
+export type MarketHighlightCard = {
+  label: string;
+  headline: string;
+  body: string;
+  footnote: string;
+};
+
+export type MarketHighlightsData = {
+  cards: MarketHighlightCard[];
+  stephenNote?: string;
+};
+
 // ─── Stephen's Take ──────────────────────────────────────
 export type StephensTake = {
   id: string;
@@ -61,6 +74,7 @@ export type BoardMeeting = {
   nextMeeting: string; // e.g., "Tuesday, April 14 @ 4:00 PM"
   topic: string;
   link?: string;
+  agendaLink?: string;
 };
 
 // ─── Opportunities / Off-Market Desk ─────────────────────
@@ -86,6 +100,42 @@ export type OpportunitySubmission = {
 export type BoardWatchData = {
   updatedAt: string;
   meetings: BoardMeeting[];
+};
+
+// ─── Inventory Tracker ────────────────────────────────────
+export type InventorySegmentSnapshot = {
+  absorptionMonths: number | null;
+  inventoryCount: number;
+};
+
+export type InventoryActivitySnapshot = {
+  startingInventory: number;
+  endingInventory: number;
+  newListings: number;
+  returnToMarket: number;
+  priceChanges: number;
+  offMarket: number;
+  offerToPurchase: number;
+  pAndS: number;
+  sold: number;
+  foreclosures: number;
+};
+
+export type MonthlyInventorySnapshot = {
+  monthKey: string; // YYYY-MM
+  label: string; // e.g. "March 2026"
+  source: "chart-backfill" | "pdf-seed" | "auto-monthly";
+  activity: InventoryActivitySnapshot;
+  segments: {
+    residential: InventorySegmentSnapshot;
+    land: InventorySegmentSnapshot;
+    commercial: InventorySegmentSnapshot;
+  };
+};
+
+export type InventoryHistoryData = {
+  updatedAt: string;
+  snapshots: MonthlyInventorySnapshot[];
 };
 
 // ─── Partners & Initiatives ─────────────────────────────

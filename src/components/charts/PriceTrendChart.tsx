@@ -13,14 +13,13 @@ type MonthlyData = {
 type Props = {
   data: MonthlyData[];
   isLoading?: boolean;
-  analystNote?: string;
 };
 
 // Brand colors
 const GOLD_PRIMARY = "#2D4635";
 const NAVY_DARK = "#1B263B";
 
-export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
+export function PriceTrendChart({ data, isLoading }: Props) {
   if (isLoading) {
     return (
       <div className="h-[420px] bg-white rounded-sm border border-[#6B5E51] p-6 animate-pulse">
@@ -182,14 +181,6 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Analyst Note */}
-      {analystNote && (
-        <div className="mt-4 pt-4 border-t border-[#E8E8E8]">
-          <p className="text-xs text-[#1B263B]/70 italic leading-relaxed">
-            <span className="font-semibold text-[#2D4635] not-italic">Stephen&apos;s Take:</span> {analystNote}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

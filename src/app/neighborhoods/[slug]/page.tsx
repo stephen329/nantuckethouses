@@ -1,15 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Ruler, TreePine, Waves, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { MapPin, Ruler, TreePine, Waves, AlertTriangle } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { NEIGHBORHOOD_SLUGS, getNeighborhoodName } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
-import vibeMeterData from "@/data/vibe-meter.json";
 import zoningData from "@/data/zoning-districts.json";
-import type { VibeMeterData, VibeTrend } from "@/types";
-
-const vibe = vibeMeterData as VibeMeterData;
 
 type Profile = {
   slug: string;
@@ -57,21 +53,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const trendIcons: Record<VibeTrend, typeof TrendingUp> = {
-  up: TrendingUp,
-  down: TrendingDown,
-  flat: Minus,
-};
-
 export default async function NeighborhoodPage({ params }: Props) {
   const { slug } = await params;
   const profile = (neighborhoodProfiles as Record<string, Profile>)[slug];
   if (!profile) return notFound();
 
   const name = profile.name;
-  const vibeEntry = vibe.neighborhoods.find(
-    (n) => n.neighborhood.replace("'", "").toLowerCase() === name.replace("'", "").toLowerCase()
-  );
   // Support multiple districts per neighborhood
   const neighborhoodDistricts = (zoningData as any).neighborhoodDistricts ?? {};
   const assignedCodes: string[] = neighborhoodDistricts[name] ?? [profile.zoningDistrict];
@@ -115,28 +102,6 @@ export default async function NeighborhoodPage({ params }: Props) {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Vibe / Stephen's Take */}
-        {vibeEntry && (
-          <div className="bg-[var(--sandstone)] rounded-lg border-l-4 border-[var(--cedar-shingle)] p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cedar-shingle)] font-sans">
-                Stephen&apos;s Take
-              </p>
-              {(() => {
-                const TrendIcon = trendIcons[vibeEntry.trend];
-                const trendColor = vibeEntry.trend === "up" ? "text-[var(--privet-green)]" : vibeEntry.trend === "down" ? "text-red-500" : "text-[var(--nantucket-gray)]";
-                return <TrendIcon className={`w-4 h-4 ${trendColor}`} />;
-              })()}
-            </div>
-            <p className="text-sm text-[var(--atlantic-navy)]/80 leading-relaxed italic">
-              &ldquo;{vibeEntry.note}&rdquo;
-            </p>
-            <p className="text-xs text-[var(--nantucket-gray)] mt-2">
-              Week of {new Date(vibe.weekOf + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-            </p>
           </div>
         )}
 
