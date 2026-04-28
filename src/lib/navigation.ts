@@ -20,6 +20,12 @@ export type NavEntry = {
   megaMenuColumns?: NavColumn[];
 };
 
+type NavLink = {
+  label: string;
+  href: string;
+  description?: string;
+};
+
 export const NAV_STRUCTURE: Record<string, NavEntry> = {
   marketPulse: {
     key: "marketPulse",
@@ -105,14 +111,17 @@ export const navCta = {
 };
 
 // Compatibility exports for existing footer/sitemap consumers.
-export const navPillars = [
+export const navPillars: { label: string; items: NavLink[] }[] = [
   {
     label: NAV_STRUCTURE.marketPulse.label,
-    items: NAV_STRUCTURE.marketPulse.children?.map((item) => ({
-      label: item.label,
-      href: item.path,
-      description: item.description,
-    })) ?? [],
+    items:
+      NAV_STRUCTURE.marketPulse.children
+        ?.filter((item): item is NavItem & { path: string } => Boolean(item.path))
+        .map((item) => ({
+          label: item.label,
+          href: item.path,
+          description: item.description,
+        })) ?? [],
   },
   {
     label: NAV_STRUCTURE.neighborhoods.label,
@@ -124,11 +133,11 @@ export const navPillars = [
   },
 ];
 
-export const standaloneNavItems = [
+export const standaloneNavItems: NavLink[] = [
   { label: NAV_STRUCTURE.about.label, href: NAV_STRUCTURE.about.path },
 ];
 
-export const allNavItems = [
+export const allNavItems: NavLink[] = [
   { label: "Home", href: "/" },
   ...navPillars.flatMap((p) => p.items),
   ...standaloneNavItems,

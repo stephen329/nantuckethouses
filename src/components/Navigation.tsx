@@ -135,24 +135,38 @@ export function Navigation() {
                           </div>
                         </>
                       ) : (
-                        item.children?.map((subItem) => (
-                          <Link
-                            key={subItem.path}
-                            href={subItem.path}
-                            className={`block px-3 py-2.5 rounded-md text-sm transition-colors ${
-                              pathname === subItem.path
-                                ? "text-[var(--privet-green)] bg-[var(--sandstone)]"
-                                : "text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]/60"
-                            }`}
-                          >
-                            <span className="font-medium">{subItem.label}</span>
-                            {subItem.description && (
-                              <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
-                                {subItem.description}
-                              </span>
-                            )}
-                          </Link>
-                        ))
+                        item.children?.map((subItem) =>
+                          subItem.path ? (
+                            <Link
+                              key={subItem.path}
+                              href={subItem.path}
+                              className={`block px-3 py-2.5 rounded-md text-sm transition-colors ${
+                                pathname === subItem.path
+                                  ? "text-[var(--privet-green)] bg-[var(--sandstone)]"
+                                  : "text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]/60"
+                              }`}
+                            >
+                              <span className="font-medium">{subItem.label}</span>
+                              {subItem.description && (
+                                <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                  {subItem.description}
+                                </span>
+                              )}
+                            </Link>
+                          ) : (
+                            <div
+                              key={`nolink-${item.key}-${subItem.label}`}
+                              className="block px-3 py-2.5 rounded-md text-sm text-[var(--atlantic-navy)]/70 bg-[var(--sandstone)]/40"
+                            >
+                              <span className="font-medium">{subItem.label}</span>
+                              {subItem.description && (
+                                <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                  {subItem.description}
+                                </span>
+                              )}
+                            </div>
+                          ),
+                        )
                       )}
                     </div>
                   </div>
