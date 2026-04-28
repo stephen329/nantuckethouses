@@ -1,0 +1,106 @@
+# Nantucket Tax Parcels - Data Dictionary (v1)
+
+- Source: `/Users/stephenmaury/Downloads/GeoJSON_Test.json`
+- Features: **599**
+- Output: `/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/nantucket-tax-parcels.clean.geojson`
+
+## Normalized Fields
+
+- `parcel_id` (string): Parcel identifier used for lookup and joins.
+- `alt_parcel_id` (string): Alternate parcel identifier from assessor export.
+- `zoning` (string): Normalized zoning district code (uppercased).
+- `zoning_color` (string): Hex color token for zoning map/tool UI.
+- `use` (string): Parcel use category.
+- `primary_use` (number|string): Primary use code from assessor data.
+- `land_use_code` (number|string): Land use classification code.
+- `street_number` (string): Street number of subject parcel.
+- `street_name` (string): Street name of subject parcel.
+- `location` (string): Display address; derived from street parts when missing.
+- `owner_name` (string): Owner/trust label from assessor export.
+- `co_owner_name` (string): Optional secondary owner.
+- `land_class` (string): Land class designation.
+- `utilities` (string): Utility availability/description field.
+- `shape_area_sq_m` (number): Lot size in square meters (geometry area field).
+- `lot_area_sqft` (number): Derived lot size in square feet.
+- `acreage` (number): Derived lot size in acres.
+- `assessed_total` (number): Total assessed value.
+- `assessed_building` (number): Building-only assessed amount.
+- `assessed_outbuilding` (number): Outbuilding assessed amount.
+- `assessed_extra_features` (number): Extra-features assessed amount.
+- `assessed_improvements` (number): Combined improvements assessed amount.
+- `assessed_price_per_acre` (number): Derived valuation density for comps.
+- `source_fields` (string[]): Raw source columns used for this normalized record.
+
+## Raw Source Field Coverage
+
+- `Nantucket_TaxParcels_2025_05I.BND_CHK`: present in 599 features; observed types: NoneType
+- `Nantucket_TaxParcels_2025_05I.LAST_EDIT`: present in 599 features; observed types: int
+- `Nantucket_TaxParcels_2025_05I.LOC_ID`: present in 599 features; observed types: str
+- `Nantucket_TaxParcels_2025_05I.LOC_ID_ISL`: present in 599 features; observed types: NoneType, str
+- `Nantucket_TaxParcels_2025_05I.MAP_NO`: present in 599 features; observed types: NoneType, str
+- `Nantucket_TaxParcels_2025_05I.MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
+- `Nantucket_TaxParcels_2025_05I.MA_MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
+- `Nantucket_TaxParcels_2025_05I.NO_MATCH`: present in 599 features; observed types: str
+- `Nantucket_TaxParcels_2025_05I.OBJECTID`: present in 599 features; observed types: int
+- `Nantucket_TaxParcels_2025_05I.ORIG_FID`: present in 599 features; observed types: int
+- `Nantucket_TaxParcels_2025_05I.PLAN_ID`: present in 599 features; observed types: NoneType, str
+- `Nantucket_TaxParcels_2025_05I.POLY_TYPE`: present in 599 features; observed types: str
+- `Nantucket_TaxParcels_2025_05I.SOURCE`: present in 599 features; observed types: str
+- `Nantucket_TaxParcels_2025_05I.Shape_Area`: present in 599 features; observed types: float
+- `Nantucket_TaxParcels_2025_05I.Shape_Length`: present in 599 features; observed types: float
+- `Nantucket_TaxParcels_2025_05I.TOWN_ID`: present in 599 features; observed types: int
+- `vis2gis_20250530.csv.Address_Line_1`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Address_Line_2`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Address_Line_3`: present in 599 features; observed types: NoneType
+- `vis2gis_20250530.csv.Alt_Parcel_ID`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Assessed`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.City`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.CoOwner_Full_Name`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Country`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Deed_Book`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Deed_Page`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Gis_ID`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Internal_ID`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Internet_Suppression`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.LND_USE_CODE`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Land_Class`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Legal_Area`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Location`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Lot`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Lot_Cut`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.MAP_PAR_ID_X`: present in 599 features; observed types: NoneType, float, int
+- `vis2gis_20250530.csv.MAP_PAR_ID_Y`: present in 599 features; observed types: NoneType, float
+- `vis2gis_20250530.csv.MBLU`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Mixed_Use_Pct`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Mixed_Use_Pct_2`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Mixed_Use_Pct_3`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Nbhd`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.NonDisclosure`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.OLD_GIS`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Owner_Full_Name`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Owners_Name`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Parcel_City`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Parcel_Id`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Parcel_Name`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Parcel_State`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Parcel_Status`: present in 599 features; observed types: NoneType, float, int
+- `vis2gis_20250530.csv.Parcel_Total_Exemptions`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Parcel_Zip`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Primary_Use`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Rem_Cmplx_Num`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Sale_Price`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.State`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Street_Name`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Street_Number`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Total_Assessed_Bldg`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Total_Assessed_Extra_Features`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Total_Assessed_Improvements`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Total_Assessed_Outbldg`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Total_Assessed_Parcel_Value`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Use`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Utilities`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Utilities_Desc`: present in 599 features; observed types: NoneType, str
+- `vis2gis_20250530.csv.Year_Built`: present in 599 features; observed types: NoneType
+- `vis2gis_20250530.csv.Zip`: present in 599 features; observed types: NoneType, int
+- `vis2gis_20250530.csv.Zoning`: present in 599 features; observed types: NoneType, str

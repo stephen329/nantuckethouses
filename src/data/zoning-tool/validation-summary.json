@@ -1,0 +1,8 @@
+{
+  "feature_count": 599,
+  "raw_field_count": 71,
+  "output_files": [
+    "/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/nantucket-tax-parcels.clean.geojson",
+    "/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/DATA_DICTIONARY.md"
+  ]
+}
