@@ -7,6 +7,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 export type ParcelProperties = {
   parcel_id?: string | null;
+  tax_map?: string | null;
+  parcel?: string | null;
   alt_parcel_id?: string | null;
   location?: string | null;
   zoning?: string | null;
@@ -27,6 +29,7 @@ type ZoningMapProps = {
   geojson: FeatureCollection<Geometry, ParcelProperties> | null;
   selectedParcelId?: string | null;
   onParcelSelect: (feature: ParcelFeature) => void;
+  className?: string;
 };
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
@@ -34,9 +37,9 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 const DEFAULT_CENTER: [number, number] = [-70.1, 41.28];
 const DEFAULT_ZOOM = 13.5;
 
-function getFeatureCenter(feature: ParcelFeature): [number, number] | null {
+function getFeatureCoordinates(feature: ParcelFeature): [number, number][] {
   const geometry = feature.geometry;
-  if (!geometry) return null;
+  if (!geometry) return [];
 
   const coords: [number, number][] = [];
 
@@ -64,24 +67,26 @@ function getFeatureCenter(feature: ParcelFeature): [number, number] | null {
       }
     }
   }
-  if (coords.length === 0) return null;
-
-  let minLng = Infinity;
-  let minLat = Infinity;
-  let maxLng = -Infinity;
-  let maxLat = -Infinity;
-
-  for (const [lng, lat] of coords) {
-    minLng = Math.min(minLng, lng);
-    minLat = Math.min(minLat, lat);
-    maxLng = Math.max(maxLng, lng);
-    maxLat = Math.max(maxLat, lat);
-  }
-
-  return [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
+  return coords;
 }
 
-export function ZoningMap({ geojson, onParcelSelect, selectedParcelId }: ZoningMapProps) {
+function getFeatureBounds(feature: ParcelFeature): mapboxgl.LngLatBounds | null {
+  const coords = getFeatureCoordinates(feature);
+  if (coords.length === 0) return null;
+
+  const bounds = new mapboxgl.LngLatBounds(coords[0], coords[0]);
+  for (const coordinate of coords) {
+    bounds.extend(coordinate);
+  }
+  return bounds;
+}
+
+export function ZoningMap({
+  geojson,
+  onParcelSelect,
+  selectedParcelId,
+  className,
+}: ZoningMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
@@ -165,14 +170,13 @@ export function ZoningMap({ geojson, onParcelSelect, selectedParcelId }: ZoningM
       map.on("click", "parcels-fill", (event) => {
         if (!event.features?.length) return;
         const feature = event.features[0] as ParcelFeature;
-        const center = getFeatureCenter(feature);
+        const bounds = getFeatureBounds(feature);
 
-        if (center) {
-          map.flyTo({
-            center,
-            zoom: 17,
-            duration: 1200,
+        if (bounds) {
+          map.fitBounds(bounds, {
             padding: { right: 64, left: 64, top: 64, bottom: 64 },
+            maxZoom: 17.5,
+            duration: 1200,
           });
         }
 
@@ -214,5 +218,10 @@ export function ZoningMap({ geojson, onParcelSelect, selectedParcelId }: ZoningM
     );
   }
 
-  return <div ref={mapContainerRef} className="min-h-[620px] w-full rounded-xl" />;
+  return (
+    <div
+      ref={mapContainerRef}
+      className={className ?? "min-h-[620px] w-full rounded-xl"}
+    />
+  );
 }

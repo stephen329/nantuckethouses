@@ -2,14 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeatureCollection, Geometry } from "geojson";
+import Link from "next/link";
 import { Download, MapPinned, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { ParcelProperties, ZoningMap } from "@/components/zoning/ZoningMap";
+import zoningData from "@/data/zoning-districts.json";
 
 type ParcelFeatureCollection = FeatureCollection<Geometry, ParcelProperties>;
+type ParcelFeature = ParcelFeatureCollection["features"][number];
 
 function formatCurrency(value?: number | null): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
@@ -21,12 +24,39 @@ function formatNumber(value?: number | null, digits = 2): string {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(value);
 }
 
+function formatTruncatedAcreage(value?: number | null): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
+  const truncated = Math.trunc(value * 100) / 100;
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(truncated);
+}
+
+type DistrictInfo = {
+  name?: string;
+  minLotSize?: string;
+  frontage?: string;
+  maxGroundCover?: string;
+  frontSetback?: string;
+  sideSetback?: string;
+  rearSetback?: string;
+  hdcScrutiny?: string;
+  typicalPermitLag?: string;
+  notes?: string;
+};
+
+function normalizeDistrictCode(value: string): string {
+  return value.trim().toUpperCase().replace(/\s+/g, "").replace(/-/g, "");
+}
+
 export function ZoningLookupClient() {
   const [geojson, setGeojson] = useState<ParcelFeatureCollection | null>(null);
   const [selectedParcel, setSelectedParcel] = useState<ParcelProperties | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchStatus, setSearchStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -59,31 +89,86 @@ export function ZoningLookupClient() {
 
   const features = useMemo(() => geojson?.features ?? [], [geojson]);
 
-  const handleSearch = useCallback(() => {
+  const findParcelMatch = useCallback(
+    (rawQuery: string): ParcelFeature | undefined => {
+      const query = rawQuery.trim().toLowerCase();
+      if (!query) return undefined;
+
+      return features.find((feature) => {
+        const properties = feature.properties ?? {};
+        const address = String(properties.location ?? "").toLowerCase();
+        const mapParcel = `${properties.tax_map ?? ""} ${properties.parcel ?? ""}`.trim().toLowerCase();
+        const parcelId = String(properties.parcel_id ?? "").toLowerCase();
+
+        return address.includes(query) || mapParcel.includes(query) || parcelId.includes(query);
+      });
+    },
+    [features],
+  );
+
+  const suggestions = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
+    if (!query || query.length < 2) return [];
+
+    return features
+      .filter((feature) => {
+        const properties = feature.properties ?? {};
+        const address = String(properties.location ?? "").toLowerCase();
+        const mapParcel = `${properties.tax_map ?? ""} ${properties.parcel ?? ""}`.trim().toLowerCase();
+        const parcelId = String(properties.parcel_id ?? "").toLowerCase();
+        return address.includes(query) || mapParcel.includes(query) || parcelId.includes(query);
+      })
+      .slice(0, 8)
+      .map((feature) => {
+        const properties = feature.properties ?? {};
+        return {
+          key: `${properties.parcel_id ?? "parcel"}-${properties.location ?? "address"}`,
+          label: properties.location ?? "Address unavailable",
+          subLabel: `Tax Map ${properties.tax_map ?? "N/A"} • Parcel ${properties.parcel ?? "N/A"}`,
+          feature,
+        };
+      });
+  }, [features, searchTerm]);
+
+  const handleSearch = useCallback(() => {
+    const query = searchTerm.trim();
     if (!query) {
-      setSearchStatus("Enter an address, MAP_PAR_ID, or owner to search.");
+      setSearchStatus("Enter an address or Tax Map + Parcel.");
       return;
     }
 
-    const match = features.find((feature) => {
-      const properties = feature.properties ?? {};
-      return [properties.location, properties.parcel_id, properties.owner_name, properties.alt_parcel_id]
-        .filter(Boolean)
-        .some((candidate) => String(candidate).toLowerCase().includes(query));
-    });
+    const match = findParcelMatch(query);
 
     if (!match?.properties) {
-      setSearchStatus("No parcel match found in this sample set yet.");
+      setSearchStatus("No parcel match found. Search by address or Tax Map + Parcel.");
       return;
     }
 
     setSelectedParcel(match.properties);
     setSearchStatus(`Found: ${match.properties.location ?? match.properties.parcel_id ?? "Parcel"}`);
-  }, [features, searchTerm]);
+    setShowSuggestions(false);
+  }, [findParcelMatch, searchTerm]);
 
   const zoningLabel = selectedParcel?.zoning ?? "Unknown";
   const primaryUse = selectedParcel?.use ?? selectedParcel?.primary_use ?? "Unknown";
+  const districtLookup = useMemo(() => {
+    const map = new Map<string, { code: string; info: DistrictInfo }>();
+    const districts = zoningData.districts as Record<string, DistrictInfo>;
+
+    for (const [code, info] of Object.entries(districts)) {
+      map.set(code.toUpperCase(), { code, info });
+      map.set(normalizeDistrictCode(code), { code, info });
+    }
+
+    return map;
+  }, []);
+
+  const districtMatch = useMemo(() => {
+    if (!selectedParcel?.zoning) return null;
+
+    const raw = String(selectedParcel.zoning).toUpperCase();
+    return districtLookup.get(raw) ?? districtLookup.get(normalizeDistrictCode(raw)) ?? null;
+  }, [districtLookup, selectedParcel?.zoning]);
 
   return (
     <section className="bg-[var(--sandstone)] py-10">
@@ -97,19 +182,48 @@ export function ZoningLookupClient() {
           </p>
           <div className="flex flex-col gap-3 lg:flex-row">
             <div className="flex w-full gap-2">
-              <Input
-                placeholder="Search by address, MAP_PAR_ID, or owner..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    handleSearch();
-                  }
-                }}
-                className="h-11 bg-white"
-                aria-label="Search parcels"
-              />
+              <div className="relative w-full">
+                <Input
+                  placeholder="Search by address or Tax Map + Parcel (e.g., 42.3.4 152)..."
+                  value={searchTerm}
+                  onChange={(event) => {
+                    setSearchTerm(event.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => {
+                    window.setTimeout(() => setShowSuggestions(false), 120);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleSearch();
+                    }
+                  }}
+                  className="h-11 bg-white"
+                  aria-label="Search parcels"
+                />
+                {showSuggestions && suggestions.length > 0 ? (
+                  <div className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-[var(--cedar-shingle)]/20 bg-white shadow-lg">
+                    {suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.key}
+                        type="button"
+                        className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--sandstone)]"
+                        onMouseDown={() => {
+                          setSelectedParcel(suggestion.feature.properties ?? null);
+                          setSearchTerm(suggestion.label);
+                          setSearchStatus(`Found: ${suggestion.label}`);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        <span className="text-sm text-[var(--atlantic-navy)]">{suggestion.label}</span>
+                        <span className="text-xs text-[var(--nantucket-gray)]">{suggestion.subLabel}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
               <Button onClick={handleSearch} className="h-11 bg-[var(--privet-green)] px-5 text-white hover:bg-[var(--brass-hover)]">
                 <Search className="h-4 w-4" />
                 Search
@@ -155,10 +269,6 @@ export function ZoningLookupClient() {
                 <h2 className="mt-1 text-2xl text-[var(--atlantic-navy)]">
                   {selectedParcel?.location ?? "Select a parcel on the map"}
                 </h2>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge variant="outline">MAP_PAR_ID: {selectedParcel?.parcel_id ?? "N/A"}</Badge>
-                  <Badge variant="outline">Alt Parcel: {selectedParcel?.alt_parcel_id ?? "N/A"}</Badge>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -175,7 +285,7 @@ export function ZoningLookupClient() {
                 <div className="rounded-lg border bg-white p-3">
                   <p className="text-xs text-[var(--nantucket-gray)]">Lot Size</p>
                   <p className="mt-1 font-medium">
-                    {formatNumber(selectedParcel?.acreage, 3)} acres ({formatNumber(selectedParcel?.lot_area_sqft, 0)} sqft)
+                    {formatTruncatedAcreage(selectedParcel?.acreage)} acres ({formatNumber(selectedParcel?.lot_area_sqft, 0)} sqft)
                   </p>
                 </div>
                 <div className="rounded-lg border bg-white p-3">
@@ -183,28 +293,40 @@ export function ZoningLookupClient() {
                   <p className="mt-1 font-medium">{formatCurrency(selectedParcel?.assessed_total)}</p>
                 </div>
                 <div className="rounded-lg border bg-white p-3">
-                  <p className="text-xs text-[var(--nantucket-gray)]">$/Acre</p>
-                  <p className="mt-1 font-medium">{formatCurrency(selectedParcel?.assessed_price_per_acre)}</p>
-                </div>
-                <div className="rounded-lg border bg-white p-3">
-                  <p className="text-xs text-[var(--nantucket-gray)]">Primary Use</p>
-                  <p className="mt-1 font-medium">{String(primaryUse)}</p>
-                </div>
-                <div className="rounded-lg border bg-white p-3">
-                  <p className="text-xs text-[var(--nantucket-gray)]">Owner</p>
-                  <p className="mt-1 font-medium">{selectedParcel?.owner_name ?? "Unknown"}</p>
-                </div>
-                <div className="col-span-2 rounded-lg border bg-white p-3">
-                  <p className="text-xs text-[var(--nantucket-gray)]">Utilities</p>
-                  <p className="mt-1 font-medium">{selectedParcel?.utilities ?? "Not provided"}</p>
+                  <p className="text-xs text-[var(--nantucket-gray)]">Tax Map/Parcel</p>
+                  <p className="mt-1 font-medium">
+                    {selectedParcel?.tax_map ?? "N/A"} / {selectedParcel?.parcel ?? "N/A"}
+                  </p>
                 </div>
               </div>
 
               <div className="rounded-lg border border-[var(--cedar-shingle)]/25 bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-[var(--nantucket-gray)]">Local Insight (Phase 1)</p>
-                <p className="mt-2 text-sm text-[var(--atlantic-navy)]">
-                  This {zoningLabel} zoning in the Town core is highly restrictive. Contact Stephen for buildable square footage guidance.
-                </p>
+                {districtMatch ? (
+                  <div className="mt-2 space-y-2 text-sm text-[var(--atlantic-navy)]">
+                    <p className="font-medium">
+                      {districtMatch.code} ({districtMatch.info.name ?? "District details"})
+                    </p>
+                    <p className="text-xs text-[var(--nantucket-gray)]">
+                      Minimum Lot Size: {districtMatch.info.minLotSize ?? "N/A"}
+                    </p>
+                    <p className="text-xs text-[var(--nantucket-gray)]">
+                      Minimum Frontage: {districtMatch.info.frontage ?? "N/A"}
+                    </p>
+                    <p className="text-xs text-[var(--nantucket-gray)]">
+                      Ground Cover Ratio: {districtMatch.info.maxGroundCover ?? "N/A"}
+                    </p>
+                    <p className="text-xs text-[var(--nantucket-gray)]">
+                      Setbacks: {districtMatch.info.frontSetback ?? "N/A"} front, {districtMatch.info.sideSetback ?? "N/A"} side, {districtMatch.info.rearSetback ?? "N/A"} rear
+                    </p>
+                    {districtMatch.info.notes ? (
+                      <p className="text-xs text-[var(--atlantic-navy)]">{districtMatch.info.notes}</p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="mt-2 text-sm text-[var(--atlantic-navy)]">
+                    No district rule profile found for zoning code {zoningLabel}. Contact Stephen for parcel-specific buildability guidance.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -226,6 +348,13 @@ export function ZoningLookupClient() {
                     Export PDF Report
                   </Button>
                 </div>
+                {selectedParcel?.tax_map && selectedParcel?.parcel ? (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href={`/tools/zoning-lookup/${encodeURIComponent(selectedParcel.tax_map)}/${encodeURIComponent(selectedParcel.parcel)}`}>
+                      Open Full Parcel Page
+                    </Link>
+                  </Button>
+                ) : null}
               </div>
             </div>
           </aside>

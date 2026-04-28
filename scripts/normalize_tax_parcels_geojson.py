@@ -36,7 +36,7 @@ DEFAULT_ZONING_COLOR = "#546E7A"
 FIELD_PRIORITY = {
     "parcel_id": ["MAP_PAR_ID", "Parcel_Id", "MA_MAP_PAR_ID"],
     "alt_parcel_id": ["Alt_Parcel_ID"],
-    "zoning": ["Zoning"],
+    "zoning": ["Land_Class", "Zoning"],
     "use": ["Use"],
     "primary_use": ["Primary_Use"],
     "land_use_code": ["LND_USE_CODE"],
@@ -103,6 +103,21 @@ def pick_value(index: dict, candidates: list[str]):
     return None, None
 
 
+def parse_map_parcel(parcel_id: str | None) -> tuple[str | None, str | None]:
+    if not parcel_id or not isinstance(parcel_id, str):
+        return None, None
+
+    normalized = " ".join(parcel_id.strip().split())
+    if not normalized:
+        return None, None
+
+    if " " in normalized:
+        tax_map, parcel = normalized.rsplit(" ", 1)
+        return tax_map or None, parcel or None
+
+    return normalized, None
+
+
 def normalize_feature(feature: dict) -> tuple[dict, list[str]]:
     raw_props = feature.get("properties", {}) or {}
     indexed = index_properties(raw_props)
@@ -114,6 +129,10 @@ def normalize_feature(feature: dict) -> tuple[dict, list[str]]:
         normalized[output_key] = value
         if source_field:
             used_raw_fields.append(source_field)
+
+    tax_map, parcel = parse_map_parcel(normalized.get("parcel_id"))
+    normalized["tax_map"] = tax_map
+    normalized["parcel"] = parcel
 
     shape_area_sqm = to_number(normalized.get("shape_area_sq_m"))
     acreage = shape_area_sqm * SQM_TO_ACRES if shape_area_sqm is not None else None
@@ -210,7 +229,9 @@ def main() -> None:
         "",
         "- `parcel_id` (string): Parcel identifier used for lookup and joins.",
         "- `alt_parcel_id` (string): Alternate parcel identifier from assessor export.",
-        "- `zoning` (string): Normalized zoning district code (uppercased).",
+        "- `tax_map` (string): Parsed map component from `MAP_PAR_ID` (example: `42.3.4`).",
+        "- `parcel` (string): Parsed parcel component from `MAP_PAR_ID` (example: `152`).",
+        "- `zoning` (string): Normalized zoning district code (uppercased), sourced from `Land_Class` first then `Zoning`.",
         "- `zoning_color` (string): Hex color token for zoning map/tool UI.",
         "- `use` (string): Parcel use category.",
         "- `primary_use` (number|string): Primary use code from assessor data.",
