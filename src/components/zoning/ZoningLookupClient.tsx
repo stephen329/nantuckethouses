@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeatureCollection, Geometry } from "geojson";
 import Link from "next/link";
-import { Download, MapPinned, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
 import { ParcelProperties, ZoningMap } from "@/components/zoning/ZoningMap";
 import zoningData from "@/data/zoning-districts.json";
+import zoningUseChart from "@/data/zoning-use-chart.json";
 
 type ParcelFeatureCollection = FeatureCollection<Geometry, ParcelProperties>;
 type ParcelFeature = ParcelFeatureCollection["features"][number];
@@ -44,6 +45,11 @@ type DistrictInfo = {
   hdcScrutiny?: string;
   typicalPermitLag?: string;
   notes?: string;
+};
+
+type UsePermission = {
+  value: string;
+  allowed: boolean;
 };
 
 function normalizeDistrictCode(value: string): string {
@@ -170,6 +176,31 @@ export function ZoningLookupClient() {
     return districtLookup.get(raw) ?? districtLookup.get(normalizeDistrictCode(raw)) ?? null;
   }, [districtLookup, selectedParcel?.zoning]);
 
+  const zoningUseRows = useMemo(() => {
+    if (!selectedParcel?.zoning) return [];
+
+    const normalizedSelected = normalizeDistrictCode(String(selectedParcel.zoning));
+    const categories = zoningUseChart as {
+      metadata: { source: string; legend: Record<string, string> };
+      Residential: Record<string, Record<string, UsePermission>>;
+    };
+
+    return Object.entries(categories.Residential)
+      .map(([useName, districtMap]) => {
+        const matchEntry = Object.entries(districtMap).find(
+          ([districtCode]) => normalizeDistrictCode(districtCode) === normalizedSelected,
+        );
+        if (!matchEntry) return null;
+        const [, permission] = matchEntry;
+        return {
+          useName,
+          value: permission.value,
+          allowed: permission.allowed,
+        };
+      })
+      .filter((row): row is { useName: string; value: string; allowed: boolean } => row !== null);
+  }, [selectedParcel?.zoning]);
+
   return (
     <section className="bg-[var(--sandstone)] py-10">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:px-8">
@@ -233,12 +264,6 @@ export function ZoningLookupClient() {
               <Badge variant="secondary" className="h-8 bg-white text-[var(--atlantic-navy)]">
                 Last Updated: May 2025 • Town of Nantucket Assessors
               </Badge>
-              <Button asChild variant="outline" className="h-8 bg-white">
-                <a href="/api/tools/zoning-lookup/parcels?download=1">
-                  <Download className="mr-1 h-4 w-4" />
-                  Download Full Report
-                </a>
-              </Button>
             </div>
           </div>
           {searchStatus ? <p className="text-sm text-[var(--nantucket-gray)]">{searchStatus}</p> : null}
@@ -266,9 +291,18 @@ export function ZoningLookupClient() {
             <div className="space-y-4 p-5">
               <div>
                 <p className="text-xs uppercase tracking-wide text-[var(--nantucket-gray)]">Parcel Detail</p>
-                <h2 className="mt-1 text-2xl text-[var(--atlantic-navy)]">
-                  {selectedParcel?.location ?? "Select a parcel on the map"}
-                </h2>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl text-[var(--atlantic-navy)]">
+                    {selectedParcel?.location ?? "Select a parcel on the map"}
+                  </h2>
+                  {selectedParcel?.tax_map && selectedParcel?.parcel ? (
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/tools/zoning-lookup/${encodeURIComponent(selectedParcel.tax_map)}/${encodeURIComponent(selectedParcel.parcel)}`}>
+                        Open Full Parcel Page
+                      </Link>
+                    </Button>
+                  ) : null}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -336,25 +370,62 @@ export function ZoningLookupClient() {
                 "sticky bottom-0 md:static",
               )}
             >
-              <div className="flex flex-col gap-2">
+              <div className="mb-3 rounded-lg border bg-white">
+                <div className="border-b px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--nantucket-gray)]">
+                    Zoning Uses ({selectedParcel?.zoning ?? "District"})
+                  </p>
+                </div>
+                <div className="max-h-48 overflow-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-[var(--sandstone)]">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-[var(--nantucket-gray)]">Use</th>
+                        <th className="px-3 py-2 text-left text-[var(--nantucket-gray)]">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {zoningUseRows.length ? (
+                        zoningUseRows.map((row) => (
+                          <tr key={row.useName} className="border-t">
+                            <td className="px-3 py-2 text-[var(--atlantic-navy)]">{row.useName}</td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={cn(
+                                  "inline-flex rounded px-2 py-0.5 font-medium",
+                                  row.allowed
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-rose-100 text-rose-700",
+                                )}
+                                title={(zoningUseChart as { metadata: { legend: Record<string, string> } }).metadata.legend[row.value] ?? row.value}
+                              >
+                                {row.value}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="px-3 py-2 text-[var(--nantucket-gray)]" colSpan={2}>
+                            No use-chart rows available for this district.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="border-t px-3 py-2 text-[10px] text-[var(--nantucket-gray)]">
+                  Source: {(zoningUseChart as { metadata: { source: string } }).metadata.source}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]">
                   Get Custom Valuation from Stephen Maury
                 </Button>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <Button variant="outline" className="w-full">Run Build Cost Estimate</Button>
+                <div className="grid grid-cols-1 gap-2">
                   <Button variant="outline" className="w-full">View Nearby Price Trends</Button>
-                  <Button variant="outline" className="w-full">
-                    <MapPinned className="mr-1 h-4 w-4" />
-                    Export PDF Report
-                  </Button>
                 </div>
-                {selectedParcel?.tax_map && selectedParcel?.parcel ? (
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href={`/tools/zoning-lookup/${encodeURIComponent(selectedParcel.tax_map)}/${encodeURIComponent(selectedParcel.parcel)}`}>
-                      Open Full Parcel Page
-                    </Link>
-                  </Button>
-                ) : null}
               </div>
             </div>
           </aside>
