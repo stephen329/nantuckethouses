@@ -174,9 +174,11 @@ export function ZoningMap({
 
         if (bounds) {
           map.fitBounds(bounds, {
-            padding: { right: 64, left: 64, top: 64, bottom: 64 },
-            maxZoom: 17.5,
+            padding: { right: 4, left: 4, top: 4, bottom: 4 },
+            maxZoom: 18,
             duration: 1200,
+            pitch: 0,
+            bearing: 0,
           });
         }
 
