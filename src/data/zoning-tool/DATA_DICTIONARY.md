@@ -8,6 +8,7 @@
 
 - `parcel_id` (string): Parcel identifier used for lookup and joins.
 - `alt_parcel_id` (string): Alternate parcel identifier from assessor export.
+- `internal_id` (number|string): Assessor internal account identifier (`Internal_ID`).
 - `tax_map` (string): Parsed map component from `MAP_PAR_ID` (example: `42.3.4`).
 - `parcel` (string): Parsed parcel component from `MAP_PAR_ID` (example: `152`).
 - `zoning` (string): Normalized zoning district code (uppercased), sourced from `Land_Class` first then `Zoning`.
