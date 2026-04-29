@@ -10,7 +10,7 @@ const quickLinks = [
   { label: "HDC Morning After", description: "Weekly 2-minute recaps", href: "/regulatory/hdc-morning-after", icon: Scale },
   { label: "Planning Board", description: "Summaries and highlights", href: "/regulatory/planning-board", icon: Calendar },
   { label: "Zoning Board", description: "Appeals and decisions", href: "/regulatory/zoning-board", icon: FileText },
-  { label: "Zoning Lookup", description: "Zoning by address tool", href: "/regulatory/zoning-lookup", icon: Search },
+  { label: "Property Map", description: "Rentals, parcels, and zoning", href: "/map", icon: Search },
   { label: "Cheat Sheets", description: "Downloadable guides", href: "/regulatory/cheat-sheets", icon: Download },
   { label: "Zoning Map", description: "Interactive district overlay", href: "/regulatory/zoning-map", icon: MapPin },
 ];

@@ -18,25 +18,62 @@ from pathlib import Path
 SQM_TO_ACRES = 0.00024710538146717
 SQM_TO_SQFT = 10.76391041671
 
+# Colors from Use Chart - September 2024 - Sheet2.csv (Zones, Color).
 ZONING_COLORS = {
-    "LUG1": "#2E7D32",
-    "LUG2": "#388E3C",
-    "LUG3": "#43A047",
-    "ROH": "#1976D2",
-    "RC": "#7B1FA2",
-    "CN": "#F57C00",
-    "CTEC": "#00838F",
-    "S": "#6D4C41",
-    "R1": "#5E35B1",
-    "R5": "#8E24AA",
-    "R10": "#AB47BC",
+    "AH": "#FFFF73",
+    "ALC": "#EFB6FC",
+    "CDT": "#A80000",
+    "CI": "#BE6666",
+    "CMI": "#868885",
+    "CN": "#88C27F",
+    "CTEC": "#FCC2B3",
+    "LC": "#898945",
+    "LUG-1": "#C19ED7",
+    "LUG-2": "#FBFCC5",
+    "LUG-3": "#E8CF70",
+    "MMD": "#B4D79E",
+    "OIH": "#4DE603",
+    "R-1": "#FFBEBE",
+    "R-5": "#FDBF6F",
+    "R-5L": "#FDBF6F",
+    "R-10": "#CDF57A",
+    "R-10L": "#D7D79E",
+    "R-20": "#F5A27A",
+    "R-40": "#448970",
+    "RC": "#73FFDE",
+    "RC-2": "#FFAA01",
+    "ROH": "#BED2FF",
+    "SOH": "#BED2FF",
+    "SR-1": "#FFBEBE",
+    "SR-10": "#CDF57A",
+    "SR-20": "#F5A27A",
+    "VN": "#CC6699",
+    "VR": "#66CDAB",
+    "VTEC": "#D79E9D",
+    # Aliases seen in assessor exports without hyphens.
+    "LUG1": "#C19ED7",
+    "LUG2": "#FBFCC5",
+    "LUG3": "#E8CF70",
+    "R1": "#FFBEBE",
+    "R5": "#FDBF6F",
+    "R5L": "#FDBF6F",
+    "R10": "#CDF57A",
+    "R10L": "#D7D79E",
+    "R20": "#F5A27A",
+    "R40": "#448970",
+    "RC2": "#FFAA01",
+    "RC2M": "#FFAA01",
+    "SR1": "#FFBEBE",
+    "SR10": "#CDF57A",
+    "SR20": "#F5A27A",
 }
-DEFAULT_ZONING_COLOR = "#546E7A"
+DEFAULT_ZONING_COLOR = "#DDDDDD"
 
 FIELD_PRIORITY = {
     "parcel_id": ["MAP_PAR_ID", "Parcel_Id", "MA_MAP_PAR_ID"],
     "alt_parcel_id": ["Alt_Parcel_ID"],
-    "zoning": ["Zoning"],
+    "internal_id": ["Internal_ID"],
+    "zoning": ["Land_Class", "Zoning"],
     "use": ["Use"],
     "primary_use": ["Primary_Use"],
     "land_use_code": ["LND_USE_CODE"],
@@ -103,6 +140,21 @@ def pick_value(index: dict, candidates: list[str]):
     return None, None
 
 
+def parse_map_parcel(parcel_id: str | None) -> tuple[str | None, str | None]:
+    if not parcel_id or not isinstance(parcel_id, str):
+        return None, None
+
+    normalized = " ".join(parcel_id.strip().split())
+    if not normalized:
+        return None, None
+
+    if " " in normalized:
+        tax_map, parcel = normalized.rsplit(" ", 1)
+        return tax_map or None, parcel or None
+
+    return normalized, None
+
+
 def normalize_feature(feature: dict) -> tuple[dict, list[str]]:
     raw_props = feature.get("properties", {}) or {}
     indexed = index_properties(raw_props)
@@ -114,6 +166,10 @@ def normalize_feature(feature: dict) -> tuple[dict, list[str]]:
         normalized[output_key] = value
         if source_field:
             used_raw_fields.append(source_field)
+
+    tax_map, parcel = parse_map_parcel(normalized.get("parcel_id"))
+    normalized["tax_map"] = tax_map
+    normalized["parcel"] = parcel
 
     shape_area_sqm = to_number(normalized.get("shape_area_sq_m"))
     acreage = shape_area_sqm * SQM_TO_ACRES if shape_area_sqm is not None else None
@@ -210,7 +266,10 @@ def main() -> None:
         "",
         "- `parcel_id` (string): Parcel identifier used for lookup and joins.",
         "- `alt_parcel_id` (string): Alternate parcel identifier from assessor export.",
-        "- `zoning` (string): Normalized zoning district code (uppercased).",
+        "- `internal_id` (number|string): Assessor internal account identifier (`Internal_ID`).",
+        "- `tax_map` (string): Parsed map component from `MAP_PAR_ID` (example: `42.3.4`).",
+        "- `parcel` (string): Parsed parcel component from `MAP_PAR_ID` (example: `152`).",
+        "- `zoning` (string): Normalized zoning district code (uppercased), sourced from `Land_Class` first then `Zoning`.",
         "- `zoning_color` (string): Hex color token for zoning map/tool UI.",
         "- `use` (string): Parcel use category.",
         "- `primary_use` (number|string): Primary use code from assessor data.",

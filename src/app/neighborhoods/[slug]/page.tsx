@@ -150,7 +150,7 @@ export default async function NeighborhoodPage({ params }: Props) {
                 </p>
               </div>
             ))}
-            <Link href="/regulatory/zoning-lookup" className="text-xs text-[var(--privet-green)] hover:underline">
+            <Link href="/map" className="text-xs text-[var(--privet-green)] hover:underline">
               Look up zoning for a specific address &rarr;
             </Link>
           </div>

@@ -113,7 +113,7 @@ export default async function ResourcesPage() {
               Search by address and jump directly into zoning lookup workflows for quick feasibility checks.
             </p>
             <Link
-              href="/regulatory/zoning-lookup"
+              href="/map"
               className="inline-flex items-center gap-2 brand-btn brand-btn-secondary px-5 py-2.5 text-sm"
             >
               Open Zoning Tools

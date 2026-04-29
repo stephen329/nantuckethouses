@@ -52,7 +52,7 @@ export const NAV_STRUCTURE: Record<string, NavEntry> = {
     description: "Regulatory and construction command center",
     children: [
       { label: "Regulatory Updates", path: "/regulatory" },
-      { label: "Zoning & Planning Tools", path: "/regulatory/zoning-lookup" },
+      { label: "Zoning & Planning Tools", path: "/map" },
       { label: "Affordable & Workforce Housing", path: "/affordable-housing" },
       { label: "Build & Renovate", path: "/build-renovate" },
     ],
@@ -68,7 +68,7 @@ export const NAV_STRUCTURE: Record<string, NavEntry> = {
       {
         label: "Zoning & Planning Tools",
         items: [
-          { label: "Zoning Tools", path: "/regulatory/zoning-lookup", description: "Search by address + interactive map", isFeatured: true },
+          { label: "Property Map", path: "/map", description: "Rentals, parcels, and zoning — live map", isFeatured: true },
           { label: "Regulatory Cheat Sheets", path: "/regulatory/cheat-sheets", badge: "Popular" },
           { label: "Local Case Studies", path: "/build-renovate", description: "Build and planning examples" },
         ],

@@ -6,6 +6,7 @@ Source of truth: `src/app/**/page.tsx` and `src/lib/navigation.ts`
 ## 1) Primary Navigation (current pillars)
 
 - `/`
+- `/map` — unified property map (rentals pins + parcels + zoning; replaces `/tools/zoning-lookup` entry)
 - `/market-pulse`
   - `/market-pulse/whale-watch`
   - `/market-pulse/price-trends`
@@ -16,7 +17,7 @@ Source of truth: `src/app/**/page.tsx` and `src/lib/navigation.ts`
     - `/regulatory/hdc-morning-after/[date]` (dynamic)
   - `/regulatory/planning-board`
   - `/regulatory/zoning-board`
-  - `/regulatory/zoning-lookup`
+  - `/regulatory/zoning-lookup` (redirects to `/map`)
   - `/regulatory/cheat-sheets`
 - `/affordable-housing`
   - `/affordable-housing/hfhn-projects`
