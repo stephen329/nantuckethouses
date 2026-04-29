@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function LegacyZoningLookupRedirectPage() {
-  redirect("/tools/zoning-lookup");
+  redirect("/map?mode=rent");
 }

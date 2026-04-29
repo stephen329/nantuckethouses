@@ -13,6 +13,8 @@ import {
   getParcelByMapAndParcel,
   getParcelDataLastUpdatedLabel,
 } from "@/lib/parcel-data";
+import recentSoldParcels from "@/data/recent-sold-parcels.json";
+import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 
 type Params = {
   taxMap: string;
@@ -88,6 +90,9 @@ export default async function ParcelDetailPage({
   };
 
   const parcelKey = `${record.taxMap}-${record.parcel}`;
+
+  const linkListingFeed = recentSoldParcels as { linkListingByParcelId?: Record<string, string> };
+  const linkListingId = record.parcelId ? linkListingFeed.linkListingByParcelId?.[record.parcelId] ?? null : null;
 
   return (
     <div className="bg-[var(--sandstone)]">
@@ -233,11 +238,18 @@ export default async function ParcelDetailPage({
               <p className="mb-2 text-sm font-medium text-[var(--atlantic-navy)]">Quick Actions</p>
               <div className="space-y-2">
                 <SaveParcelButton parcelKey={parcelKey} />
+                {linkListingId ? (
+                  <Button asChild variant="outline" className="w-full">
+                    <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">
+                      View LINK listing
+                    </a>
+                  </Button>
+                ) : null}
                 <Button asChild className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]">
                   <Link href="/buy">Contact Stephen for Confidential Analysis</Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/tools/zoning-lookup">Back to Parcel Lookup</Link>
+                  <Link href="/map">Back to Property Map</Link>
                 </Button>
               </div>
             </div>

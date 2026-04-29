@@ -572,7 +572,7 @@
         "allowed": false
       }
     },
-    "Apartment builiding": {
+    "Apartment building": {
       "R-1": {
         "value": "N",
         "allowed": false
@@ -1314,7 +1314,7 @@
         "allowed": true
       }
     },
-    "Garage - reseidential": {
+    "Garage - residential": {
       "R-1": {
         "value": "A",
         "allowed": true
@@ -2694,7 +2694,7 @@
         "allowed": true
       }
     },
-    "Phamacy": {
+    "Pharmacy": {
       "R-1": {
         "value": "N",
         "allowed": false
@@ -5874,7 +5874,7 @@
         "allowed": false
       }
     },
-    "Marijuana establishment, recreational and marijuana treatmetn center, medical": {
+    "Marijuana establishment, recreational and marijuana treatment center, medical": {
       "R-1": {
         "value": "N",
         "allowed": false
@@ -6405,7 +6405,7 @@
       }
     }
   },
-  "Commerical Industrial": {
+  "Commercial Industrial": {
     "Contractor shop": {
       "R-1": {
         "value": "N",
@@ -8316,7 +8316,7 @@
         "allowed": false
       }
     },
-    "Utilitiy production/distribution": {
+    "Utility production/distribution": {
       "R-1": {
         "value": "N",
         "allowed": false
@@ -8848,7 +8848,7 @@
         "allowed": true
       }
     },
-    "Care and propogation of fish and shellfish": {
+    "Care and propagation of fish and shellfish": {
       "R-1": {
         "value": "Y",
         "allowed": true
@@ -8954,7 +8954,7 @@
         "allowed": true
       }
     },
-    "All aggricultural uses allowed by Ch 590 of the Acts of 1989": {
+    "All agricultural uses allowed by Ch 590 of the Acts of 1989": {
       "R-1": {
         "value": "Y",
         "allowed": true
@@ -9590,7 +9590,7 @@
         "allowed": true
       }
     },
-    "Animal hosptial": {
+    "Animal hospital": {
       "R-1": {
         "value": "SP",
         "allowed": true

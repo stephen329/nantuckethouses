@@ -1,7 +1,7 @@
 # Nantucket Tax Parcels - Data Dictionary (v1)
 
-- Source: `/Users/stephenmaury/Downloads/GeoJSON_Test.json`
-- Features: **599**
+- Source: `/Users/stephenmaury/Downloads/GeojsonNantucketParcels.geojson`
+- Features: **14890**
 - Output: `/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/nantucket-tax-parcels.clean.geojson`
 
 ## Normalized Fields
@@ -36,74 +36,74 @@
 
 ## Raw Source Field Coverage
 
-- `Nantucket_TaxParcels_2025_05I.BND_CHK`: present in 599 features; observed types: NoneType
-- `Nantucket_TaxParcels_2025_05I.LAST_EDIT`: present in 599 features; observed types: int
-- `Nantucket_TaxParcels_2025_05I.LOC_ID`: present in 599 features; observed types: str
-- `Nantucket_TaxParcels_2025_05I.LOC_ID_ISL`: present in 599 features; observed types: NoneType, str
-- `Nantucket_TaxParcels_2025_05I.MAP_NO`: present in 599 features; observed types: NoneType, str
-- `Nantucket_TaxParcels_2025_05I.MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
-- `Nantucket_TaxParcels_2025_05I.MA_MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
-- `Nantucket_TaxParcels_2025_05I.NO_MATCH`: present in 599 features; observed types: str
-- `Nantucket_TaxParcels_2025_05I.OBJECTID`: present in 599 features; observed types: int
-- `Nantucket_TaxParcels_2025_05I.ORIG_FID`: present in 599 features; observed types: int
-- `Nantucket_TaxParcels_2025_05I.PLAN_ID`: present in 599 features; observed types: NoneType, str
-- `Nantucket_TaxParcels_2025_05I.POLY_TYPE`: present in 599 features; observed types: str
-- `Nantucket_TaxParcels_2025_05I.SOURCE`: present in 599 features; observed types: str
-- `Nantucket_TaxParcels_2025_05I.Shape_Area`: present in 599 features; observed types: float
-- `Nantucket_TaxParcels_2025_05I.Shape_Length`: present in 599 features; observed types: float
-- `Nantucket_TaxParcels_2025_05I.TOWN_ID`: present in 599 features; observed types: int
-- `vis2gis_20250530.csv.Address_Line_1`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Address_Line_2`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Address_Line_3`: present in 599 features; observed types: NoneType
-- `vis2gis_20250530.csv.Alt_Parcel_ID`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Assessed`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.City`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.CoOwner_Full_Name`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Country`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Deed_Book`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Deed_Page`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Gis_ID`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Internal_ID`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Internet_Suppression`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.LND_USE_CODE`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Land_Class`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Legal_Area`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Location`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Lot`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Lot_Cut`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.MAP_PAR_ID`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.MAP_PAR_ID_X`: present in 599 features; observed types: NoneType, float, int
-- `vis2gis_20250530.csv.MAP_PAR_ID_Y`: present in 599 features; observed types: NoneType, float
-- `vis2gis_20250530.csv.MBLU`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Mixed_Use_Pct`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Mixed_Use_Pct_2`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Mixed_Use_Pct_3`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Nbhd`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.NonDisclosure`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.OLD_GIS`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Owner_Full_Name`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Owners_Name`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Parcel_City`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Parcel_Id`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Parcel_Name`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Parcel_State`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Parcel_Status`: present in 599 features; observed types: NoneType, float, int
-- `vis2gis_20250530.csv.Parcel_Total_Exemptions`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Parcel_Zip`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Primary_Use`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Rem_Cmplx_Num`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Sale_Price`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.State`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Street_Name`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Street_Number`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Total_Assessed_Bldg`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Total_Assessed_Extra_Features`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Total_Assessed_Improvements`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Total_Assessed_Outbldg`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Total_Assessed_Parcel_Value`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Use`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Utilities`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Utilities_Desc`: present in 599 features; observed types: NoneType, str
-- `vis2gis_20250530.csv.Year_Built`: present in 599 features; observed types: NoneType
-- `vis2gis_20250530.csv.Zip`: present in 599 features; observed types: NoneType, int
-- `vis2gis_20250530.csv.Zoning`: present in 599 features; observed types: NoneType, str
+- `Address_Line_1`: present in 14890 features; observed types: NoneType, str
+- `Address_Line_2`: present in 14890 features; observed types: NoneType, str
+- `Address_Line_3`: present in 14890 features; observed types: NoneType, str
+- `Alt_Parcel_ID`: present in 14890 features; observed types: NoneType, str
+- `Assessed`: present in 14890 features; observed types: NoneType, int
+- `BND_CHK`: present in 14890 features; observed types: NoneType, str
+- `City`: present in 14890 features; observed types: NoneType, str
+- `CoOwner_Full_Name`: present in 14890 features; observed types: NoneType, str
+- `Country`: present in 14890 features; observed types: NoneType, str
+- `Deed_Book`: present in 14890 features; observed types: NoneType, str
+- `Deed_Page`: present in 14890 features; observed types: NoneType, str
+- `Gis_ID`: present in 14890 features; observed types: NoneType, str
+- `Internal_ID`: present in 14890 features; observed types: NoneType, int
+- `Internet_Suppression`: present in 14890 features; observed types: NoneType, str
+- `LAST_EDIT`: present in 14890 features; observed types: int
+- `LND_USE_CODE`: present in 14890 features; observed types: NoneType, int
+- `LOC_ID`: present in 14890 features; observed types: str
+- `LOC_ID_ISL`: present in 14890 features; observed types: NoneType, str
+- `Land_Class`: present in 14890 features; observed types: NoneType, str
+- `Legal_Area`: present in 14890 features; observed types: NoneType, int
+- `Location`: present in 14890 features; observed types: NoneType, str
+- `Lot`: present in 14890 features; observed types: NoneType, int
+- `Lot_Cut`: present in 14890 features; observed types: NoneType, int
+- `MAP_NO`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID_1`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID_X`: present in 14890 features; observed types: NoneType, float, int
+- `MAP_PAR_ID_Y`: present in 14890 features; observed types: NoneType, float, int
+- `MA_MAP_PAR_ID`: present in 14890 features; observed types: NoneType, str
+- `MBLU`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct_2`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct_3`: present in 14890 features; observed types: NoneType, int
+- `NO_MATCH`: present in 14890 features; observed types: str
+- `Nbhd`: present in 14890 features; observed types: NoneType, int
+- `NonDisclosure`: present in 14890 features; observed types: NoneType, str
+- `OBJECTID`: present in 14890 features; observed types: int
+- `OLD_GIS`: present in 14890 features; observed types: NoneType, int
+- `ORIG_FID`: present in 14890 features; observed types: NoneType, int
+- `Owner_Full_Name`: present in 14890 features; observed types: NoneType, str
+- `Owners_Name`: present in 14890 features; observed types: NoneType, str
+- `PLAN_ID`: present in 14890 features; observed types: NoneType, str
+- `POLY_TYPE`: present in 14890 features; observed types: str
+- `Parcel_City`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Id`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Name`: present in 14890 features; observed types: NoneType, int
+- `Parcel_State`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Status`: present in 14890 features; observed types: NoneType, float, int
+- `Parcel_Total_Exemptions`: present in 14890 features; observed types: NoneType, int
+- `Parcel_Zip`: present in 14890 features; observed types: NoneType, int
+- `Primary_Use`: present in 14890 features; observed types: NoneType, int
+- `Rem_Cmplx_Num`: present in 14890 features; observed types: NoneType, int
+- `SOURCE`: present in 14890 features; observed types: str
+- `Sale_Price`: present in 14890 features; observed types: NoneType, int
+- `Shape_Area`: present in 14890 features; observed types: float
+- `Shape_Length`: present in 14890 features; observed types: float
+- `State`: present in 14890 features; observed types: NoneType, str
+- `Street_Name`: present in 14890 features; observed types: NoneType, str
+- `Street_Number`: present in 14890 features; observed types: NoneType, str
+- `TOWN_ID`: present in 14890 features; observed types: int
+- `Total_Assessed_Bldg`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Extra_Features`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Improvements`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Outbldg`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Parcel_Value`: present in 14890 features; observed types: NoneType, str
+- `Use`: present in 14890 features; observed types: NoneType, str
+- `Utilities`: present in 14890 features; observed types: NoneType, str
+- `Utilities_Desc`: present in 14890 features; observed types: NoneType, str
+- `Year_Built`: present in 14890 features; observed types: NoneType
+- `Zip`: present in 14890 features; observed types: NoneType, int
+- `Zoning`: present in 14890 features; observed types: NoneType, str
