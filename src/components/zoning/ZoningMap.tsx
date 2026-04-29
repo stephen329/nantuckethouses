@@ -7,6 +7,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 export type ParcelProperties = {
   parcel_id?: string | null;
+  internal_id?: string | number | null;
   tax_map?: string | null;
   parcel?: string | null;
   alt_parcel_id?: string | null;
@@ -174,9 +175,9 @@ export function ZoningMap({
 
         if (bounds) {
           map.fitBounds(bounds, {
-            padding: { right: 4, left: 4, top: 4, bottom: 4 },
+            padding: { right: 20, left: 20, top: 20, bottom: 20 },
             maxZoom: 18,
-            duration: 1200,
+            duration: 900,
             pitch: 0,
             bearing: 0,
           });

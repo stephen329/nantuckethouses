@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeatureCollection, Geometry } from "geojson";
-import Link from "next/link";
 import { Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -296,11 +295,17 @@ export function ZoningLookupClient() {
                     {selectedParcel?.location ?? "Select a parcel on the map"}
                   </h2>
                   {selectedParcel?.tax_map && selectedParcel?.parcel ? (
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/tools/zoning-lookup/${encodeURIComponent(selectedParcel.tax_map)}/${encodeURIComponent(selectedParcel.parcel)}`}>
-                        Open Full Parcel Page
-                      </Link>
-                    </Button>
+                    selectedParcel?.internal_id ? (
+                      <Button asChild variant="outline" size="sm">
+                        <a
+                          href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View Assessor&apos;s Record
+                        </a>
+                      </Button>
+                    ) : null
                   ) : null}
                 </div>
               </div>
@@ -377,42 +382,30 @@ export function ZoningLookupClient() {
                   </p>
                 </div>
                 <div className="max-h-48 overflow-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-[var(--sandstone)]">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-[var(--nantucket-gray)]">Use</th>
-                        <th className="px-3 py-2 text-left text-[var(--nantucket-gray)]">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {zoningUseRows.length ? (
-                        zoningUseRows.map((row) => (
-                          <tr key={row.useName} className="border-t">
-                            <td className="px-3 py-2 text-[var(--atlantic-navy)]">{row.useName}</td>
-                            <td className="px-3 py-2">
-                              <span
-                                className={cn(
-                                  "inline-flex rounded px-2 py-0.5 font-medium",
-                                  row.allowed
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-rose-100 text-rose-700",
-                                )}
-                                title={(zoningUseChart as { metadata: { legend: Record<string, string> } }).metadata.legend[row.value] ?? row.value}
-                              >
-                                {row.value}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td className="px-3 py-2 text-[var(--nantucket-gray)]" colSpan={2}>
-                            No use-chart rows available for this district.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  {zoningUseRows.length ? (
+                    <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2">
+                      {zoningUseRows.map((row) => (
+                        <div key={row.useName} className="rounded border bg-white px-2 py-1.5">
+                          <p className="text-[11px] text-[var(--atlantic-navy)]">{row.useName}</p>
+                          <span
+                            className={cn(
+                              "mt-1 inline-flex rounded px-2 py-0.5 text-[11px] font-medium",
+                              row.allowed
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-rose-100 text-rose-700",
+                            )}
+                            title={(zoningUseChart as { metadata: { legend: Record<string, string> } }).metadata.legend[row.value] ?? row.value}
+                          >
+                            {row.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="px-3 py-2 text-xs text-[var(--nantucket-gray)]">
+                      No use-chart rows available for this district.
+                    </p>
+                  )}
                 </div>
                 <p className="border-t px-3 py-2 text-[10px] text-[var(--nantucket-gray)]">
                   Source: {(zoningUseChart as { metadata: { source: string } }).metadata.source}
