@@ -37,6 +37,8 @@ export type LinkListingRow = {
 
 export type LinkListingMapPoint = {
   linkId: number;
+  /** Assessor parcel_id when the listing street matched a parcel centroid in the index. */
+  parcel_id: string;
   longitude: number;
   latitude: number;
   address: string;
@@ -181,6 +183,7 @@ export function matchLinkListingToPoint(
   const area = String(row.MLSAreaMajor ?? "").trim();
   return {
     linkId: id,
+    parcel_id: String(hit.parcel_id).trim(),
     longitude: hit.lng,
     latitude: hit.lat,
     address: stem,

@@ -57,43 +57,46 @@ export function Navigation() {
                     <ChevronDown className="w-3 h-3 opacity-50 transition-transform group-hover:rotate-180" />
                   </button>
 
-                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className={`bg-white rounded-lg border border-[#e8e8e8] shadow-lg p-3 ${
-                      item.megaMenuColumns ? "min-w-[1040px]" : "min-w-[260px]"
-                    }`}>
-                      {item.megaMenuColumns ? (
-                        <>
+                  {item.megaMenuColumns ? (
+                    <>
+                      {/* Full-width hover bridge so cursor can reach the fixed mega without leaving the group */}
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute left-1/2 top-full z-[55] h-4 w-screen max-w-[100vw] -translate-x-1/2 opacity-0 invisible transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible"
+                      />
+                      <div className="pointer-events-none fixed inset-x-4 top-16 z-[60] flex justify-center pt-2 opacity-0 invisible transition-all duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:visible lg:top-20">
+                        <div className="max-h-[min(80vh,calc(100vh-6rem))] w-full max-w-[1040px] min-w-0 overflow-y-auto rounded-lg border border-[#e8e8e8] bg-white p-3 shadow-lg">
                           <div
-                            className="grid gap-4"
+                            className="grid min-w-0 gap-4"
                             style={{
                               gridTemplateColumns: `repeat(${item.megaMenuColumns.length}, minmax(0, 1fr))`,
                             }}
                           >
                             {item.megaMenuColumns.map((column) => (
-                              <div key={column.label}>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--nantucket-gray)] mb-2 font-sans">
+                              <div key={column.label} className="min-w-0">
+                                <p className="mb-2 font-sans text-xs font-semibold uppercase tracking-wider text-[var(--nantucket-gray)]">
                                   {column.label}
                                 </p>
                                 <div className="space-y-1">
-                                  {column.items.map((subItem) => (
+                                  {column.items.map((subItem) =>
                                     subItem.path ? (
                                       <Link
                                         key={`${column.label}-${subItem.path}-${subItem.label}`}
                                         href={subItem.path}
-                                        className={`block px-3 py-2.5 rounded-md text-sm transition-colors ${
+                                        className={`block rounded-md px-3 py-2.5 text-sm transition-colors ${
                                           pathname === subItem.path
-                                            ? "text-[var(--privet-green)] bg-[var(--sandstone)]"
+                                            ? "bg-[var(--sandstone)] text-[var(--privet-green)]"
                                             : "text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]/60"
                                         } ${subItem.isFeatured ? "border border-[var(--privet-green)]/30" : ""}`}
                                       >
                                         <span className="font-medium">{subItem.label}</span>
                                         {subItem.badge && (
-                                          <span className="ml-2 inline-flex rounded-full bg-[var(--privet-green)]/10 text-[var(--privet-green)] px-2 py-0.5 text-[10px] font-semibold align-middle">
+                                          <span className="ml-2 inline-flex rounded-full bg-[var(--privet-green)]/10 px-2 py-0.5 align-middle text-[10px] font-semibold text-[var(--privet-green)]">
                                             {subItem.badge}
                                           </span>
                                         )}
                                         {subItem.description && (
-                                          <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                          <span className="mt-0.5 block text-xs text-[var(--nantucket-gray)]">
                                             {subItem.description}
                                           </span>
                                         )}
@@ -101,54 +104,58 @@ export function Navigation() {
                                     ) : (
                                       <div
                                         key={`${column.label}-nolink-${subItem.label}`}
-                                        className={`block px-3 py-2.5 rounded-md text-sm ${
+                                        className={`block rounded-md px-3 py-2.5 text-sm ${
                                           subItem.label.includes("Cost Calculator")
-                                            ? "text-[var(--privet-green)] bg-[var(--sandstone)]/75"
-                                            : "text-[var(--atlantic-navy)]/75 bg-[var(--sandstone)]/40"
+                                            ? "bg-[var(--sandstone)]/75 text-[var(--privet-green)]"
+                                            : "bg-[var(--sandstone)]/40 text-[var(--atlantic-navy)]/75"
                                         }`}
                                       >
                                         <span className="font-medium">{subItem.label}</span>
                                         {subItem.badge && (
-                                          <span className="ml-2 inline-flex rounded-full bg-[var(--privet-green)]/10 text-[var(--privet-green)] px-2 py-0.5 text-[10px] font-semibold align-middle">
+                                          <span className="ml-2 inline-flex rounded-full bg-[var(--privet-green)]/10 px-2 py-0.5 align-middle text-[10px] font-semibold text-[var(--privet-green)]">
                                             {subItem.badge}
                                           </span>
                                         )}
                                         {subItem.description && (
-                                          <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                          <span className="mt-0.5 block text-xs text-[var(--nantucket-gray)]">
                                             {subItem.description}
                                           </span>
                                         )}
                                       </div>
-                                    )
-                                  ))}
+                                    ),
+                                  )}
                                 </div>
                               </div>
                             ))}
                           </div>
-                          <div className="mt-3 pt-3 border-t border-[#e8e8e8]">
+                          <div className="mt-3 border-t border-[#e8e8e8] pt-3">
                             <Link
                               href={item.path}
-                              className="inline-flex items-center bg-[var(--atlantic-navy)] text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-[var(--atlantic-navy)]/90 transition-colors"
+                              className="inline-flex items-center rounded-md bg-[var(--atlantic-navy)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--atlantic-navy)]/90"
                             >
                               Explore All Resources
                             </Link>
                           </div>
-                        </>
-                      ) : (
-                        item.children?.map((subItem) =>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="absolute left-0 top-full z-50 max-w-[calc(100vw-1.5rem)] pt-2 opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible">
+                      <div className="min-w-[260px] w-max max-w-full rounded-lg border border-[#e8e8e8] bg-white p-3 shadow-lg">
+                        {item.children?.map((subItem) =>
                           subItem.path ? (
                             <Link
                               key={subItem.path}
                               href={subItem.path}
-                              className={`block px-3 py-2.5 rounded-md text-sm transition-colors ${
+                              className={`block rounded-md px-3 py-2.5 text-sm transition-colors ${
                                 pathname === subItem.path
-                                  ? "text-[var(--privet-green)] bg-[var(--sandstone)]"
+                                  ? "bg-[var(--sandstone)] text-[var(--privet-green)]"
                                   : "text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]/60"
                               }`}
                             >
                               <span className="font-medium">{subItem.label}</span>
                               {subItem.description && (
-                                <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                <span className="mt-0.5 block text-xs text-[var(--nantucket-gray)]">
                                   {subItem.description}
                                 </span>
                               )}
@@ -156,20 +163,20 @@ export function Navigation() {
                           ) : (
                             <div
                               key={`nolink-${item.key}-${subItem.label}`}
-                              className="block px-3 py-2.5 rounded-md text-sm text-[var(--atlantic-navy)]/70 bg-[var(--sandstone)]/40"
+                              className="block rounded-md bg-[var(--sandstone)]/40 px-3 py-2.5 text-sm text-[var(--atlantic-navy)]/70"
                             >
                               <span className="font-medium">{subItem.label}</span>
                               {subItem.description && (
-                                <span className="block text-xs text-[var(--nantucket-gray)] mt-0.5">
+                                <span className="mt-0.5 block text-xs text-[var(--nantucket-gray)]">
                                   {subItem.description}
                                 </span>
                               )}
                             </div>
                           ),
-                        )
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}

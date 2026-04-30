@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { navPillars, standaloneNavItems } from "@/lib/navigation";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -43,7 +44,7 @@ export function Footer() {
                 <Linkedin className="w-4 h-4" />
               </a>
               <a
-                href="mailto:stephen@nantuckethouses.com"
+                href="mailto:stephen@maury.net"
                 className="p-2 rounded-md bg-white/10 hover:bg-[var(--privet-green)] transition-colors"
                 aria-label="Email"
               >
@@ -137,13 +138,13 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:stephen@nantuckethouses.com" className="hover:text-white transition-colors">
-                  stephen@nantuckethouses.com
+                <a href="mailto:stephen@maury.net" className="hover:text-white transition-colors">
+                  stephen@maury.net
                 </a>
               </li>
             </ul>
             <a
-              href="https://calendly.com/stephen-maury/30min"
+              href={SCHEDULE_CALL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-4 bg-[var(--privet-green)] text-white px-5 py-2.5 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors"

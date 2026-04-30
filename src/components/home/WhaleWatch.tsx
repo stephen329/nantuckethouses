@@ -1,9 +1,40 @@
 import type { WhaleWatchSale } from "@/types";
+import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 
 type Props = {
   sales: WhaleWatchSale[];
   year: number;
 };
+
+/** Linked row: underline + hover; text color comes from `className` or defaults to Atlantic navy. */
+const linkAffordance =
+  "underline decoration-[var(--cedar-shingle)]/50 underline-offset-2 hover:text-[var(--privet-green)] hover:decoration-[var(--privet-green)]/50";
+
+/** Renders the street address; when `linkListingId` is set, links to the public LINK listing page. */
+export function WhaleWatchSaleAddress({
+  sale,
+  className,
+}: {
+  sale: WhaleWatchSale;
+  className?: string;
+}) {
+  if (sale.linkListingId) {
+    const merged = [linkAffordance, className ?? "font-medium text-[var(--atlantic-navy)]"]
+      .filter(Boolean)
+      .join(" ");
+    return (
+      <a
+        href={nantucketLinkListingUrl(sale.linkListingId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={merged}
+      >
+        {sale.address}
+      </a>
+    );
+  }
+  return <span className={className}>{sale.address}</span>;
+}
 
 function formatCurrency(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
@@ -66,7 +97,7 @@ export function WhaleWatch({ sales, year }: Props) {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-medium text-[var(--atlantic-navy)]">
-                    {sale.address}
+                    <WhaleWatchSaleAddress sale={sale} />
                   </td>
                   <td className="px-4 py-3 text-[var(--nantucket-gray)]">
                     {sale.neighborhood}

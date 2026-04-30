@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/components/ui/utils";
-
-const CALENDLY_URL = "https://calendly.com/stephen-maury/30min";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 type Props = {
   className?: string;
@@ -14,7 +13,7 @@ export function MapResearchHubStickyFooter({ className }: Props) {
   return (
     <div className={cn("shrink-0 space-y-2", className)}>
       <a
-        href={CALENDLY_URL}
+        href={SCHEDULE_CALL_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="flex w-full items-center justify-center rounded-md bg-[var(--privet-green)] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--brass-hover)]"
@@ -33,11 +32,11 @@ export function MapResearchHubStickyFooter({ className }: Props) {
           ·
         </span>
         <a
-          href="mailto:stephen@nantuckethouses.com"
+          href="mailto:stephen@maury.net"
           className="inline-flex min-h-10 max-w-full items-center rounded-md px-2 underline-offset-2 hover:underline"
-          aria-label="Email stephen@nantuckethouses.com"
+          aria-label="Email stephen@maury.net"
         >
-          stephen@nantuckethouses.com
+          stephen@maury.net
         </a>
       </p>
       <nav

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { CTASection } from "@/components/home/CTASection";
 import { fetchAllListings } from "@/lib/cnc-api";
+import { WhaleWatchSaleAddress } from "@/components/home/WhaleWatch";
 import type { WhaleWatchSale } from "@/types";
 
 export const metadata: Metadata = {
@@ -68,6 +69,8 @@ async function getWhaleWatchData(): Promise<WhaleWatchStats> {
         listPrice: l.ListPrice,
         closeDate: l.CloseDate!,
         neighborhood: l.MLSAreaMajor ?? "Unknown",
+        linkListingId:
+          l.link_id != null && l.link_id > 0 ? String(l.link_id) : undefined,
       }));
 
     const totalVolume = all.reduce((sum, s) => sum + s.closePrice, 0);
@@ -151,7 +154,14 @@ export default async function WhaleWatchPage() {
                 {highestSale ? formatCurrency(highestSale.closePrice) : "—"}
               </p>
               <p className="text-sm text-[var(--nantucket-gray)] mt-1">
-                {highestSale ? highestSale.address : "No sales data yet"}
+                {highestSale ? (
+                  <WhaleWatchSaleAddress
+                    sale={highestSale}
+                    className="font-medium text-[var(--nantucket-gray)]"
+                  />
+                ) : (
+                  "No sales data yet"
+                )}
               </p>
             </div>
           </div>
@@ -211,7 +221,7 @@ export default async function WhaleWatchPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 font-medium text-[var(--atlantic-navy)]">
-                          {sale.address}
+                          <WhaleWatchSaleAddress sale={sale} />
                         </td>
                         <td className="px-4 py-3 text-[var(--nantucket-gray)] hidden md:table-cell">
                           {sale.neighborhood}

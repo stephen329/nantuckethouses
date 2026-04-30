@@ -53,6 +53,8 @@ export type WhaleWatchSale = {
   closeDate: string;
   neighborhood: string;
   listPrice?: number;
+  /** Nantucket LINK MLS listing id when provided by the API (sold listing detail page). */
+  linkListingId?: string;
 };
 
 export type WhaleWatchData = {

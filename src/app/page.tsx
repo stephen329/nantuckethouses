@@ -85,6 +85,8 @@ async function getWhaleWatchSales(): Promise<WhaleWatchSale[]> {
         listPrice: l.ListPrice,
         closeDate: l.CloseDate!,
         neighborhood: l.MLSAreaMajor ?? "Unknown",
+        linkListingId:
+          l.link_id != null && l.link_id > 0 ? String(l.link_id) : undefined,
       }));
   } catch (error) {
     console.error("Failed to fetch whale watch:", error);

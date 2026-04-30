@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* shadcn/ui primitives use bg-popover / text-popover-foreground — define tokens or panels render transparent */
+@theme {
+  --color-popover: #ffffff;
+  --color-popover-foreground: #074059;
+}
+
 @layer base {
   :root {
     /* Shared NR brand palette (aligned with nr-web-fe) */

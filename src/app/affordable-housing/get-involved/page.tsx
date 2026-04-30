@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Hammer, Heart, Home, Mail, ExternalLink } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 const ways = [
   {
@@ -140,7 +141,7 @@ export default function GetInvolvedPage() {
               Submit to Opportunity Desk
             </Link>
             <a
-              href="https://calendly.com/stephen-maury/30min"
+              href={SCHEDULE_CALL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white/10 text-white px-6 py-3 text-sm font-medium rounded-md hover:bg-white/20 transition-colors"

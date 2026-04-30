@@ -69,7 +69,7 @@ export async function POST(request: Request) {
           },
           body: JSON.stringify({
             from: "NantucketHouses.com <notifications@nantuckethouses.com>",
-            to: "stephen@nantuckethouses.com",
+            to: "stephen@maury.net",
             subject: `New Opportunity: ${categoryLabel(category)} from ${name}`,
             html: `
               <h2>New ${categoryLabel(category)} Submission</h2>

@@ -8,6 +8,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { cn } from "@/components/ui/utils";
 import type { PropertyMapMode } from "@/lib/property-map-filters";
 import type { OmniboxActiveListing, OmniboxResponse, OmniboxRentalHit, OmniboxSoldComp } from "@/lib/map-omnibox-types";
+import { formatLinkMlsDateDisplay } from "@/lib/link-listing-date-format";
 import { pushRecentOmniboxSearch, readRecentOmniboxSearches, type OmniboxRecentEntry } from "@/lib/omnibox-local-storage";
 
 const SLASH_HINT_KEY = "nh-map-omnibox-slash-hint-dismissed";
@@ -356,6 +357,11 @@ export function MapOmnibox({
                             {p.zone ? ` · ${p.zone}` : ""}
                             {p.expansionVerdict ? ` · ${p.expansionVerdict}` : ""}
                           </p>
+                          {p.matchedListing ? (
+                            <p className="mt-0.5 text-xs font-medium text-[var(--atlantic-navy)]">
+                              {p.matchedListing.statusLabel} · {p.matchedListing.priceLabel}
+                            </p>
+                          ) : null}
                         </div>
                       </CommandItem>
                     ))}
@@ -434,7 +440,7 @@ export function MapOmnibox({
                   </CommandGroup>
                 ) : null}
                 {data.soldComps.length ? (
-                  <CommandGroup heading="LINK — Sold" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase">
+                  <CommandGroup heading="Sold Listings" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase">
                     {data.soldComps.map((l) => (
                       <CommandItem
                         key={l.id}
@@ -456,7 +462,7 @@ export function MapOmnibox({
                           <p className="text-sm font-medium text-[var(--atlantic-navy)]">{l.address}</p>
                           <p className="text-xs text-[var(--nantucket-gray)]">
                             {l.priceLabel}
-                            {l.closeDate ? ` · ${l.closeDate}` : ""}
+                            {l.closeDate ? ` · ${formatLinkMlsDateDisplay(l.closeDate)}` : ""}
                           </p>
                         </div>
                       </CommandItem>

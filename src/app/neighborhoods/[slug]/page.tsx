@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { NEIGHBORHOOD_SLUGS, getNeighborhoodName } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
 import zoningData from "@/data/zoning-districts.json";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 type Profile = {
   slug: string;
@@ -209,7 +210,7 @@ export default async function NeighborhoodPage({ params }: Props) {
               Submit Buying Criteria
             </Link>
             <a
-              href="https://calendly.com/stephen-maury/30min"
+              href={SCHEDULE_CALL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white/10 text-white px-6 py-3 text-sm font-medium rounded-md hover:bg-white/20 transition-colors"
