@@ -1122,23 +1122,44 @@ export function ZoningMap({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !flyTo || !map.isStyleLoaded()) return;
-    if ("bounds" in flyTo) {
-      const { west, south, east, north } = flyTo.bounds;
-      map.fitBounds(
-        [
-          [west, south],
-          [east, north],
-        ],
-        { padding: { top: 72, bottom: 100, left: 40, right: 40 }, duration: 2000, maxZoom: 15 },
-      );
-    } else {
-      map.easeTo({
-        center: [flyTo.lng, flyTo.lat],
-        zoom: flyTo.zoom,
-        duration: 2000,
-      });
-    }
+    if (!map || !flyTo) return;
+
+    const apply = (): boolean => {
+      if (!map.isStyleLoaded()) return false;
+      if ("bounds" in flyTo) {
+        const { west, south, east, north } = flyTo.bounds;
+        map.fitBounds(
+          [
+            [west, south],
+            [east, north],
+          ],
+          { padding: { top: 72, bottom: 100, left: 40, right: 40 }, duration: 2000, maxZoom: 15 },
+        );
+      } else {
+        map.easeTo({
+          center: [flyTo.lng, flyTo.lat],
+          zoom: flyTo.zoom,
+          duration: 2000,
+        });
+      }
+      return true;
+    };
+
+    if (apply()) return undefined;
+
+    let done = false;
+    const onIdle = () => {
+      if (done) return;
+      if (apply()) {
+        done = true;
+        map.off("idle", onIdle);
+      }
+    };
+    map.on("idle", onIdle);
+    return () => {
+      done = true;
+      map.off("idle", onIdle);
+    };
   }, [flyTo]);
 
   if (!mapboxgl.accessToken) {
