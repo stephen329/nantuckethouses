@@ -17,6 +17,12 @@ export type CncListing = {
   /** Full mailing-style line from LINK (used for parcel / map matching). */
   Address?: string;
   link_images?: { url?: string; small_url?: string }[];
+  LotSizeAcres?: number;
+  YearBuilt?: number;
+  PublicRemarks?: string;
+  LINK_descr?: string;
+  TitleTag?: string;
+  View?: string[];
 };
 
 type CncListingsResponse = {

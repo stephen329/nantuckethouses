@@ -132,8 +132,8 @@ export function Footer() {
               <li>Stephen Maury</li>
               <li>Congdon &amp; Coleman Real Estate</li>
               <li>
-                <a href="tel:+15085601575" className="hover:text-white transition-colors">
-                  (508) 560-1575
+                <a href="tel:+15084510191" className="hover:text-white transition-colors">
+                  (508) 451-0191
                 </a>
               </li>
               <li>

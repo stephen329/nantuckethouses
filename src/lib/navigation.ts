@@ -45,6 +45,12 @@ export const NAV_STRUCTURE: Record<string, NavEntry> = {
     path: "/neighborhoods",
     description: "Dreaming and discovery",
   },
+  propertyMap: {
+    key: "propertyMap",
+    label: "Property Map",
+    path: "/map",
+    description: "Live rentals, sales, comps, and zoning",
+  },
   resources: {
     key: "resources",
     label: "Resources",
@@ -101,6 +107,7 @@ export const NAV_STRUCTURE: Record<string, NavEntry> = {
 export const primaryNavItems: NavEntry[] = [
   NAV_STRUCTURE.marketPulse,
   NAV_STRUCTURE.neighborhoods,
+  NAV_STRUCTURE.propertyMap,
   NAV_STRUCTURE.resources,
   NAV_STRUCTURE.about,
 ];

@@ -7,12 +7,16 @@ import {
   buildParcelStreetCentroidIndex,
   linkMapPointsToGeoJson,
   matchLinkListingToPoint,
+  parcelMapListingMatchFromMapPoint,
   type LinkListingMapPoint,
   type LinkListingRow,
   type ParcelProps,
 } from "@/lib/link-listings-parcel-match";
 
 const GEOJSON_PATH = path.join(process.cwd(), "src/data/zoning-tool/nantucket-tax-parcels.clean.geojson");
+
+/** Whole-island bounds for parcel-scoped MLS match (same order of magnitude as omnibox). */
+const ISLAND_BBOX = { west: -70.2, south: 41.22, east: -69.95, north: 41.33 };
 
 let cachedParcelFeatures: Feature<Geometry, ParcelProps>[] | null = null;
 
@@ -31,9 +35,52 @@ function loadParcelFeatures(): Feature<Geometry, ParcelProps>[] {
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const parcelIdParam = searchParams.get("parcel_id")?.trim() ?? "";
   const bboxRaw = searchParams.get("bbox");
   const pool = (searchParams.get("pool") ?? "both").toLowerCase();
   const soldDays = Math.min(Math.max(parseInt(searchParams.get("soldDays") ?? "1095", 10), 30), 3650);
+
+  if (parcelIdParam) {
+    if (!["active", "sold", "both"].includes(pool)) {
+      return NextResponse.json({ error: "pool must be active, sold, or both" }, { status: 400 });
+    }
+    try {
+      const features = loadParcelFeatures();
+      const hasParcel = features.some((f) => String(f.properties?.parcel_id ?? "").trim() === parcelIdParam);
+      if (!hasParcel) {
+        return NextResponse.json({ match: null, error: "parcel_not_found" }, { status: 404 });
+      }
+      const index = buildParcelStreetCentroidIndex(features);
+      let hit: LinkListingMapPoint | null = null;
+
+      if (pool === "active" || pool === "both") {
+        const active = await fetchAllListings({ status: "A" });
+        for (const row of active) {
+          const p = matchLinkListingToPoint(row as LinkListingRow, index, "active", ISLAND_BBOX, parcelIdParam);
+          if (p) {
+            hit = p;
+            break;
+          }
+        }
+      }
+      if (!hit && (pool === "sold" || pool === "both")) {
+        const sold = await fetchAllListings({ status: "S", close_date: soldDays });
+        for (const row of sold) {
+          const p = matchLinkListingToPoint(row as LinkListingRow, index, "sold", ISLAND_BBOX, parcelIdParam);
+          if (p) {
+            hit = p;
+            break;
+          }
+        }
+      }
+
+      const match = hit ? parcelMapListingMatchFromMapPoint(hit) : null;
+      return NextResponse.json({ match, pool, soldDays });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      return NextResponse.json({ error: message, match: null }, { status: 500 });
+    }
+  }
 
   if (!bboxRaw) {
     return NextResponse.json({ error: "Missing bbox (west,south,east,north)" }, { status: 400 });
