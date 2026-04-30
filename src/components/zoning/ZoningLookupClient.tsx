@@ -911,7 +911,20 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
         setSelectedParcel(null);
       }
       setMobileDrawerTab("parcel");
-      if (fly) setMapFlyTo({ id: bumpFlyId(), lng: fly.lng, lat: fly.lat, zoom: 16 });
+
+      let lng = fly?.lng;
+      let lat = fly?.lat;
+      if ((lng == null || lat == null || !Number.isFinite(lng) || !Number.isFinite(lat)) && match?.geometry) {
+        const c = centroidFromGeometry(match.geometry);
+        if (c) {
+          lng = c.lng;
+          lat = c.lat;
+        }
+      }
+      if (lng != null && lat != null && Number.isFinite(lng) && Number.isFinite(lat)) {
+        setMapFlyTo({ id: bumpFlyId(), lng, lat, zoom: 16 });
+      }
+
       if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
     },
     [features],
