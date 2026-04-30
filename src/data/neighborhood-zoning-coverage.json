@@ -1,0 +1,402 @@
+{
+  "generatedAt": "2026-04-30T05:16:16.398Z",
+  "method": "Interior label point per parcel (polylabel) ∩ RE market polygon; assessor `zoning` normalized to keys in zoning-districts.json.",
+  "parcelFile": "src/data/zoning-tool/nantucket-tax-parcels.clean.geojson",
+  "reDistrictsFile": "public/data/re-districts.geojson",
+  "stats": {
+    "parcelsLabeled": 14056,
+    "skippedNoGeometry": 0,
+    "skippedNoReDistrict": 310,
+    "skippedUnmappedZoning": 524
+  },
+  "byReAbbrv": {
+    "POLP": [
+      "LUG-1",
+      "LUG-3"
+    ],
+    "ELPT": [
+      "LUG-2",
+      "LUG-3"
+    ],
+    "FLDG": [
+      "LUG-2",
+      "LUG-3"
+    ],
+    "DION": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3"
+    ],
+    "MADA": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "MMD",
+      "R-20",
+      "VR",
+      "VTEC"
+    ],
+    "CLIF": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "R-1",
+      "R-10",
+      "R-20",
+      "R-40",
+      "R-5",
+      "ROH"
+    ],
+    "BRAN": [
+      "CN",
+      "R-1",
+      "R-10",
+      "R-40",
+      "R-5",
+      "RC",
+      "ROH"
+    ],
+    "TOWN": [
+      "CDT",
+      "CMI",
+      "CN",
+      "LUG-3",
+      "R-1",
+      "R-10",
+      "R-40",
+      "R-5",
+      "RC",
+      "ROH"
+    ],
+    "WTWN": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "R-1",
+      "R-10",
+      "R-20",
+      "R-40"
+    ],
+    "CISC": [
+      "CN",
+      "LUG-2",
+      "LUG-3",
+      "MMD",
+      "R-20",
+      "RC-2",
+      "VR",
+      "VTEC"
+    ],
+    "HUMM": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "R-20",
+      "R-40",
+      "R-5",
+      "RC-2"
+    ],
+    "STWN": [
+      "CN",
+      "R-1",
+      "R-10",
+      "R-20",
+      "R-40"
+    ],
+    "NASH": [
+      "R-10"
+    ],
+    "MIAC": [
+      "CN",
+      "CTEC",
+      "LUG-2",
+      "LUG-3",
+      "MMD",
+      "R-10",
+      "R-10L",
+      "R-20",
+      "R-5",
+      "RC-2",
+      "VTEC"
+    ],
+    "SURF": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "R-20",
+      "R-40"
+    ],
+    "MIDI": [
+      "CI",
+      "CMI",
+      "CN",
+      "CTEC",
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "R-1",
+      "R-10",
+      "R-10L",
+      "R-20",
+      "R-40",
+      "R-5",
+      "RC",
+      "RC-2",
+      "VN",
+      "VR"
+    ],
+    "NAUS": [
+      "CN",
+      "R-5"
+    ],
+    "SAND": [
+      "R-20",
+      "R-5"
+    ],
+    "BPLM": [
+      "LUG-2"
+    ],
+    "MONO": [
+      "LUG-1",
+      "LUG-3",
+      "VR"
+    ],
+    "MM": [
+      "LUG-3"
+    ],
+    "SHIM": [
+      "LUG-1",
+      "LUG-3"
+    ],
+    "ARPT": [
+      "CI",
+      "CN",
+      "LUG-3",
+      "RC-2"
+    ],
+    "SHAW": [
+      "LUG-3"
+    ],
+    "MADQ": [
+      "LUG-3"
+    ],
+    "TNVR": [
+      "LUG-3"
+    ],
+    "QUAS": [
+      "LUG-3"
+    ],
+    "WAUW": [
+      "LUG-1",
+      "LUG-3",
+      "R-1",
+      "R-10"
+    ],
+    "SCON": [
+      "LUG-3",
+      "R-10",
+      "R-20",
+      "SOH",
+      "SR-1",
+      "SR-10",
+      "SR-20",
+      "VN"
+    ],
+    "QUID": [
+      "LUG-1",
+      "LUG-3",
+      "R-20"
+    ],
+    "POCO": [
+      "LUG-3"
+    ],
+    "SQUM": [
+      "LUG-1",
+      "LUG-2",
+      "LUG-3"
+    ]
+  },
+  "bySlug": {
+    "brant-point": {
+      "reDistrictAbbrvs": [
+        "BRAN"
+      ],
+      "zoningDistrictCodes": [
+        "CN",
+        "R-1",
+        "R-10",
+        "R-40",
+        "R-5",
+        "RC",
+        "ROH"
+      ]
+    },
+    "sconset": {
+      "reDistrictAbbrvs": [
+        "SCON"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-3",
+        "R-10",
+        "R-20",
+        "SOH",
+        "SR-1",
+        "SR-10",
+        "SR-20",
+        "VN"
+      ]
+    },
+    "madaket": {
+      "reDistrictAbbrvs": [
+        "MADA",
+        "ELPT"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "MMD",
+        "R-20",
+        "VR",
+        "VTEC"
+      ]
+    },
+    "mid-island": {
+      "reDistrictAbbrvs": [
+        "MIDI",
+        "SHIM",
+        "ARPT",
+        "MIAC",
+        "MM"
+      ],
+      "zoningDistrictCodes": [
+        "CI",
+        "CMI",
+        "CN",
+        "CTEC",
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "MMD",
+        "R-1",
+        "R-10",
+        "R-10L",
+        "R-20",
+        "R-40",
+        "R-5",
+        "RC",
+        "RC-2",
+        "VN",
+        "VR",
+        "VTEC"
+      ]
+    },
+    "town": {
+      "reDistrictAbbrvs": [
+        "TOWN",
+        "STWN",
+        "WTWN"
+      ],
+      "zoningDistrictCodes": [
+        "CDT",
+        "CMI",
+        "CN",
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "R-1",
+        "R-10",
+        "R-20",
+        "R-40",
+        "R-5",
+        "RC",
+        "ROH"
+      ]
+    },
+    "cliff": {
+      "reDistrictAbbrvs": [
+        "CLIF"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "R-1",
+        "R-10",
+        "R-20",
+        "R-40",
+        "R-5",
+        "ROH"
+      ]
+    },
+    "surfside": {
+      "reDistrictAbbrvs": [
+        "SURF"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "R-20",
+        "R-40"
+      ]
+    },
+    "cisco": {
+      "reDistrictAbbrvs": [
+        "CISC",
+        "HUMM"
+      ],
+      "zoningDistrictCodes": [
+        "CN",
+        "LUG-1",
+        "LUG-2",
+        "LUG-3",
+        "MMD",
+        "R-20",
+        "R-40",
+        "R-5",
+        "RC-2",
+        "VR",
+        "VTEC"
+      ]
+    },
+    "dionis": {
+      "reDistrictAbbrvs": [
+        "DION"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-2",
+        "LUG-3"
+      ]
+    },
+    "polpis": {
+      "reDistrictAbbrvs": [
+        "POLP",
+        "POCO"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-3"
+      ]
+    },
+    "monomoy": {
+      "reDistrictAbbrvs": [
+        "MONO"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-1",
+        "LUG-3",
+        "VR"
+      ]
+    },
+    "madequecham": {
+      "reDistrictAbbrvs": [
+        "MADQ"
+      ],
+      "zoningDistrictCodes": [
+        "LUG-3"
+      ]
+    }
+  }
+}

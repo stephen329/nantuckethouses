@@ -5,6 +5,7 @@ import { MapPin, Ruler, TreePine, Waves, AlertTriangle } from "lucide-react";
 import { Breadcrumbs } from "@/components/regulatory/Breadcrumbs";
 import { NEIGHBORHOOD_SLUGS, getNeighborhoodName } from "@/lib/neighborhoods";
 import neighborhoodProfiles from "@/data/neighborhood-profiles.json";
+import neighborhoodZoningCoverage from "@/data/neighborhood-zoning-coverage.json";
 import zoningData from "@/data/zoning-districts.json";
 import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
@@ -29,6 +30,17 @@ type DistrictInfo = {
   hdcScrutiny: string;
   typicalPermitLag: string;
   notes: string;
+};
+
+type ZoningCoverageFile = {
+  generatedAt?: string;
+  bySlug: Record<
+    string,
+    {
+      reDistrictAbbrvs: string[];
+      zoningDistrictCodes: string[];
+    }
+  >;
 };
 
 type Props = {
@@ -60,9 +72,11 @@ export default async function NeighborhoodPage({ params }: Props) {
   if (!profile) return notFound();
 
   const name = profile.name;
-  // Support multiple districts per neighborhood
-  const neighborhoodDistricts = (zoningData as any).neighborhoodDistricts ?? {};
-  const assignedCodes: string[] = neighborhoodDistricts[name] ?? [profile.zoningDistrict];
+  const coverage = neighborhoodZoningCoverage as ZoningCoverageFile;
+  const coverageGenerated = coverage.generatedAt;
+  const fromMap = coverage.bySlug[slug]?.zoningDistrictCodes ?? [];
+  const assignedCodes: string[] =
+    fromMap.length > 0 ? fromMap : [profile.zoningDistrict].filter(Boolean);
   const districts = assignedCodes
     .map((code: string) => ({
       code,
@@ -151,6 +165,20 @@ export default async function NeighborhoodPage({ params }: Props) {
                 </p>
               </div>
             ))}
+            {coverageGenerated && (
+              <p className="text-xs text-[var(--nantucket-gray)]">
+                Districts shown are those present on assessor parcels within this guide&apos;s MLS market
+                area(s), matching the property map overlays. Regenerate with{" "}
+                <code className="rounded bg-[var(--sandstone)] px-1">npm run build:neighborhood-zoning</code>{" "}
+                after parcel or RE district updates. Last build:{" "}
+                {new Date(coverageGenerated).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+                .
+              </p>
+            )}
             <Link href="/map" className="text-xs text-[var(--privet-green)] hover:underline">
               Look up zoning for a specific address &rarr;
             </Link>

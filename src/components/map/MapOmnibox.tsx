@@ -31,6 +31,8 @@ type Props = {
   /** Increment (e.g. suggestion chip) to prefill and open the omnibox. */
   prefillNonce?: number;
   prefillQuery?: string;
+  /** Compact trigger sizing for dense mobile map headers. */
+  compact?: boolean;
 };
 
 const QUICK = [
@@ -52,25 +54,16 @@ export function MapOmnibox({
   onPreviewChange,
   prefillNonce = 0,
   prefillQuery = "",
+  compact = false,
 }: Props) {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OmniboxResponse | null>(null);
   const [recents, setRecents] = useState<OmniboxRecentEntry[]>([]);
   const [showSlashHint, setShowSlashHint] = useState(false);
-  const [wideViewport, setWideViewport] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   /** Ignores stale HTTP responses when the query changes faster than the network. */
   const omniboxRequestSeq = useRef(0);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setWideViewport(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   useEffect(() => {
     if (!prefillQuery.trim() || prefillNonce < 1) return;
@@ -232,8 +225,18 @@ export function MapOmnibox({
       }}
     >
       <PopoverAnchor asChild>
-        <div className="relative w-full overflow-hidden rounded-xl border border-[var(--cedar-shingle)]/25 bg-white shadow-md ring-1 ring-slate-900/[0.06] lg:border-[var(--cedar-shingle)]/30 lg:shadow-lg lg:shadow-slate-900/10">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--nantucket-gray)] lg:left-3.5 lg:h-5 lg:w-5" />
+        <div
+          className={cn(
+            "relative w-full overflow-hidden rounded-xl border border-[var(--cedar-shingle)]/25 bg-white ring-1 ring-slate-900/[0.06] lg:border-[var(--cedar-shingle)]/30 lg:shadow-lg lg:shadow-slate-900/10",
+            compact ? "shadow-sm" : "shadow-md",
+          )}
+        >
+          <Search
+            className={cn(
+              "pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nantucket-gray)] lg:left-3.5 lg:h-5 lg:w-5",
+              compact ? "h-3.5 w-3.5" : "h-4 w-4",
+            )}
+          />
           <Input
             ref={inputRef}
             value={value}
@@ -249,12 +252,11 @@ export function MapOmnibox({
               dismissSlashHint();
               onOpenChange(true);
             }}
-            placeholder={
-              wideViewport
-                ? "Search address, Tax Map/Parcel, or neighborhood (e.g. Sconset, Polpis)"
-                : "Search address, Tax Map/Parcel, or neighborhood…"
-            }
-            className="h-12 w-full rounded-none border-0 bg-white pl-10 pr-3 text-base text-[var(--atlantic-navy)] shadow-none outline-none ring-0 placeholder:text-[var(--nantucket-gray)] focus-visible:ring-2 focus-visible:ring-[var(--atlantic-navy)]/25 focus-visible:ring-offset-0 lg:h-14 lg:pl-11 lg:pr-4 lg:text-[17px]"
+            placeholder="Search address, Tax Map/Parcel, or neighborhood (e.g. Sconset, Polpis, Cliff Rd)"
+            className={cn(
+              "w-full rounded-none border-0 bg-white text-[var(--atlantic-navy)] shadow-none outline-none ring-0 placeholder:text-[var(--nantucket-gray)] focus-visible:ring-2 focus-visible:ring-[var(--atlantic-navy)]/25 focus-visible:ring-offset-0 lg:h-14 lg:pl-11 lg:pr-4 lg:text-[17px]",
+              compact ? "h-10 pl-9 pr-2.5 text-sm" : "h-12 pl-10 pr-3 text-base",
+            )}
             aria-label="Map search"
             autoComplete="off"
           />

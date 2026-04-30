@@ -38,6 +38,7 @@ export type MapFilterPinSummary = {
 
 type Props = {
   mapMode: PropertyMapMode;
+  selectedModes?: Array<Exclude<PropertyMapMode, "all">>;
   rentalFilters: RentalFiltersState;
   onRentalFiltersChange: (next: RentalFiltersState) => void;
   linkFilters: LinkFiltersState;
@@ -47,6 +48,8 @@ type Props = {
   trigger?: "floating" | "none";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Drawer edge; mobile map uses top drawer. */
+  side?: "top" | "bottom";
 };
 
 function toggleTypeKey(keys: LinkPropertyTypeKey[], k: LinkPropertyTypeKey): LinkPropertyTypeKey[] {
@@ -89,6 +92,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 export function PropertyMapFiltersSheet({
   mapMode,
+  selectedModes,
   rentalFilters,
   onRentalFiltersChange,
   linkFilters,
@@ -98,6 +102,7 @@ export function PropertyMapFiltersSheet({
   trigger = "floating",
   open: openControlled,
   onOpenChange,
+  side = "bottom",
 }: Props) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -108,28 +113,37 @@ export function PropertyMapFiltersSheet({
     else setInternalOpen(next);
   };
 
-  const showRent = mapMode === "rent" || mapMode === "all";
-  const showLink = mapMode === "sale" || mapMode === "sold" || mapMode === "all";
-  const showSoldTools = mapMode === "sold" || mapMode === "all";
+  const selected = new Set<Exclude<PropertyMapMode, "all">>(
+    selectedModes?.length
+      ? selectedModes
+      : mapMode === "all"
+        ? ["rent", "sale", "sold"]
+        : [mapMode as Exclude<PropertyMapMode, "all">],
+  );
+  const showRent = selected.has("rent");
+  const showSale = selected.has("sale");
+  const showSold = selected.has("sold");
+  const showLink = showSale || showSold;
+  const showSoldTools = showSold;
 
   const badge =
     (showRent ? countActiveRentalFilters(rentalFilters) : 0) + (showLink ? countActiveLinkFilters(linkFilters) : 0);
 
   const headline = useMemo(() => {
     const parts: string[] = [];
-    if (mapMode === "rent") {
+    if (showRent && !showLink) {
       parts.push(`${pinSummary.rentalsFiltered} rental${pinSummary.rentalsFiltered === 1 ? "" : "s"}`);
-    } else if (mapMode === "sale") {
+    } else if (!showRent && showSale && !showSold) {
       parts.push(`${pinSummary.linkActiveFiltered} for-sale pin${pinSummary.linkActiveFiltered === 1 ? "" : "s"}`);
-    } else if (mapMode === "sold") {
+    } else if (!showRent && !showSale && showSold) {
       parts.push(`${pinSummary.linkSoldFiltered} sold pin${pinSummary.linkSoldFiltered === 1 ? "" : "s"}`);
     } else {
-      parts.push(`${pinSummary.rentalsFiltered} rentals`);
-      parts.push(`${pinSummary.linkActiveFiltered} active`);
-      parts.push(`${pinSummary.linkSoldFiltered} sold`);
+      if (showRent) parts.push(`${pinSummary.rentalsFiltered} rentals`);
+      if (showSale) parts.push(`${pinSummary.linkActiveFiltered} active`);
+      if (showSold) parts.push(`${pinSummary.linkSoldFiltered} sold`);
     }
     return parts.join(" · ");
-  }, [mapMode, pinSummary]);
+  }, [showRent, showSale, showSold, showLink, pinSummary]);
 
   const clearAll = () => {
     onRentalFiltersChange({ ...DEFAULT_RENTAL_FILTERS });
@@ -165,8 +179,13 @@ export function PropertyMapFiltersSheet({
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
-          side="bottom"
-          className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-t-2xl border-t-2 border-blue-700/35 bg-white p-0 shadow-2xl"
+          side={side}
+          className={cn(
+            "flex max-h-[90dvh] flex-col gap-0 overflow-hidden bg-white p-0 shadow-2xl",
+            side === "top"
+              ? "rounded-b-2xl border-b-2 border-blue-700/35"
+              : "rounded-t-2xl border-t-2 border-blue-700/35",
+          )}
         >
           <SheetHeader className="shrink-0 space-y-2 border-b border-[var(--cedar-shingle)]/15 px-4 pb-3 pt-4 text-left">
             <div className="flex items-start justify-between gap-3 pr-10">
@@ -196,51 +215,6 @@ export function PropertyMapFiltersSheet({
                   <span className="text-[11px] font-medium text-[var(--privet-green)]">
                     {pinSummary.rentalsFiltered}/{pinSummary.rentalsInView} pins
                   </span>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Rate basis</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(
-                      [
-                        { v: "weekly" as const, l: "Weekly" },
-                        { v: "monthly" as const, l: "Monthly" },
-                        { v: "annual" as const, l: "Annual" },
-                      ] as const
-                    ).map(({ v, l }) => (
-                      <Chip
-                        key={v}
-                        selected={rentalFilters.ratePeriod === v}
-                        onClick={() => onRentalFiltersChange({ ...rentalFilters, ratePeriod: v })}
-                      >
-                        {l}
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Weekly rate (custom)</p>
-                  <div className="flex items-stretch overflow-hidden rounded-xl border border-[var(--cedar-shingle)]/25 bg-[var(--sandstone)]/30 shadow-inner">
-                    <div className="flex min-w-0 flex-1 flex-col border-r border-[var(--cedar-shingle)]/20 px-3 py-2">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--nantucket-gray)]">Min</span>
-                      <Input
-                        inputMode="numeric"
-                        placeholder="$0"
-                        value={rentalFilters.minRate}
-                        onChange={(e) => onRentalFiltersChange({ ...rentalFilters, minRate: e.target.value })}
-                        className="h-8 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--atlantic-navy)] placeholder:text-[var(--nantucket-gray)]/60 focus-visible:ring-0"
-                      />
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col px-3 py-2">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--nantucket-gray)]">Max</span>
-                      <Input
-                        inputMode="numeric"
-                        placeholder="No max"
-                        value={rentalFilters.maxRate}
-                        onChange={(e) => onRentalFiltersChange({ ...rentalFilters, maxRate: e.target.value })}
-                        className="h-8 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--atlantic-navy)] placeholder:text-[var(--nantucket-gray)]/60 focus-visible:ring-0"
-                      />
-                    </div>
-                  </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -282,26 +256,6 @@ export function PropertyMapFiltersSheet({
                         onClick={() => onRentalFiltersChange({ ...rentalFilters, minOccupancy: v })}
                       >
                         {v === "" ? "Any" : `${v}+`}
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Beach access</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(
-                      [
-                        { v: "any" as const, l: "Any" },
-                        { v: "walk" as const, l: "Walk to beach" },
-                        { v: "not_walk" as const, l: "Exclude walk-to-beach" },
-                      ] as const
-                    ).map(({ v, l }) => (
-                      <Chip
-                        key={v}
-                        selected={rentalFilters.beachDistance === v}
-                        onClick={() => onRentalFiltersChange({ ...rentalFilters, beachDistance: v })}
-                      >
-                        {l}
                       </Chip>
                     ))}
                   </div>
@@ -351,13 +305,13 @@ export function PropertyMapFiltersSheet({
                 <div className="flex items-center justify-between gap-2">
                   <SectionLabel>LINK listings</SectionLabel>
                   <span className="text-right text-[11px] font-medium leading-tight text-blue-900">
-                    {mapMode !== "sold" ? (
+                    {showSale ? (
                       <span>
                         {pinSummary.linkActiveFiltered}/{pinSummary.linkActiveTotal} active
                       </span>
                     ) : null}
-                    {mapMode === "all" ? <span className="mx-1 text-[var(--nantucket-gray)]">·</span> : null}
-                    {mapMode !== "sale" ? (
+                    {showSale && showSold ? <span className="mx-1 text-[var(--nantucket-gray)]">·</span> : null}
+                    {showSold ? (
                       <span>
                         {pinSummary.linkSoldFiltered}/{pinSummary.linkSoldTotal} sold
                       </span>
