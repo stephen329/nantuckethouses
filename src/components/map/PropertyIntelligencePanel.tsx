@@ -521,6 +521,17 @@ export function PropertyIntelligencePanel({
         </section>
 
         <div className="flex flex-col gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
+          {selectedParcel?.internal_id ? (
+            <Button asChild variant="outline" className="w-full text-sm">
+              <a
+                href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Assessor&apos;s Record
+              </a>
+            </Button>
+          ) : null}
           {selectedLink ? (
             <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
               <a href={nantucketLinkListingUrl(selectedLink.linkId)} target="_blank" rel="noopener noreferrer">
