@@ -22,7 +22,7 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-sm border border-[#D6C8B0] p-6 animate-pulse">
+      <div className="bg-white rounded-sm border border-[#6B5E51] p-6 animate-pulse">
         <div className="h-5 bg-[#E8E8E8] rounded w-1/3 mb-4"></div>
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -35,10 +35,10 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-sm border border-[#D6C8B0] p-6">
-        <h3 className="text-[#1A2A3A] text-lg font-medium mb-4">Sales by Neighborhood</h3>
-        <div className="h-[200px] flex items-center justify-center bg-[#FAF8F5] rounded border border-dashed border-[#D6C8B0]">
-          <p className="text-[#1A2A3A]/50 text-sm">No neighborhood sales data available</p>
+      <div className="bg-white rounded-sm border border-[#6B5E51] p-6">
+        <h3 className="text-[#1B263B] text-lg font-medium mb-4">Sales by Neighborhood</h3>
+        <div className="h-[200px] flex items-center justify-center bg-[#F1F1E6] rounded border border-dashed border-[#6B5E51]">
+          <p className="text-[#1B263B]/50 text-sm">No neighborhood sales data available</p>
         </div>
       </div>
     );
@@ -72,16 +72,16 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
   const totalVolume = data.reduce((sum, n) => sum + n.totalVolume, 0);
 
   return (
-    <div className="bg-white rounded-sm border border-[#D6C8B0] overflow-hidden">
+    <div className="bg-white rounded-sm border border-[#6B5E51] overflow-hidden">
       <div className="p-4 border-b border-[#E8E8E8]">
         <div className="flex items-center justify-between">
-          <h3 className="text-[#1A2A3A] text-lg font-medium">Sales by Neighborhood</h3>
-          <div className="flex items-center gap-4 text-xs text-[#1A2A3A]/60">
+          <h3 className="text-[#1B263B] text-lg font-medium">Sales by Neighborhood</h3>
+          <div className="flex items-center gap-4 text-xs text-[#1B263B]/60">
             <span>
-              Total: <span className="font-semibold text-[#1A2A3A]">{totalSales} sales</span>
+              Total: <span className="font-semibold text-[#1B263B]">{totalSales} sales</span>
             </span>
             <span>
-              Volume: <span className="font-semibold text-[#1A2A3A]">{formatVolume(totalVolume)}</span>
+              Volume: <span className="font-semibold text-[#1B263B]">{formatVolume(totalVolume)}</span>
             </span>
           </div>
         </div>
@@ -90,7 +90,7 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-[#FAF8F5] text-left text-xs font-semibold text-[#1A2A3A]/70 uppercase tracking-wider">
+            <tr className="bg-[#F1F1E6] text-left text-xs font-semibold text-[#1B263B]/70 uppercase tracking-wider">
               <th className="px-4 py-3">Neighborhood</th>
               <th className="px-4 py-3 text-right"># Sales</th>
               <th className="px-4 py-3 text-right">Avg Sale Price</th>
@@ -101,30 +101,30 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
             {displayData.map((neighborhood, index) => (
               <tr 
                 key={neighborhood.name} 
-                className={`hover:bg-[#FAF8F5] transition-colors ${
-                  index < 3 ? "bg-[#FAF8F5]/50" : ""
+                className={`hover:bg-[#F1F1E6] transition-colors ${
+                  index < 3 ? "bg-[#F1F1E6]/50" : ""
                 }`}
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     {index < 3 && (
-                      <span className="w-5 h-5 rounded-full bg-[#D4AF37] text-white text-xs font-bold flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full bg-[#2D4635] text-white text-xs font-bold flex items-center justify-center">
                         {index + 1}
                       </span>
                     )}
-                    <span className={`font-medium text-[#1A2A3A] ${index < 3 ? "" : "ml-7"}`}>
+                    <span className={`font-medium text-[#1B263B] ${index < 3 ? "" : "ml-7"}`}>
                       {neighborhood.name}
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right text-[#1A2A3A]/80">
+                <td className="px-4 py-3 text-right text-[#1B263B]/80">
                   {neighborhood.salesCount}
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-[#1A2A3A]">
+                <td className="px-4 py-3 text-right font-medium text-[#1B263B]">
                   {formatCurrency(neighborhood.avgSalePrice)}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <span className="font-semibold text-[#1A2A3A]">
+                  <span className="font-semibold text-[#1B263B]">
                     {formatVolume(neighborhood.totalVolume)}
                   </span>
                 </td>
@@ -139,7 +139,7 @@ export function NeighborhoodSalesTable({ data, isLoading }: Props) {
         <div className="p-3 border-t border-[#E8E8E8]">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-[#1A2A3A]/70 hover:text-[#1A2A3A] hover:bg-[#FAF8F5] rounded transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-medium text-[#1B263B]/70 hover:text-[#1B263B] hover:bg-[#F1F1E6] rounded transition-colors"
           >
             {isExpanded ? (
               <>

@@ -1,10 +1,40 @@
-import type { WhaleWatchSale, StephensTake } from "@/types";
+import type { WhaleWatchSale } from "@/types";
+import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 
 type Props = {
   sales: WhaleWatchSale[];
-  stephensTake: StephensTake;
   year: number;
 };
+
+/** Linked row: underline + hover; text color comes from `className` or defaults to Atlantic navy. */
+const linkAffordance =
+  "underline decoration-[var(--cedar-shingle)]/50 underline-offset-2 hover:text-[var(--privet-green)] hover:decoration-[var(--privet-green)]/50";
+
+/** Renders the street address; when `linkListingId` is set, links to the public LINK listing page. */
+export function WhaleWatchSaleAddress({
+  sale,
+  className,
+}: {
+  sale: WhaleWatchSale;
+  className?: string;
+}) {
+  if (sale.linkListingId) {
+    const merged = [linkAffordance, className ?? "font-medium text-[var(--atlantic-navy)]"]
+      .filter(Boolean)
+      .join(" ");
+    return (
+      <a
+        href={nantucketLinkListingUrl(sale.linkListingId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={merged}
+      >
+        {sale.address}
+      </a>
+    );
+  }
+  return <span className={className}>{sale.address}</span>;
+}
 
 function formatCurrency(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
@@ -19,7 +49,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function WhaleWatch({ sales, stephensTake, year }: Props) {
+export function WhaleWatch({ sales, year }: Props) {
   return (
     <section className="py-12 sm:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,7 +97,7 @@ export function WhaleWatch({ sales, stephensTake, year }: Props) {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-medium text-[var(--atlantic-navy)]">
-                    {sale.address}
+                    <WhaleWatchSaleAddress sale={sale} />
                   </td>
                   <td className="px-4 py-3 text-[var(--nantucket-gray)]">
                     {sale.neighborhood}
@@ -84,22 +114,6 @@ export function WhaleWatch({ sales, stephensTake, year }: Props) {
           </table>
         </div>
 
-        {/* Stephen's Take */}
-        <div className="mt-8 bg-[var(--sandstone)] rounded-lg border-l-4 border-[var(--cedar-shingle)] p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cedar-shingle)] mb-3 font-sans">
-            Stephen&apos;s Take
-          </p>
-          <p className="text-sm text-[var(--atlantic-navy)]/80 leading-relaxed">
-            {stephensTake.body}
-          </p>
-          <p className="text-xs text-[var(--nantucket-gray)] mt-3 font-sans">
-            Updated {new Date(stephensTake.date + "T00:00:00").toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
-        </div>
       </div>
     </section>
   );

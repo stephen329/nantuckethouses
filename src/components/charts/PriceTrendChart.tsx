@@ -13,17 +13,16 @@ type MonthlyData = {
 type Props = {
   data: MonthlyData[];
   isLoading?: boolean;
-  analystNote?: string;
 };
 
 // Brand colors
-const GOLD_PRIMARY = "#D4AF37";
-const NAVY_DARK = "#1A2A3A";
+const GOLD_PRIMARY = "#2D4635";
+const NAVY_DARK = "#1B263B";
 
-export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
+export function PriceTrendChart({ data, isLoading }: Props) {
   if (isLoading) {
     return (
-      <div className="h-[420px] bg-white rounded-sm border border-[#D6C8B0] p-6 animate-pulse">
+      <div className="h-[420px] bg-white rounded-sm border border-[#6B5E51] p-6 animate-pulse">
         <div className="h-4 bg-[#E8E8E8] rounded w-1/3 mb-4"></div>
         <div className="h-[320px] bg-[#E8E8E8] rounded"></div>
       </div>
@@ -33,12 +32,12 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
   // Handle empty data state
   if (!data || data.length === 0) {
     return (
-      <div className="h-[420px] bg-white rounded-sm border border-[#D6C8B0] p-6">
-        <h3 className="text-[#1A2A3A] text-lg font-medium mb-4">Sold Price Trends</h3>
-        <div className="h-[320px] flex flex-col items-center justify-center bg-[#FAF8F5] rounded border border-dashed border-[#D6C8B0]">
+      <div className="h-[420px] bg-white rounded-sm border border-[#6B5E51] p-6">
+        <h3 className="text-[#1B263B] text-lg font-medium mb-4">Sold Price Trends</h3>
+        <div className="h-[320px] flex flex-col items-center justify-center bg-[#F1F1E6] rounded border border-dashed border-[#6B5E51]">
           <div className="text-center">
-            <p className="text-[#1A2A3A]/60 text-sm font-medium mb-1">Data being calculated</p>
-            <p className="text-[#1A2A3A]/40 text-xs">Historical trends will appear once data is available</p>
+            <p className="text-[#1B263B]/60 text-sm font-medium mb-1">Data being calculated</p>
+            <p className="text-[#1B263B]/40 text-xs">Historical trends will appear once data is available</p>
           </div>
         </div>
       </div>
@@ -78,18 +77,18 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
   const formatPrice = (value: number) => `$${value.toFixed(1)}M`;
 
   return (
-    <div className="bg-white rounded-sm border border-[#D6C8B0] p-6">
+    <div className="bg-white rounded-sm border border-[#6B5E51] p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-[#1A2A3A] text-lg font-medium">Sold Price Trends</h3>
+          <h3 className="text-[#1B263B] text-lg font-medium">Sold Price Trends</h3>
           {isSparseData && (
-            <p className="text-xs text-[#1A2A3A]/50 mt-1">
+            <p className="text-xs text-[#1B263B]/50 mt-1">
               — Dashed segments indicate estimated values
             </p>
           )}
         </div>
         {overallMedian && (
-          <span className="text-xs text-[#1A2A3A]/50 bg-[#FAF8F5] px-2 py-1 rounded">
+          <span className="text-xs text-[#1B263B]/50 bg-[#F1F1E6] px-2 py-1 rounded">
             Period Avg: {formatPrice(overallMedian)}
           </span>
         )}
@@ -123,8 +122,8 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
                     : label;
                 
                 return (
-                  <div className="bg-white border border-[#D6C8B0] rounded p-2 text-sm shadow-md">
-                    <p className="font-semibold text-[#1A2A3A] mb-2">{headerText}</p>
+                  <div className="bg-white border border-[#6B5E51] rounded p-2 text-sm shadow-md">
+                    <p className="font-semibold text-[#1B263B] mb-2">{headerText}</p>
                     {payload.map((entry, index) => {
                       const isMedian = entry.dataKey === "medianPriceM";
                       const labelText = isMedian ? "Median Sold" : "Average Sold";
@@ -150,9 +149,9 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
             {overallMedian && (
               <ReferenceLine 
                 y={overallMedian} 
-                stroke="#D6C8B0" 
+                stroke="#6B5E51" 
                 strokeDasharray="5 5" 
-                label={{ value: "Avg", position: "right", fontSize: 9, fill: "#1A2A3A80" }}
+                label={{ value: "Avg", position: "right", fontSize: 9, fill: "#1B263B80" }}
               />
             )}
             {/* Median line - Gold, solid, prominent */}
@@ -182,14 +181,6 @@ export function PriceTrendChart({ data, isLoading, analystNote }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Analyst Note */}
-      {analystNote && (
-        <div className="mt-4 pt-4 border-t border-[#E8E8E8]">
-          <p className="text-xs text-[#1A2A3A]/70 italic leading-relaxed">
-            <span className="font-semibold text-[#D4AF37] not-italic">Stephen&apos;s Take:</span> {analystNote}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

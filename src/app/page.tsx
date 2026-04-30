@@ -1,17 +1,19 @@
 import { fetchAllListings, fetchListings, median, average } from "@/lib/cnc-api";
 import { PulseDashboard } from "@/components/home/PulseDashboard";
-import { VibeMeter } from "@/components/home/VibeMeter";
+import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { WhaleWatch } from "@/components/home/WhaleWatch";
 import { BoardWatch } from "@/components/home/BoardWatch";
 import { Teasers } from "@/components/home/Teasers";
+import { OpportunityDesk } from "@/components/home/OpportunityDesk";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { CTASection } from "@/components/home/CTASection";
-import type { PulseStats, VibeMeterData, WhaleWatchSale, StephensTake, BoardWatchData } from "@/types";
+import { PartnersCarousel } from "@/components/partners/PartnersCarousel";
+import { getBoardWatchData } from "@/lib/board-watch";
+import type { PulseStats, MarketHighlightsData, WhaleWatchSale, Partner } from "@/types";
 
 // Import fallback data
-import vibeMeterFallback from "@/data/vibe-meter.json";
-import whaleWatchFallback from "@/data/whale-watch.json";
-import boardWatchFallback from "@/data/board-watch.json";
+import marketHighlightsFallback from "@/data/market-highlights.json";
+import partnersData from "@/data/partners.json";
 
 export const revalidate = 3600; // 1 hour for market data
 
@@ -83,6 +85,8 @@ async function getWhaleWatchSales(): Promise<WhaleWatchSale[]> {
         listPrice: l.ListPrice,
         closeDate: l.CloseDate!,
         neighborhood: l.MLSAreaMajor ?? "Unknown",
+        linkListingId:
+          l.link_id != null && l.link_id > 0 ? String(l.link_id) : undefined,
       }));
   } catch (error) {
     console.error("Failed to fetch whale watch:", error);
@@ -91,27 +95,27 @@ async function getWhaleWatchSales(): Promise<WhaleWatchSale[]> {
 }
 
 export default async function Home() {
-  const [pulseStats, whaleWatchSales] = await Promise.all([
+  const [pulseStats, whaleWatchSales, boardWatchData] = await Promise.all([
     getPulseStats(),
     getWhaleWatchSales(),
+    getBoardWatchData(),
   ]);
 
-  const vibeMeterData: VibeMeterData = vibeMeterFallback as VibeMeterData;
-  const stephensTake: StephensTake = whaleWatchFallback.stephensTake as StephensTake;
-  const boardWatchData: BoardWatchData = boardWatchFallback as BoardWatchData;
+  const marketHighlightsData: MarketHighlightsData = marketHighlightsFallback as MarketHighlightsData;
 
   return (
     <>
       <PulseDashboard stats={pulseStats} />
-      <VibeMeter data={vibeMeterData} />
+      <MarketHighlights data={marketHighlightsData} />
       <WhaleWatch
         sales={whaleWatchSales}
-        stephensTake={stephensTake}
         year={new Date().getFullYear()}
       />
       <BoardWatch data={boardWatchData} />
       <Teasers />
+      <OpportunityDesk />
       <NewsletterSignup />
+      <PartnersCarousel partners={partnersData as Partner[]} />
       <CTASection />
     </>
   );

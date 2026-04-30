@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { navPillars, standaloneNavItems } from "@/lib/navigation";
+import { listArticles } from "@/lib/content";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://nantuckethouses.com";
@@ -33,6 +34,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}${item.href}`,
       lastModified: now,
       changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
+
+  // Article pages
+  const articles = listArticles();
+  for (const article of articles) {
+    pages.push({
+      url: `${baseUrl}/articles/${article.slug}`,
+      lastModified: article.date,
+      changeFrequency: "monthly",
       priority: 0.7,
     });
   }

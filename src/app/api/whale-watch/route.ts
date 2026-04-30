@@ -32,6 +32,8 @@ export async function GET() {
         listPrice: l.ListPrice,
         closeDate: l.CloseDate!,
         neighborhood: l.MLSAreaMajor ?? "Unknown",
+        linkListingId:
+          l.link_id != null && l.link_id > 0 ? String(l.link_id) : undefined,
       }));
 
     return NextResponse.json({
