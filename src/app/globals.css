@@ -33,6 +33,48 @@
     background: var(--sandstone);
   }
 
+  /* Immersive /map: lock scroll, hide global footer, let main fill viewport */
+  html.map-route,
+  body.map-route {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  body.map-route {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.map-route > footer {
+    display: none !important;
+  }
+
+  body.map-route > main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Map route: shell fills viewport under nav; map + sidebar share remaining height */
+  body.map-route .map-page-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Map tool: main map + sidebar grid row fills remaining height under compact header */
+  body.map-route .map-content-area {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 0;
+  }
+
   h1,
   h2,
   h3,

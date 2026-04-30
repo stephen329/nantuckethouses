@@ -16,7 +16,7 @@ export function Navigation() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#e8e8e8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex h-16 items-center justify-between gap-3 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0" onClick={() => setIsOpen(false)}>
             <Image
@@ -30,7 +30,7 @@ export function Navigation() {
           </Link>
 
           {/* Desktop: 5-pillar nav + CTA */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex flex-1 items-center justify-end gap-1">
             {primaryNavItems.map((item) => {
               const hasDropdown = (item.children && item.children.length > 0) || item.megaMenuColumns;
 
@@ -183,14 +183,16 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2 text-[var(--atlantic-navy)]"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? "Close menu" : "Open menu"}
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              type="button"
+              className="p-2 text-[var(--atlantic-navy)]"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { Activity, DollarSign, TrendingUp } from "lucide-react";
+import Link from "next/link";
 import type { PulseStats } from "@/types";
 
 type Props = {
@@ -62,6 +63,20 @@ export function PulseDashboard({ stats }: Props) {
             Nantucket Pulse
           </p>
           <h1 className="text-white text-2xl sm:text-3xl">The Big Three</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Link
+              href="/map"
+              className="inline-flex items-center rounded-md bg-[var(--privet-green)] px-4 py-2 text-xs font-semibold text-white hover:bg-[var(--brass-hover)]"
+            >
+              Try the New Nantucket Property Map →
+            </Link>
+            <Link
+              href="/market-pulse"
+              className="inline-flex items-center rounded-md border border-white/25 px-4 py-2 text-xs font-semibold text-white/85 hover:bg-white/10"
+            >
+              View Market Pulse Dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">

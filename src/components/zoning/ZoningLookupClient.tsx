@@ -1,33 +1,67 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { FeatureCollection, Geometry, Point } from "geojson";
-import { Search } from "lucide-react";
+import { Layers, Map as MapIcon, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/components/ui/utils";
 import { MapLegend } from "@/components/zoning/MapLegend";
-import { ParcelProperties, ZoningMap } from "@/components/zoning/ZoningMap";
-import { UseBadge } from "@/components/zoning/UseBadge";
+import { ParcelZoningUsesSection, type ZoningUseRow } from "@/components/zoning/ParcelZoningUsesSection";
+import { ParcelProperties, ZoningMap, type ParcelBaseMapLayer } from "@/components/zoning/ZoningMap";
 import zoningData from "@/data/zoning-districts.json";
 import zoningUseChart from "@/data/zoning-use-chart.json";
 import recentSoldParcels from "@/data/recent-sold-parcels.json";
 import nrRentalSlugsByParcel from "@/data/nr-rental-slugs-by-parcel.json";
 import { getZoningColor } from "@/lib/zoning-colors";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
-import type {
-  LinkListingPinFeature,
-  LinkListingPinProperties,
+import {
+  linkListingMatchForParcelMapSelection,
+  type LinkListingPinFeature,
+  type LinkListingPinProperties,
+  type ParcelMapLinkListingMatch,
 } from "@/lib/link-listings-parcel-match";
 import type { NrMapRentalResult, RentalPinFeature } from "@/lib/nr-map-rentals";
 import { rentalsToGeoJson } from "@/lib/nr-map-rentals";
 import { nantucketVacationRentalListingUrl } from "@/lib/nr-vacation-rental-url";
-import { PropertyMapWelcomeBanner } from "@/components/map/PropertyMapWelcomeBanner";
-
+import {
+  applyRentalFilters,
+  countActiveLinkFilters,
+  countActiveRentalFilters,
+  DEFAULT_LINK_FILTERS,
+  DEFAULT_RENTAL_FILTERS,
+  filterLinkFeatureCollection,
+  type LinkFiltersState,
+  type PropertyMapMode,
+  type RentalFiltersState,
+} from "@/lib/property-map-filters";
+import { PropertyMapFiltersSheet } from "@/components/map/PropertyMapFiltersSheet";
+import {
+  PropertyMapDesktopLayerBar,
+  PropertyMapLayerHelpTrigger,
+  PropertyMapLayerPillsRow,
+  PropertyMapLayersSheetBody,
+  PropertyMapReMarketFocusSelect,
+  ZoningLookupColorsStrip,
+} from "@/components/map/PropertyMapLayerBar";
+import { MapLegalNoticeButton } from "@/components/map/MapLegalNoticeButton";
+import { MapResearchHubStickyFooter } from "@/components/map/MapResearchHubStickyFooter";
+import { MapOmnibox } from "@/components/map/MapOmnibox";
+import { PropertyIntelligencePanel } from "@/components/map/PropertyIntelligencePanel";
+import type { OmniboxActiveListing, OmniboxRentalHit, OmniboxSoldComp } from "@/lib/map-omnibox-types";
+import { MAP_NEIGHBORHOOD_BOUNDS } from "@/lib/map-neighborhood-bounds";
+import { centroidFromGeometry } from "@/lib/geo-centroid";
+import { bboxForReDistrictAbbrv } from "@/lib/re-districts-map";
 type RecentSoldParcelsFeed = {
   parcelIds: string[];
   linkListingByParcelId: Record<string, string>;
@@ -41,7 +75,7 @@ type NrRentalSlugsFeed = {
   listingCount: number;
 };
 
-export type PropertyMapMode = "rent" | "sale" | "sold" | "all";
+export type { PropertyMapMode } from "@/lib/property-map-filters";
 
 const EMPTY_LINK_FC: FeatureCollection<Point, LinkListingPinProperties> = { type: "FeatureCollection", features: [] };
 
@@ -52,8 +86,6 @@ function parseMapMode(v: string | null): PropertyMapMode {
 
 type ParcelFeatureCollection = FeatureCollection<Geometry, ParcelProperties>;
 type ParcelFeature = ParcelFeatureCollection["features"][number];
-type UseFilterChip = "all" | "residential" | "accessory" | "special";
-
 type DistrictInfo = {
   name?: string;
   minLotSize?: string;
@@ -65,7 +97,6 @@ type DistrictInfo = {
 };
 
 type UsePermission = { value: string; allowed: boolean };
-type ZoningUseRow = { category: string; useName: string; value: string; allowed: boolean };
 
 function formatCurrency(value?: number | null): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
@@ -93,24 +124,52 @@ function isNarrowForParcelDrawer(): boolean {
   return window.matchMedia("(max-width: 1023px)").matches;
 }
 
-function filterUseRows(rows: ZoningUseRow[], filterText: string, chip: UseFilterChip) {
-  const q = filterText.trim().toLowerCase();
-  return rows.filter((row) => {
-    if (q && !row.useName.toLowerCase().includes(q)) return false;
-    if (chip === "residential") return row.category === "Residential";
-    if (chip === "accessory") return row.useName.toLowerCase().includes("accessory");
-    if (chip === "special") return row.value.includes("SP");
-    return true;
-  });
+function getStephensTake(selectedParcel: ParcelProperties | null): string | null {
+  if (!selectedParcel) return null;
+  const zoning = String(selectedParcel.zoning ?? "").toUpperCase();
+  if (zoning.includes("ROH")) {
+    return "Strong year-round and seasonal rental demand in many ROH pockets. Well-kept properties here often see premium weekly rents in peak season.";
+  }
+  if (zoning.includes("R-10") || zoning.includes("R10")) {
+    return "R-10 areas are often a sweet spot: broad buyer demand, good liquidity, and consistent renovation upside when zoning constraints are respected.";
+  }
+  if (zoning.includes("R-20") || zoning.includes("R20") || zoning.includes("R-40") || zoning.includes("R40")) {
+    return "Lower-density districts can hold long-term value well, especially where lot configuration supports expansion potential without heavy variance risk.";
+  }
+  if (zoning.includes("CN") || zoning.includes("RC")) {
+    return "Mixed-use and commercial-adjacent zones can move on story and location. Underwriting permitting risk early is critical for real confidence.";
+  }
+  return "Parcel-level context matters on Nantucket. I focus on zoning constraints, neighborhood demand, and resale liquidity before any final valuation call.";
 }
 
-function groupByCategory(rows: ZoningUseRow[], categoryOrder: string[]) {
-  const out = new Map<string, ZoningUseRow[]>();
-  for (const category of categoryOrder) {
-    const group = rows.filter((row) => row.category === category);
-    if (group.length) out.set(category, group);
-  }
-  return out;
+function linkPinFromOmniboxHit(hit: OmniboxActiveListing | OmniboxSoldComp, pool: "active" | "sold"): LinkListingPinProperties {
+  const isSold = pool === "sold";
+  const price = typeof hit.price === "number" && !Number.isNaN(hit.price) ? hit.price : 0;
+  return {
+    linkId: hit.id,
+    pool,
+    address: hit.address,
+    listPrice: isSold ? "" : hit.priceLabel,
+    listPriceNum: isSold ? 0 : price,
+    closePrice: isSold ? hit.priceLabel : "",
+    closePriceNum: isSold ? price : 0,
+    closeDate: isSold && "closeDate" in hit && hit.closeDate ? hit.closeDate : "",
+    thumbUrl: null,
+    slug: null,
+    bedrooms: null,
+    baths: null,
+    lotAcres: null,
+    waterfront: false,
+    newConstruction: false,
+    propertyType: null,
+    mlsArea: null,
+    onMarketDate: null,
+    livingAreaSqft: null,
+    renoHint: false,
+    townWalkHint: false,
+    longitude: hit.lng ?? null,
+    latitude: hit.lat ?? null,
+  };
 }
 
 type PanelProps = {
@@ -122,25 +181,29 @@ type PanelProps = {
   linkListingId: string | null;
   /** Nantucket Rentals site slug when parcel matches built feed (`nr-rental-slugs-by-parcel.json`). */
   vacationRentalSlug: string | null;
+  /** Property map: switch to sold comps and frame this parcel. */
+  onViewNearbySales?: () => void;
+  /** Property map: switch to rentals and frame this parcel. */
+  onViewComparableRentals?: () => void;
+  /** Property map: LINK row matched to this parcel (active at centroid preferred). */
+  parcelLinkListingMatch?: ParcelMapLinkListingMatch | null;
 };
 
-function ParcelDetailPanel({ selectedParcel, zoningLabel, districtMatch, zoningUseRows, linkListingId, vacationRentalSlug }: PanelProps) {
-  const [filter, setFilter] = useState("");
-  const [chip, setChip] = useState<UseFilterChip>("all");
-
-  const categoryOrder = ["Residential", "Commercial", "Commercial Industrial", "Industrial", "Other"];
-  const labelMap: Record<string, string> = {
-    Residential: "Residential",
-    Commercial: "Commercial",
-    "Commercial Industrial": "Commercial Industrial",
-    Industrial: "Industrial",
-    Other: "Other",
-  };
+function ParcelDetailPanel({
+  selectedParcel,
+  zoningLabel,
+  districtMatch,
+  zoningUseRows,
+  linkListingId,
+  vacationRentalSlug,
+  onViewNearbySales,
+  onViewComparableRentals,
+  parcelLinkListingMatch = null,
+}: PanelProps) {
   const legend = (zoningUseChart as { metadata: { legend: Record<string, string> } }).metadata.legend;
+  const stephensTake = useMemo(() => getStephensTake(selectedParcel), [selectedParcel]);
 
-  const filteredRows = useMemo(() => filterUseRows(zoningUseRows, filter, chip), [zoningUseRows, filter, chip]);
-  const permitted = useMemo(() => groupByCategory(filteredRows.filter((r) => r.allowed), categoryOrder), [filteredRows]);
-  const blocked = useMemo(() => groupByCategory(filteredRows.filter((r) => !r.allowed), categoryOrder), [filteredRows]);
+  const mlsListingLinkId = parcelLinkListingMatch?.linkId ?? linkListingId;
 
   return (
     <div className="flex min-h-[620px] flex-col">
@@ -156,9 +219,9 @@ function ParcelDetailPanel({ selectedParcel, zoningLabel, districtMatch, zoningU
                 </a>
               </Button>
             ) : null}
-            {linkListingId ? (
+            {mlsListingLinkId ? (
               <Button asChild variant="outline" size="sm">
-                <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">
+                <a href={nantucketLinkListingUrl(mlsListingLinkId)} target="_blank" rel="noopener noreferrer">
                   View LINK listing
                 </a>
               </Button>
@@ -172,6 +235,27 @@ function ParcelDetailPanel({ selectedParcel, zoningLabel, districtMatch, zoningU
             ) : null}
           </div>
         </div>
+
+        {parcelLinkListingMatch?.thumbUrl ? (
+          <a
+            href={nantucketLinkListingUrl(parcelLinkListingMatch.linkId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block overflow-hidden rounded-lg border border-[var(--cedar-shingle)]/25 shadow-sm outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
+            aria-label="Open LINK MLS listing (photos)"
+          >
+            <div className="relative aspect-[16/10] w-full max-h-52">
+              <Image
+                src={parcelLinkListingMatch.thumbUrl}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 420px, 100vw"
+                unoptimized
+              />
+            </div>
+          </a>
+        ) : null}
 
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-lg border bg-white p-3">
@@ -193,8 +277,22 @@ function ParcelDetailPanel({ selectedParcel, zoningLabel, districtMatch, zoningU
             <p className="mt-1 font-medium">{formatCurrency(selectedParcel?.assessed_total)}</p>
           </div>
           <div className="rounded-lg border bg-white p-3">
-            <p className="text-xs text-[var(--nantucket-gray)]">Tax Map/Parcel</p>
-            <p className="mt-1 font-medium">{selectedParcel?.tax_map ?? "N/A"} / {selectedParcel?.parcel ?? "N/A"}</p>
+            {parcelLinkListingMatch?.pool === "active" && parcelLinkListingMatch.listPrice ? (
+              <>
+                <p className="text-xs text-[var(--nantucket-gray)]">List price &amp; area</p>
+                <p className="mt-1 text-lg font-semibold leading-snug tabular-nums text-[var(--atlantic-navy)]">
+                  {parcelLinkListingMatch.listPrice}
+                  {parcelLinkListingMatch.mlsArea?.trim()
+                    ? ` ${parcelLinkListingMatch.mlsArea.trim()}`
+                    : ""}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-[var(--nantucket-gray)]">Tax Map/Parcel</p>
+                <p className="mt-1 font-medium">{selectedParcel?.tax_map ?? "N/A"} / {selectedParcel?.parcel ?? "N/A"}</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -211,78 +309,50 @@ function ParcelDetailPanel({ selectedParcel, zoningLabel, districtMatch, zoningU
             <p className="text-sm text-[var(--atlantic-navy)]">No district rule profile found for zoning code {zoningLabel}.</p>
           )}
         </div>
+        {stephensTake ? (
+          <details className="rounded-lg border border-[var(--cedar-shingle)]/25 bg-white p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-[var(--atlantic-navy)]">
+              Stephen Maury&apos;s Take
+            </summary>
+            <p className="mt-2 text-sm text-[var(--nantucket-gray)]">{stephensTake}</p>
+          </details>
+        ) : null}
       </div>
 
       <div className={cn("mt-auto border-t bg-white p-4", "sticky bottom-0 md:static")}>
-        <div className="mb-3 rounded-lg border bg-white">
-          <div className="border-b px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--nantucket-gray)]">Zoning Uses ({selectedParcel?.zoning ?? "District"})</p>
-          </div>
-          <div className="space-y-2 p-3">
-            <Input placeholder="Filter uses..." value={filter} onChange={(e) => setFilter(e.target.value)} className="h-8 bg-white text-xs" />
-            <div className="flex flex-wrap gap-1">
-              {(["all", "residential", "accessory", "special"] as UseFilterChip[]).map((c) => (
-                <button key={c} type="button" onClick={() => setChip(c)} className={cn("rounded border px-2 py-1 text-[10px] uppercase tracking-wide", chip === c ? "border-[var(--privet-green)] bg-[var(--privet-green)]/10 text-[var(--atlantic-navy)]" : "border-[var(--cedar-shingle)]/30 text-[var(--nantucket-gray)]")}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="max-h-56 overflow-auto px-3 pb-3">
-            {filteredRows.length ? (
-              <div className="space-y-3">
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Permitted Uses</p>
-                  <div className="space-y-2">
-                    {Array.from(permitted.entries()).map(([category, rows]) => (
-                      <div key={`p-${category}`} className="rounded border">
-                        <p className="border-b bg-[var(--sandstone)] px-2 py-1 text-[11px] font-medium text-[var(--atlantic-navy)]">{labelMap[category] ?? category}</p>
-                        <div className="grid grid-cols-1 gap-1 p-2 sm:grid-cols-2">
-                          {rows.map((row) => (
-                            <div key={`${category}-${row.useName}`} className="rounded border bg-white px-2 py-1.5">
-                              <p className="text-[11px] text-[var(--atlantic-navy)]">{row.useName}</p>
-                              <div className="mt-1">
-                                <UseBadge value={row.value} allowed={row.allowed} title={legend[row.value] ?? row.value} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-rose-700">Not Allowed</p>
-                  <div className="space-y-2">
-                    {Array.from(blocked.entries()).map(([category, rows]) => (
-                      <div key={`n-${category}`} className="rounded border">
-                        <p className="border-b bg-[var(--sandstone)] px-2 py-1 text-[11px] font-medium text-[var(--atlantic-navy)]">{labelMap[category] ?? category}</p>
-                        <div className="grid grid-cols-1 gap-1 p-2 sm:grid-cols-2">
-                          {rows.map((row) => (
-                            <div key={`${category}-${row.useName}`} className="rounded border bg-white px-2 py-1.5">
-                              <p className="text-[11px] text-[var(--atlantic-navy)]">{row.useName}</p>
-                              <div className="mt-1">
-                                <UseBadge value={row.value} allowed={row.allowed} title={legend[row.value] ?? row.value} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-xs text-[var(--nantucket-gray)]">No use-chart rows available for this district/filter.</p>
-            )}
-          </div>
-          <p className="border-t px-3 py-2 text-[10px] text-[var(--nantucket-gray)]">Source: {(zoningUseChart as { metadata: { source: string } }).metadata.source}</p>
-        </div>
+        <ParcelZoningUsesSection
+          zoningCode={selectedParcel?.zoning ?? zoningLabel}
+          districtMatch={districtMatch}
+          zoningUseRows={zoningUseRows}
+          legend={legend}
+          chartSource={(zoningUseChart as { metadata: { source: string } }).metadata.source}
+        />
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <Button className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]">Get Custom Valuation from Stephen Maury</Button>
-          <Button variant="outline" className="w-full">View Nearby Price Trends</Button>
-        </div>
+        {onViewNearbySales || onViewComparableRentals ? (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Button
+              type="button"
+              className="w-full bg-[var(--atlantic-navy)] text-white hover:bg-[var(--atlantic-navy)]/90"
+              disabled={!onViewNearbySales}
+              title={!onViewNearbySales ? undefined : "Show sold LINK comps near this lot on the map"}
+              onClick={() => onViewNearbySales?.()}
+            >
+              View Nearby Sales
+            </Button>
+            <Button
+              type="button"
+              className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]"
+              disabled={!onViewComparableRentals}
+              title={!onViewComparableRentals ? undefined : "Show vacation rentals near this lot on the map"}
+              onClick={() => onViewComparableRentals?.()}
+            >
+              Comparable Rentals
+            </Button>
+          </div>
+        ) : null}
+        <Button variant="outline" className="mt-2 w-full">
+          Get Custom Valuation from Stephen Maury
+        </Button>
       </div>
     </div>
   );
@@ -304,7 +374,6 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const [isLoading, setIsLoading] = useState(true);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
-  const [highlightRecentSales, setHighlightRecentSales] = useState(false);
   const [showZoningColors, setShowZoningColors] = useState(true);
   const [mapBounds, setMapBounds] = useState<{ west: number; south: number; east: number; north: number } | null>(null);
   const [rentalResults, setRentalResults] = useState<NrMapRentalResult[]>([]);
@@ -314,6 +383,44 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const [linkSoldFc, setLinkSoldFc] = useState<FeatureCollection<Point, LinkListingPinProperties>>(EMPTY_LINK_FC);
   const [linkListingsLoading, setLinkListingsLoading] = useState(false);
   const [selectedLink, setSelectedLink] = useState<LinkListingPinProperties | null>(null);
+  /** Parcel centroid for intelligence hero satellite fallback (synced from parcel GeoJSON). */
+  const [parcelMapCenter, setParcelMapCenter] = useState<{ lng: number; lat: number } | null>(null);
+  /** MLS row from `/api/map/link-listings?parcel_id=` when viewport pins miss the lot. */
+  const [parcelScopedLinkMatch, setParcelScopedLinkMatch] = useState<ParcelMapLinkListingMatch | null>(null);
+  const flyIdRef = useRef(0);
+  const bumpFlyId = () => {
+    flyIdRef.current += 1;
+    return flyIdRef.current;
+  };
+  const [mapFlyTo, setMapFlyTo] = useState<
+    | null
+    | { id: number; lng: number; lat: number; zoom: number }
+    | { id: number; bounds: { west: number; south: number; east: number; north: number } }
+  >(null);
+  const [omniboxOpen, setOmniboxOpen] = useState(false);
+  const [omniboxPreview, setOmniboxPreview] = useState<{
+    parcelId?: string;
+    lng?: number;
+    lat?: number;
+  } | null>(null);
+  const [layoutNarrow, setLayoutNarrow] = useState(false);
+  const [mapUiHidden, setMapUiHidden] = useState(false);
+  const [mapGuideSheetOpen, setMapGuideSheetOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [omniboxPrefillNonce, setOmniboxPrefillNonce] = useState(0);
+  const [omniboxPrefillQuery, setOmniboxPrefillQuery] = useState("");
+  const [reDistrictsGeoJson, setReDistrictsGeoJson] = useState<FeatureCollection<
+    Geometry,
+    { Abbrv?: string; District?: string }
+  > | null>(null);
+  const [parcelBaseLayer, setParcelBaseLayer] = useState<ParcelBaseMapLayer>("tax_zoning");
+  const [reMarketAreaAbbrv, setReMarketAreaAbbrv] = useState<string>("");
+  const [mobileDrawerTab, setMobileDrawerTab] = useState<"rental" | "parcel">("rental");
+  const [, setWatchTick] = useState(0);
+  const [rentalFilters, setRentalFilters] = useState<RentalFiltersState>(() => ({ ...DEFAULT_RENTAL_FILTERS }));
+  const [linkFilters, setLinkFilters] = useState<LinkFiltersState>(() => ({ ...DEFAULT_LINK_FILTERS }));
+  const rentalResultsRef = useRef<NrMapRentalResult[]>([]);
+  const welcomeLayerEffectSkip = useRef(true);
 
   useEffect(() => {
     setMapMode(parseMapMode(searchParams.get("mode")));
@@ -322,6 +429,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   useEffect(() => {
     setSelectedRental(null);
     setSelectedLink(null);
+    setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
+    setLinkFilters({ ...DEFAULT_LINK_FILTERS });
   }, [mapMode]);
 
   const selectMapMode = useCallback(
@@ -344,9 +453,38 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const recentSoldFeed = recentSoldParcels as RecentSoldParcelsFeed;
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setLayoutNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
-  const soldParcelIds = useMemo(() => recentSoldFeed.parcelIds, []);
+  useEffect(() => {
+    if (!layoutNarrow) setMapGuideSheetOpen(false);
+  }, [layoutNarrow]);
+
+  useEffect(() => {
+    if (!isPropertyMap) return;
+    let cancelled = false;
+    fetch("/data/re-districts.geojson")
+      .then((r) => r.json())
+      .then((d: FeatureCollection<Geometry, { Abbrv?: string; District?: string }>) => {
+        if (cancelled || d?.type !== "FeatureCollection" || !Array.isArray(d.features)) return;
+        /** Strip legacy GeoJSON root fields; Mapbox expects plain WGS84 FeatureCollection. */
+        setReDistrictsGeoJson({
+          type: "FeatureCollection",
+          features: d.features,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isPropertyMap]);
+
+  const recentSoldFeed = recentSoldParcels as RecentSoldParcelsFeed;
 
   const linkListingByParcelId = useMemo(() => recentSoldFeed.linkListingByParcelId, []);
 
@@ -355,6 +493,56 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     if (!pid) return null;
     return linkListingByParcelId[String(pid).trim()] ?? null;
   }, [selectedParcel?.parcel_id, linkListingByParcelId]);
+
+  const parcelLinkListingMatch = useMemo((): ParcelMapLinkListingMatch | null => {
+    if (!isPropertyMap) return null;
+    return linkListingMatchForParcelMapSelection(
+      parcelMapCenter,
+      linkListingIdForSelection,
+      linkActiveFc,
+      linkSoldFc,
+    );
+  }, [isPropertyMap, parcelMapCenter, linkListingIdForSelection, linkActiveFc, linkSoldFc]);
+
+  const effectiveParcelLinkMatch = useMemo(
+    () => parcelLinkListingMatch ?? parcelScopedLinkMatch ?? null,
+    [parcelLinkListingMatch, parcelScopedLinkMatch],
+  );
+
+  useEffect(() => {
+    if (!isPropertyMap || !selectedParcel?.parcel_id?.trim()) {
+      setParcelScopedLinkMatch(null);
+      return;
+    }
+    if (mapMode === "rent") {
+      setParcelScopedLinkMatch(null);
+      return;
+    }
+    if (parcelLinkListingMatch) {
+      setParcelScopedLinkMatch(null);
+      return;
+    }
+    const pid = String(selectedParcel.parcel_id).trim();
+    const pool = mapMode === "sale" ? "active" : mapMode === "sold" ? "sold" : "both";
+    const ac = new AbortController();
+    fetch(
+      `/api/map/link-listings?parcel_id=${encodeURIComponent(pid)}&pool=${encodeURIComponent(pool)}&soldDays=1095`,
+      { signal: ac.signal },
+    )
+      .then(async (r) => {
+        if (ac.signal.aborted) return;
+        if (r.status === 404) {
+          setParcelScopedLinkMatch(null);
+          return;
+        }
+        const data = (await r.json()) as { match?: ParcelMapLinkListingMatch | null };
+        if (!ac.signal.aborted) setParcelScopedLinkMatch(data.match ?? null);
+      })
+      .catch(() => {
+        if (!ac.signal.aborted) setParcelScopedLinkMatch(null);
+      });
+    return () => ac.abort();
+  }, [isPropertyMap, selectedParcel?.parcel_id, mapMode, parcelLinkListingMatch]);
 
   const nrRentalFeed = nrRentalSlugsByParcel as NrRentalSlugsFeed;
   const slugByParcelIdForRentals = useMemo(() => nrRentalFeed.slugByParcelId, []);
@@ -365,30 +553,85 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     return slugByParcelIdForRentals[String(pid).trim()] ?? null;
   }, [selectedParcel?.parcel_id, slugByParcelIdForRentals]);
 
-  const rentalGeoJson = useMemo(() => rentalsToGeoJson(rentalResults), [rentalResults]);
+  rentalResultsRef.current = rentalResults;
+
+  const filteredRentals = useMemo(
+    () => applyRentalFilters(rentalResults, rentalFilters),
+    [rentalResults, rentalFilters],
+  );
+
+  const filteredLinkActiveFc = useMemo(
+    () => filterLinkFeatureCollection(linkActiveFc, linkFilters, "active"),
+    [linkActiveFc, linkFilters],
+  );
+
+  const filteredLinkSoldFc = useMemo(
+    () => filterLinkFeatureCollection(linkSoldFc, linkFilters, "sold"),
+    [linkSoldFc, linkFilters],
+  );
+
+  const rentalGeoJson = useMemo(() => rentalsToGeoJson(filteredRentals), [filteredRentals]);
+
+  const rentFilterActiveCount = countActiveRentalFilters(rentalFilters);
+  const linkFilterActiveCount = countActiveLinkFilters(linkFilters);
+  const filterBadgeCount = useMemo(() => {
+    const showRent = mapMode === "rent" || mapMode === "all";
+    const showLink = mapMode === "sale" || mapMode === "sold" || mapMode === "all";
+    return (showRent ? countActiveRentalFilters(rentalFilters) : 0) + (showLink ? countActiveLinkFilters(linkFilters) : 0);
+  }, [mapMode, rentalFilters, linkFilters]);
+
+  useEffect(() => {
+    if (!selectedRental) return;
+    if (!filteredRentals.some((r) => r.nrPropertyId === selectedRental.nrPropertyId)) {
+      setSelectedRental(null);
+    }
+  }, [filteredRentals, selectedRental]);
+
+  useEffect(() => {
+    if (!selectedLink) return;
+    const pool = selectedLink.pool;
+    const fc = pool === "sold" ? filteredLinkSoldFc : filteredLinkActiveFc;
+    const ok = fc.features.some((f) => f.properties.linkId === selectedLink.linkId);
+    if (!ok) setSelectedLink(null);
+  }, [filteredLinkActiveFc, filteredLinkSoldFc, selectedLink]);
 
   const handleParcelSelectFromMap = useCallback((feature: ParcelFeature) => {
-    setSelectedRental(null);
     setSelectedLink(null);
     setSelectedParcel(feature.properties ?? null);
     setSearchStatus(null);
+    setMobileDrawerTab("parcel");
     if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
   }, []);
 
   const handleRentalPinSelect = useCallback((feature: RentalPinFeature) => {
     const p = feature.properties;
     const coords = (feature.geometry as Point).coordinates;
-    setSelectedParcel(null);
+    const id = Number(p.nrPropertyId);
+    const full = rentalResultsRef.current.find((r) => r.nrPropertyId === id);
     setSelectedLink(null);
-    setSelectedRental({
-      nrPropertyId: Number(p.nrPropertyId),
-      slug: p.slug,
-      streetAddress: p.streetAddress,
-      headline: p.headline,
-      latitude: coords[1],
-      longitude: coords[0],
-      thumbUrl: p.thumbUrl,
-    });
+    setSelectedRental(
+      full ?? {
+        nrPropertyId: id,
+        slug: p.slug,
+        streetAddress: p.streetAddress,
+        headline: p.headline,
+        latitude: coords[1],
+        longitude: coords[0],
+        thumbUrl: p.thumbUrl,
+        weeklyRentEstimate: null,
+        totalBedrooms: null,
+        totalBathrooms: null,
+        totalCapacity: null,
+        hasPool: false,
+        walkToBeach: false,
+        averageNightlyRate: null,
+        petFriendlyHint: false,
+        waterfrontHint: false,
+        renovatedHint: false,
+        townWalkHint: false,
+      },
+    );
+    setMobileDrawerTab("rental");
     if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
   }, []);
 
@@ -528,6 +771,25 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
 
   const features = useMemo(() => geojson?.features ?? [], [geojson]);
 
+  useEffect(() => {
+    if (!isPropertyMap) {
+      setParcelMapCenter(null);
+      return;
+    }
+    if (!selectedParcel?.parcel_id?.trim()) {
+      setParcelMapCenter(null);
+      return;
+    }
+    const pid = String(selectedParcel.parcel_id).trim();
+    const f = features.find((x) => String(x.properties?.parcel_id ?? "").trim() === pid);
+    const geom = f?.geometry;
+    if (!geom) {
+      setParcelMapCenter(null);
+      return;
+    }
+    setParcelMapCenter(centroidFromGeometry(geom));
+  }, [isPropertyMap, selectedParcel?.parcel_id, features]);
+
   const findParcelMatch = useCallback((rawQuery: string): ParcelFeature | undefined => {
     const query = rawQuery.trim().toLowerCase();
     if (!query) return undefined;
@@ -579,6 +841,189 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
   }, [findParcelMatch, searchTerm]);
 
+  const findLinkPropsOnMap = useCallback(
+    (id: string, pool: "active" | "sold") => {
+      const fc = pool === "sold" ? linkSoldFc : linkActiveFc;
+      return fc.features.find((f) => f.properties.linkId === id)?.properties ?? null;
+    },
+    [linkActiveFc, linkSoldFc],
+  );
+
+  const handleApplyNlPreset = useCallback(
+    (id: string) => {
+      const nid = bumpFlyId();
+      if (id === "beds4_sale_sconset") {
+        selectMapMode("sale");
+        setLinkFilters({ ...DEFAULT_LINK_FILTERS, minBeds: "4" });
+        setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
+        const b = MAP_NEIGHBORHOOD_BOUNDS.sconset;
+        if (b) setMapFlyTo({ id: nid, bounds: b });
+        return;
+      }
+      if (id === "rent_beach_12k") {
+        selectMapMode("rent");
+        setRentalFilters({
+          ...DEFAULT_RENTAL_FILTERS,
+          maxRate: "12000",
+          beachDistance: "walk",
+        });
+        setLinkFilters({ ...DEFAULT_LINK_FILTERS });
+        const b = MAP_NEIGHBORHOOD_BOUNDS.surfside;
+        if (b) setMapFlyTo({ id: nid, bounds: b });
+        return;
+      }
+      if (id === "waterfront_town") {
+        selectMapMode("sale");
+        setLinkFilters({ ...DEFAULT_LINK_FILTERS, waterfront: true });
+        setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
+        const b = MAP_NEIGHBORHOOD_BOUNDS.town;
+        if (b) setMapFlyTo({ id: nid, bounds: b });
+        return;
+      }
+      if (id === "sold_surfside_2y") {
+        selectMapMode("sold");
+        setLinkFilters({ ...DEFAULT_LINK_FILTERS });
+        setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
+        const b = MAP_NEIGHBORHOOD_BOUNDS.surfside;
+        if (b) setMapFlyTo({ id: nid, bounds: b });
+      }
+    },
+    [selectMapMode],
+  );
+
+  const handleOmniboxNeighborhoodSlug = useCallback((slug: string) => {
+    setSelectedParcel(null);
+    setSelectedRental(null);
+    setSelectedLink(null);
+    const b = MAP_NEIGHBORHOOD_BOUNDS[slug];
+    if (b) setMapFlyTo({ id: bumpFlyId(), bounds: b });
+  }, []);
+
+  const handleOmniboxParcelSelect = useCallback(
+    (parcelId: string, fly?: { lat: number; lng: number }) => {
+      const trimmed = parcelId.trim();
+      const match = features.find((f) => String(f.properties?.parcel_id ?? "").trim() === trimmed);
+      setSelectedRental(null);
+      setSelectedLink(null);
+      if (match?.properties) {
+        setSelectedParcel(match.properties);
+      } else {
+        setSelectedParcel(null);
+      }
+      setMobileDrawerTab("parcel");
+      if (fly) setMapFlyTo({ id: bumpFlyId(), lng: fly.lng, lat: fly.lat, zoom: 16 });
+      if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+    },
+    [features],
+  );
+
+  const handleOmniboxRentalHit = useCallback((hit: OmniboxRentalHit) => {
+    setSelectedParcel(null);
+    setSelectedLink(null);
+    const full = rentalResultsRef.current.find((r) => r.nrPropertyId === hit.nrPropertyId);
+    const slug = (hit.slug?.trim() || full?.slug || "").trim();
+    setSelectedRental(
+      full ?? {
+        nrPropertyId: hit.nrPropertyId,
+        slug,
+        streetAddress: hit.address,
+        headline: hit.headline,
+        latitude: hit.lat,
+        longitude: hit.lng,
+        thumbUrl: null,
+        weeklyRentEstimate: null,
+        totalBedrooms: null,
+        totalBathrooms: null,
+        totalCapacity: null,
+        hasPool: false,
+        walkToBeach: false,
+        averageNightlyRate: null,
+        petFriendlyHint: false,
+        waterfrontHint: false,
+        renovatedHint: false,
+        townWalkHint: false,
+      },
+    );
+    setMapFlyTo({ id: bumpFlyId(), lng: hit.lng, lat: hit.lat, zoom: 15 });
+    setMobileDrawerTab("rental");
+    if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+  }, []);
+
+  const handleOmniboxLinkHit = useCallback(
+    (hit: OmniboxActiveListing | OmniboxSoldComp, pool: "active" | "sold") => {
+      setSelectedParcel(null);
+      setSelectedRental(null);
+      const onMap = findLinkPropsOnMap(hit.id, pool);
+      setSelectedLink(onMap ?? linkPinFromOmniboxHit(hit, pool));
+      if (hit.lat != null && hit.lng != null) {
+        setMapFlyTo({ id: bumpFlyId(), lng: hit.lng, lat: hit.lat, zoom: 15 });
+      }
+      if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+    },
+    [findLinkPropsOnMap],
+  );
+
+  const handleViewComparableRentals = useCallback(() => {
+    selectMapMode("rent");
+    setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
+    setSelectedLink(null);
+    const pid = String(selectedParcel?.parcel_id ?? "").trim();
+    const feat = features.find((f) => String(f.properties?.parcel_id ?? "").trim() === pid);
+    const geom = feat?.geometry;
+    if (geom) {
+      const c = centroidFromGeometry(geom);
+      if (c) {
+        const pad = 0.022;
+        setMapFlyTo({
+          id: bumpFlyId(),
+          bounds: {
+            west: c.lng - pad,
+            east: c.lng + pad,
+            south: c.lat - pad,
+            north: c.lat + pad,
+          },
+        });
+      }
+    }
+    if (isNarrowForParcelDrawer()) setMobilePanelOpen(false);
+  }, [features, selectMapMode, selectedParcel?.parcel_id]);
+
+  const handleViewNearbySales = useCallback(() => {
+    selectMapMode("sold");
+    setLinkFilters({ ...DEFAULT_LINK_FILTERS });
+    setSelectedRental(null);
+    setSelectedLink(null);
+    const pid = String(selectedParcel?.parcel_id ?? "").trim();
+    const feat = features.find((f) => String(f.properties?.parcel_id ?? "").trim() === pid);
+    const geom = feat?.geometry;
+    if (geom) {
+      const c = centroidFromGeometry(geom);
+      if (c) {
+        const pad = 0.028;
+        setMapFlyTo({
+          id: bumpFlyId(),
+          bounds: {
+            west: c.lng - pad,
+            east: c.lng + pad,
+            south: c.lat - pad,
+            north: c.lat + pad,
+          },
+        });
+      }
+    }
+    if (isNarrowForParcelDrawer()) setMobilePanelOpen(false);
+  }, [features, selectMapMode, selectedParcel?.parcel_id]);
+
+  const parcelMapCtas: Partial<
+    Pick<PanelProps, "onViewNearbySales" | "onViewComparableRentals" | "parcelLinkListingMatch">
+  > = isPropertyMap
+    ? {
+        onViewNearbySales: handleViewNearbySales,
+        onViewComparableRentals: handleViewComparableRentals,
+        parcelLinkListingMatch: effectiveParcelLinkMatch,
+      }
+    : {};
+
   const zoningLabel = selectedParcel?.zoning ?? "Unknown";
   const districtLookup = useMemo(() => {
     const map = new Map<string, { code: string; info: DistrictInfo }>();
@@ -618,197 +1063,652 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const showRentalPinsOnMap = isPropertyMap && (mapMode === "rent" || mapMode === "all");
   const showLinkPinsOnMap = isPropertyMap && (mapMode === "sale" || mapMode === "sold" || mapMode === "all");
 
+  const mapSelectionActive = Boolean(selectedParcel || selectedRental || selectedLink);
+
+  const WELCOME_DISMISS_LS_KEY = "nh-property-map-welcome-dismissed";
+  const [welcomePermDismissed, setWelcomePermDismissed] = useState(false);
+  const [welcomeSessionHidden, setWelcomeSessionHidden] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && localStorage.getItem(WELCOME_DISMISS_LS_KEY) === "1") {
+        setWelcomePermDismissed(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const dismissWelcomePermanent = useCallback(() => {
+    try {
+      localStorage.setItem(WELCOME_DISMISS_LS_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setWelcomePermDismissed(true);
+  }, []);
+
+  const dismissWelcomeSession = useCallback(() => {
+    setWelcomeSessionHidden(true);
+  }, []);
+
+  const showWelcomeCard =
+    isPropertyMap && !mapSelectionActive && !welcomePermDismissed && !welcomeSessionHidden;
+
+  useEffect(() => {
+    if (!isPropertyMap) {
+      welcomeLayerEffectSkip.current = true;
+    }
+  }, [isPropertyMap]);
+
+  useEffect(() => {
+    if (!isPropertyMap || !omniboxOpen) return;
+    dismissWelcomeSession();
+  }, [isPropertyMap, omniboxOpen, dismissWelcomeSession]);
+
+  useEffect(() => {
+    if (!isPropertyMap || !mapGuideSheetOpen) return;
+    dismissWelcomeSession();
+  }, [isPropertyMap, mapGuideSheetOpen, dismissWelcomeSession]);
+
+  useEffect(() => {
+    if (!isPropertyMap || !filtersOpen) return;
+    dismissWelcomeSession();
+  }, [isPropertyMap, filtersOpen, dismissWelcomeSession]);
+
+  useEffect(() => {
+    if (!isPropertyMap) return;
+    if (welcomeLayerEffectSkip.current) {
+      welcomeLayerEffectSkip.current = false;
+      return;
+    }
+    dismissWelcomeSession();
+  }, [isPropertyMap, parcelBaseLayer, showZoningColors, dismissWelcomeSession]);
+
+  const mapAddressPillLabel =
+    selectedParcel?.location ??
+    selectedRental?.streetAddress ??
+    selectedRental?.headline ??
+    selectedLink?.address ??
+    "";
+
+  const mapPillZoneBadge = useMemo(() => {
+    if (districtMatch?.code) return districtMatch.code.toUpperCase().slice(0, 8);
+    const z = selectedParcel?.zoning?.trim();
+    if (z) return z.toUpperCase().slice(0, 8);
+    if (selectedRental) return "RENT";
+    if (selectedLink) return (selectedLink.pool === "sold" ? "SOLD" : "LINK").slice(0, 8);
+    return "—";
+  }, [districtMatch?.code, selectedParcel?.zoning, selectedRental, selectedLink]);
+
   return (
-    <section className="bg-[var(--sandstone)] py-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-3">
-          {isPropertyMap ? <PropertyMapWelcomeBanner /> : null}
-          {isPropertyMap ? (
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Listing type">
-              {(
-                [
-                  { mode: "rent" as const, label: "For rent" },
-                  { mode: "sale" as const, label: "For sale" },
-                  { mode: "sold" as const, label: "Sold" },
-                  { mode: "all" as const, label: "All" },
-                ] as const
-              ).map(({ mode, label }) => (
-                <button
-                  key={mode}
-                  type="button"
-                  role="tab"
-                  aria-selected={mapMode === mode}
-                  onClick={() => selectMapMode(mode)}
-                  className={cn(
-                    "inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                    mapMode === mode
-                      ? "border-[var(--privet-green)] bg-[var(--privet-green)] text-white"
-                      : "border-[var(--cedar-shingle)]/30 bg-white/90 text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]",
-                  )}
+    <section
+      className={cn(
+        "bg-[var(--sandstone)]",
+        isPropertyMap ? "flex min-h-0 flex-1 flex-col overflow-hidden py-0" : "py-6",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-7xl flex-col px-4 sm:px-6 lg:px-8",
+          isPropertyMap ? "min-h-0 flex-1 gap-1 overflow-hidden lg:gap-2" : "gap-5",
+        )}
+      >
+        {isPropertyMap ? (
+          <>
+            <header className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[var(--cedar-shingle)]/25 bg-white py-1.5 sm:gap-2 sm:py-2">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-3">
+                <h1 className="truncate text-lg font-bold leading-tight tracking-tight text-[var(--atlantic-navy)] lg:text-3xl lg:font-semibold">
+                  Nantucket Property Map
+                </h1>
+                <span className="truncate text-[10px] font-medium leading-snug text-[var(--nantucket-gray)] lg:hidden">
+                  Live data · Curated by{" "}
+                  <span className="font-semibold text-[var(--privet-green)]">Stephen Maury</span>
+                </span>
+                <span className="hidden text-xs font-medium text-[var(--nantucket-gray)] lg:inline">
+                  Live data · Curated by{" "}
+                  <span className="font-semibold text-[var(--privet-green)]">Stephen Maury</span>
+                </span>
+              </div>
+            </header>
+            <div className="flex shrink-0 flex-col gap-2 border-b border-[var(--cedar-shingle)]/15 bg-white px-0 py-2 sm:gap-2.5 sm:py-2.5">
+              <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                <div
+                  className="flex min-w-0 flex-1 flex-nowrap gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-x-visible sm:pb-0 [&::-webkit-scrollbar]:hidden"
+                  role="tablist"
+                  aria-label="Listing type"
                 >
-                  {label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <h1 className="text-4xl font-semibold tracking-tight text-[var(--atlantic-navy)]">
-            {isPropertyMap ? "Nantucket Property Map" : "Nantucket Zoning Lookup"}
-          </h1>
-          <p className="text-xl text-[var(--nantucket-gray)]">
-            {isPropertyMap
-              ? "Nantucket rentals and sales — live map. Updated from live inventory; parcel and zoning context built in."
-              : "Click any parcel • Search by address • Instant local intelligence"}
-          </p>
-          {isPropertyMap ? (
-            <p className="text-sm text-[var(--nantucket-gray)]">
-              Curated by Stephen Maury — local context on every search.
-            </p>
-          ) : null}
-          <div className="flex w-full gap-2">
-            <div className="relative w-full">
-              <Input
-                placeholder="Search by address or Tax Map + Parcel (e.g., 42.3.4 152)..."
-                value={searchTerm}
-                onChange={(event) => { setSearchTerm(event.target.value); setShowSuggestions(true); }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => window.setTimeout(() => setShowSuggestions(false), 120)}
-                onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); handleSearch(); } }}
-                className="h-11 bg-white"
-                aria-label="Search parcels"
-              />
-              {showSuggestions && suggestions.length > 0 ? (
-                <div className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-[var(--cedar-shingle)]/20 bg-white shadow-lg">
-                  {suggestions.map((suggestion) => (
+                  {(
+                    [
+                      { mode: "rent" as const, label: "For rent" },
+                      { mode: "sale" as const, label: "For sale" },
+                      { mode: "sold" as const, label: "Sold" },
+                      { mode: "all" as const, label: "All" },
+                    ] as const
+                  ).map(({ mode, label }) => (
                     <button
-                      key={suggestion.key}
+                      key={mode}
                       type="button"
-                      className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--sandstone)]"
-                      onMouseDown={() => {
-                        setSelectedRental(null);
-                        setSelectedLink(null);
-                        setSelectedParcel(suggestion.feature.properties ?? null);
-                        setSearchTerm(suggestion.label);
-                        setSearchStatus(`Found: ${suggestion.label}`);
-                        setShowSuggestions(false);
-                        if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
-                      }}
+                      role="tab"
+                      aria-selected={mapMode === mode}
+                      onClick={() => selectMapMode(mode)}
+                      className={cn(
+                        "inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-xs font-medium transition-colors sm:px-3 sm:py-1.5 sm:text-sm",
+                        mapMode === mode
+                          ? mode === "rent"
+                            ? "border-blue-700 bg-blue-700 text-white shadow-sm"
+                            : "border-[var(--privet-green)] bg-[var(--privet-green)] text-white"
+                          : "border-[var(--cedar-shingle)]/30 bg-white/90 text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]",
+                      )}
                     >
-                      <span className="text-sm text-[var(--atlantic-navy)]">{suggestion.label}</span>
-                      <span className="text-xs text-[var(--nantucket-gray)]">{suggestion.subLabel}</span>
+                      {mode === "rent" ? (
+                        <span
+                          className={cn(
+                            "mr-2 inline-block h-2 w-2 rounded-full",
+                            mapMode === "rent" ? "bg-emerald-300" : "bg-emerald-500",
+                          )}
+                        />
+                      ) : null}
+                      {label}
                     </button>
                   ))}
                 </div>
-              ) : null}
-            </div>
-            <Button onClick={handleSearch} className="h-11 bg-[var(--privet-green)] px-5 text-white hover:bg-[var(--brass-hover)]">
-              <Search className="h-4 w-4" />
-              Search
-            </Button>
-          </div>
-          {searchStatus ? <p className="text-sm text-[var(--nantucket-gray)]">{searchStatus}</p> : null}
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
-          <div className="brand-surface overflow-hidden p-2">
-            {isLoading ? (
-              <div className="flex min-h-[620px] items-center justify-center text-[var(--nantucket-gray)]">Loading parcel intelligence map...</div>
-            ) : (
-              <div className="relative">
-                <div className="absolute left-3 top-3 z-10 flex max-w-[min(100%,20rem)] flex-col gap-3 rounded-md border border-[var(--cedar-shingle)]/20 bg-white/95 px-2.5 py-2 text-xs shadow">
-                  <div className="flex items-start gap-2">
-                    <Checkbox
-                      id="zoning-show-colors"
-                      checked={showZoningColors}
-                      onCheckedChange={(value) => setShowZoningColors(value === true)}
-                      className="mt-0.5"
-                    />
-                    <label htmlFor="zoning-show-colors" className="cursor-pointer leading-snug text-[var(--atlantic-navy)]">
-                      Zoning colors
-                      <span className="mt-0.5 block font-normal text-[var(--nantucket-gray)]">Tint parcels by district. Off uses a neutral fill.</span>
-                    </label>
-                  </div>
-                  <div className="flex items-start gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
-                    <Checkbox
-                      id="zoning-highlight-recent-sales"
-                      checked={highlightRecentSales}
-                      onCheckedChange={(value) => setHighlightRecentSales(value === true)}
-                      className="mt-0.5"
-                    />
-                    <label htmlFor="zoning-highlight-recent-sales" className="cursor-pointer leading-snug text-[var(--atlantic-navy)]">
-                      Show recent sales
-                      <span className="mt-0.5 block font-normal text-[var(--nantucket-gray)]">
-                        {recentSoldFeed.matchedParcelCount} parcels matched from {recentSoldFeed.listingCount} MLS closings (MapID + ParcelId).
-                      </span>
-                    </label>
-                  </div>
-                </div>
-                <ZoningMap
-                  geojson={geojson}
-                  selectedParcelId={selectedParcel?.parcel_id ?? null}
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)] shadow-sm lg:hidden"
+                  onClick={() => setMapGuideSheetOpen(true)}
+                >
+                  <Layers className="h-3.5 w-3.5 text-blue-700" aria-hidden />
+                  Layers
+                </button>
+              </div>
+              <div className="hidden min-w-0 lg:block">
+                <PropertyMapDesktopLayerBar
                   showZoningColors={showZoningColors}
-                  highlightSoldParcels={highlightRecentSales}
-                  soldParcelIds={soldParcelIds}
-                  onParcelSelect={handleParcelSelectFromMap}
-                  showRentalPins={isPropertyMap}
-                  rentalGeoJson={isPropertyMap ? rentalGeoJson : null}
-                  selectedRentalFeatureId={isPropertyMap ? selectedRentalPinKey : null}
-                  onRentalPinSelect={isPropertyMap ? handleRentalPinSelect : undefined}
-                  onViewportBoundsChange={isPropertyMap ? handleViewportBoundsChange : undefined}
-                  showLinkPins={isPropertyMap}
-                  linkActiveGeoJson={isPropertyMap ? linkActiveFc : null}
-                  linkSoldGeoJson={isPropertyMap ? linkSoldFc : null}
-                  selectedLinkListingId={isPropertyMap ? selectedLinkPinKey : null}
-                  onLinkListingPinSelect={isPropertyMap ? handleLinkListingPinSelect : undefined}
+                  onShowZoningColors={setShowZoningColors}
+                  parcelBaseLayer={parcelBaseLayer}
+                  onParcelBaseLayer={setParcelBaseLayer}
+                  reMarketAreaAbbrv={reMarketAreaAbbrv}
+                  onReMarketAreaChange={setReMarketAreaAbbrv}
+                  onRequestFlyToReDistrict={(abbrv) => {
+                    if (!abbrv.trim() || !reDistrictsGeoJson) return;
+                    const b = bboxForReDistrictAbbrv(reDistrictsGeoJson, abbrv);
+                    if (b) setMapFlyTo({ id: bumpFlyId(), bounds: b });
+                  }}
+                  onOpenFilters={() => setFiltersOpen(true)}
+                  filterBadgeCount={filterBadgeCount}
                 />
-                <div className="absolute right-3 top-3 z-10">
+              </div>
+              <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
+                <PropertyMapLayerPillsRow
+                  layout="row"
+                  showZoningColors={showZoningColors}
+                  onShowZoningColors={setShowZoningColors}
+                  parcelBaseLayer={parcelBaseLayer}
+                  onParcelBaseLayer={setParcelBaseLayer}
+                  onOpenFilters={() => setFiltersOpen(true)}
+                  filterBadgeCount={filterBadgeCount}
+                />
+                <PropertyMapLayerHelpTrigger className="h-8 w-8 shrink-0" />
+              </div>
+              {parcelBaseLayer === "re_market_areas" ? (
+                <div className="min-w-0 lg:hidden">
+                  <PropertyMapReMarketFocusSelect
+                    reMarketAreaAbbrv={reMarketAreaAbbrv}
+                    onReMarketAreaChange={setReMarketAreaAbbrv}
+                    onRequestFlyToReDistrict={(abbrv) => {
+                      if (!abbrv.trim() || !reDistrictsGeoJson) return;
+                      const b = bboxForReDistrictAbbrv(reDistrictsGeoJson, abbrv);
+                      if (b) setMapFlyTo({ id: bumpFlyId(), bounds: b });
+                    }}
+                  />
+                </div>
+              ) : null}
+              <div className="w-full min-w-0 pt-3 pb-4 lg:pt-2 lg:pb-3">
+                <MapOmnibox
+                  mapMode={mapMode}
+                  open={omniboxOpen}
+                  onOpenChange={setOmniboxOpen}
+                  onApplyNlPreset={handleApplyNlPreset}
+                  onSelectParcelId={handleOmniboxParcelSelect}
+                  onSelectRentalHit={handleOmniboxRentalHit}
+                  onSelectLinkHit={handleOmniboxLinkHit}
+                  onSelectNeighborhoodSlug={handleOmniboxNeighborhoodSlug}
+                  mapBounds={mapBounds}
+                  prefillNonce={omniboxPrefillNonce}
+                  prefillQuery={omniboxPrefillQuery}
+                  onPreviewChange={(p) => {
+                    if (!p) setOmniboxPreview(null);
+                    else if (p.parcelId) setOmniboxPreview({ parcelId: p.parcelId });
+                    else if (p.lng != null && p.lat != null) setOmniboxPreview({ lng: p.lng, lat: p.lat });
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="space-y-3">
+          <h1 className="text-4xl font-semibold tracking-tight text-[var(--atlantic-navy)]">Nantucket Zoning Lookup</h1>
+          <p className="text-xl text-[var(--nantucket-gray)]">
+            Click any parcel • Search by address • Instant local intelligence
+          </p>
+            <>
+              <div className="flex w-full gap-2">
+                <div className="relative w-full">
+                  <Input
+                    placeholder="Search by address, Tax Map/Parcel, or neighborhood (e.g., Sconset, Polpis)"
+                    value={searchTerm}
+                    onChange={(event) => {
+                      setSearchTerm(event.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => window.setTimeout(() => setShowSuggestions(false), 120)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleSearch();
+                      }
+                    }}
+                    className="h-11 bg-white"
+                    aria-label="Search parcels"
+                  />
+                  {showSuggestions && suggestions.length > 0 ? (
+                    <div className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-md border border-[var(--cedar-shingle)]/20 bg-white shadow-lg">
+                      {suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.key}
+                          type="button"
+                          className="flex w-full flex-col items-start px-3 py-2 text-left hover:bg-[var(--sandstone)]"
+                          onMouseDown={() => {
+                            setSelectedRental(null);
+                            setSelectedLink(null);
+                            setSelectedParcel(suggestion.feature.properties ?? null);
+                            setSearchTerm(suggestion.label);
+                            setSearchStatus(`Found: ${suggestion.label}`);
+                            setShowSuggestions(false);
+                            if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+                          }}
+                        >
+                          <span className="text-sm text-[var(--atlantic-navy)]">{suggestion.label}</span>
+                          <span className="text-xs text-[var(--nantucket-gray)]">{suggestion.subLabel}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <Button onClick={handleSearch} className="h-11 bg-[var(--privet-green)] px-5 text-white hover:bg-[var(--brass-hover)]">
+                  <Search className="h-4 w-4" />
+                  Search
+                </Button>
+              </div>
+              {searchStatus ? <p className="text-sm text-[var(--nantucket-gray)]">{searchStatus}</p> : null}
+            </>
+          </div>
+        )}
+
+        <div
+          className={cn(
+            "map-content-area grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]",
+            isPropertyMap && "min-h-0 flex-1 lg:min-h-0",
+          )}
+        >
+          <div
+            className={cn(
+              "brand-surface overflow-hidden p-2",
+              isPropertyMap && "flex min-h-0 flex-1 flex-col",
+            )}
+          >
+            {isLoading ? (
+              <div
+                className={cn(
+                  "flex items-center justify-center text-[var(--nantucket-gray)]",
+                  isPropertyMap ? "min-h-[min(360px,50dvh)] flex-1" : "min-h-[620px]",
+                )}
+              >
+                Loading parcel intelligence map...
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  "relative",
+                  isPropertyMap && "flex h-full min-h-0 flex-1 flex-col",
+                )}
+              >
+                {isPropertyMap && mapUiHidden ? (
+                  <button
+                    type="button"
+                    className="absolute right-3 top-3 z-[9] rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-3 py-1.5 text-xs font-medium text-[var(--atlantic-navy)] shadow-md"
+                    onClick={() => setMapUiHidden(false)}
+                  >
+                    Show overlay
+                  </button>
+                ) : null}
+                {!isPropertyMap ? (
+                  <div
+                    className={cn(
+                      "absolute left-3 top-3 z-10 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white/95 px-2 py-2 shadow-md",
+                      mapUiHidden && "pointer-events-none opacity-0",
+                    )}
+                  >
+                    <ZoningLookupColorsStrip
+                      showZoningColors={showZoningColors}
+                      onShowZoningColors={setShowZoningColors}
+                    />
+                  </div>
+                ) : null}
+                <div className="min-h-0 flex-1">
+                  <ZoningMap
+                    geojson={geojson}
+                    selectedParcelId={selectedParcel?.parcel_id ?? null}
+                    showZoningColors={showZoningColors}
+                    onParcelSelect={handleParcelSelectFromMap}
+                    showRentalPins={isPropertyMap}
+                    rentalGeoJson={isPropertyMap ? rentalGeoJson : null}
+                    selectedRentalFeatureId={isPropertyMap ? selectedRentalPinKey : null}
+                    onRentalPinSelect={isPropertyMap ? handleRentalPinSelect : undefined}
+                    onViewportBoundsChange={isPropertyMap ? handleViewportBoundsChange : undefined}
+                    showLinkPins={isPropertyMap}
+                    linkActiveGeoJson={isPropertyMap ? filteredLinkActiveFc : null}
+                    linkSoldGeoJson={isPropertyMap ? filteredLinkSoldFc : null}
+                    selectedLinkListingId={isPropertyMap ? selectedLinkPinKey : null}
+                    onLinkListingPinSelect={isPropertyMap ? handleLinkListingPinSelect : undefined}
+                    flyTo={isPropertyMap ? mapFlyTo : null}
+                    reDistrictsGeoJson={isPropertyMap ? reDistrictsGeoJson : null}
+                    parcelBaseLayer={isPropertyMap ? parcelBaseLayer : "tax_zoning"}
+                    highlightedReDistrictAbbrv={
+                      isPropertyMap && parcelBaseLayer === "re_market_areas" && reMarketAreaAbbrv.trim()
+                        ? reMarketAreaAbbrv.trim()
+                        : null
+                    }
+                    omniboxPreviewParcelId={omniboxPreview?.parcelId ?? null}
+                    omniboxPreviewPoint={
+                      omniboxPreview?.lng != null && omniboxPreview?.lat != null
+                        ? { lng: omniboxPreview.lng, lat: omniboxPreview.lat }
+                        : null
+                    }
+                    className={
+                      isPropertyMap ? "h-full min-h-0 w-full rounded-xl" : undefined
+                    }
+                    onMapNonFeatureInteraction={
+                      isPropertyMap ? dismissWelcomeSession : undefined
+                    }
+                  />
+                </div>
+                {isPropertyMap ? (
+                  <div className={cn(mapUiHidden && "pointer-events-none opacity-0")}>
+                    <PropertyMapFiltersSheet
+                      trigger="none"
+                      open={filtersOpen}
+                      onOpenChange={setFiltersOpen}
+                      mapMode={mapMode}
+                      rentalFilters={rentalFilters}
+                      onRentalFiltersChange={setRentalFilters}
+                      linkFilters={linkFilters}
+                      onLinkFiltersChange={setLinkFilters}
+                      pinSummary={{
+                        rentalsFiltered: filteredRentals.length,
+                        rentalsInView: rentalResults.length,
+                        linkActiveFiltered: filteredLinkActiveFc.features.length,
+                        linkActiveTotal: linkActiveFc.features.length,
+                        linkSoldFiltered: filteredLinkSoldFc.features.length,
+                        linkSoldTotal: linkSoldFc.features.length,
+                      }}
+                      onClearAll={() => {
+                        setSelectedRental(null);
+                        setSelectedLink(null);
+                      }}
+                    />
+                  </div>
+                ) : null}
+                <div
+                  className={cn(
+                    "absolute right-3 top-3 z-10 flex flex-col items-end gap-2",
+                    mapUiHidden && "pointer-events-none opacity-0",
+                  )}
+                >
+                  {isPropertyMap ? (
+                    <div className="flex items-center gap-2">
+                      <MapLegalNoticeButton />
+                      <button
+                        type="button"
+                        className="rounded-full border border-[var(--cedar-shingle)]/30 bg-white/95 px-3 py-1.5 text-xs font-medium text-[var(--atlantic-navy)] shadow-sm"
+                        onClick={() => setMapUiHidden(true)}
+                      >
+                        Hide overlay
+                      </button>
+                    </div>
+                  ) : null}
                   <MapLegend showRentalsLegend={showRentalPinsOnMap} showLinkPinsLegend={showLinkPinsOnMap} />
                 </div>
+                {showWelcomeCard ? (
+                  <>
+                    <div
+                      className="pointer-events-none absolute inset-0 z-[17] rounded-xl bg-slate-900/[0.035] backdrop-blur-[2px]"
+                      aria-hidden
+                    />
+                    <div
+                      className={cn(
+                        "pointer-events-none absolute z-[19] max-w-[min(17rem,calc(100%-1.25rem))] lg:max-w-[15rem]",
+                        layoutNarrow ? "bottom-[4.25rem] right-3" : "bottom-5 right-5",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "pointer-events-auto relative rounded-xl border border-blue-800/10 bg-white/82 p-3.5 text-left shadow-lg shadow-blue-900/8 ring-1 ring-[var(--cedar-shingle)]/10 backdrop-blur-md",
+                          mapUiHidden && "pointer-events-none opacity-0",
+                        )}
+                      >
+                        <button
+                          type="button"
+                          className="absolute right-1.5 top-1.5 rounded-full p-1 text-[var(--nantucket-gray)] transition hover:bg-black/5 hover:text-[var(--atlantic-navy)]"
+                          aria-label="Dismiss welcome"
+                          onClick={dismissWelcomeSession}
+                        >
+                          <X className="h-4 w-4" aria-hidden />
+                        </button>
+                        <div className="flex items-start gap-2.5 pr-7">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-700/10 text-blue-800">
+                            <MapIcon className="h-4 w-4" aria-hidden />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-bold leading-tight text-[var(--atlantic-navy)] lg:text-[13px]">
+                              Discover Nantucket Properties
+                            </h3>
+                            <p className="mt-0.5 text-[10px] font-medium leading-snug text-[var(--nantucket-gray)]">
+                              Tap a parcel or search above for intel.
+                            </p>
+                          </div>
+                        </div>
+                        <ul className="mt-2.5 space-y-0.5 border-t border-[var(--cedar-shingle)]/10 pt-2 text-[10px] font-medium leading-snug text-[var(--atlantic-navy)]">
+                          <li className="flex gap-1.5">
+                            <span className="shrink-0 text-blue-600" aria-hidden>
+                              •
+                            </span>
+                            Expansion &amp; buildable cover
+                          </li>
+                          <li className="flex gap-1.5">
+                            <span className="shrink-0 text-blue-600" aria-hidden>
+                              •
+                            </span>
+                            Maury&apos;s take &amp; rental yield
+                          </li>
+                          <li className="flex gap-1.5">
+                            <span className="shrink-0 text-blue-600" aria-hidden>
+                              •
+                            </span>
+                            Basemap, legend &amp; filters from the toolbar
+                          </li>
+                        </ul>
+                        <div
+                          className={cn(
+                            "mt-2.5 flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                            mapUiHidden && "pointer-events-none opacity-0",
+                          )}
+                        >
+                          <button
+                            type="button"
+                            className="shrink-0 rounded-full border border-dashed border-blue-600/45 bg-white/95 px-2.5 py-1 text-[10px] font-semibold text-blue-900 shadow-sm"
+                            onClick={() => {
+                              dismissWelcomeSession();
+                              setOmniboxPrefillQuery("Cliff Rd");
+                              setOmniboxPrefillNonce((n) => n + 1);
+                            }}
+                          >
+                            Try &quot;Cliff Rd&quot;
+                          </button>
+                          <button
+                            type="button"
+                            className="shrink-0 rounded-full border border-dashed border-blue-600/45 bg-white/95 px-2.5 py-1 text-[10px] font-semibold text-blue-900 shadow-sm"
+                            onClick={() => {
+                              dismissWelcomeSession();
+                              handleOmniboxNeighborhoodSlug("sconset");
+                            }}
+                          >
+                            Try &quot;Sconset&quot;
+                          </button>
+                          <button
+                            type="button"
+                            className="shrink-0 rounded-full border border-dashed border-emerald-700/35 bg-emerald-50/90 px-2.5 py-1 text-[10px] font-semibold text-emerald-950 shadow-sm"
+                            onClick={() => {
+                              dismissWelcomeSession();
+                              handleOmniboxNeighborhoodSlug("mid-island");
+                            }}
+                          >
+                            High expansion parcels
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className="mt-3 w-full rounded-lg bg-[var(--atlantic-navy)] py-2 text-center text-[11px] font-bold text-white shadow-sm transition hover:bg-[var(--atlantic-navy)]/92"
+                          onClick={dismissWelcomePermanent}
+                        >
+                          Got it
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+                {isPropertyMap && layoutNarrow && mapSelectionActive && !mobilePanelOpen ? (
+                  <div className="pointer-events-none absolute left-1/2 top-16 z-[30] max-w-[min(calc(100%-1.5rem),22rem)] -translate-x-1/2 transition-all duration-300">
+                    <button
+                      type="button"
+                      className={cn(
+                        "pointer-events-auto flex w-full items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-md",
+                        mapUiHidden && "pointer-events-none opacity-0",
+                      )}
+                      onClick={() => setMobilePanelOpen(true)}
+                    >
+                      <span
+                        className={cn(
+                          "h-2 w-2 shrink-0 rounded-full animate-pulse",
+                          selectedLink ? "bg-blue-600" : selectedRental ? "bg-emerald-500" : "bg-blue-600",
+                        )}
+                        aria-hidden
+                      />
+                      <span className="truncate text-sm font-bold text-slate-800">{mapAddressPillLabel}</span>
+                      <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-slate-500">
+                        {mapPillZoneBadge}
+                      </span>
+                    </button>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
 
+          {isPropertyMap ? (
+            <div className="flex flex-col gap-2 lg:hidden">
+              {rentFilterActiveCount > 0 && (mapMode === "rent" || mapMode === "all") ? (
+                <p className="rounded-md border border-emerald-700/20 bg-emerald-50/90 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
+                  Showing <strong>{filteredRentals.length}</strong>{" "}
+                  {filteredRentals.length === 1 ? "rental" : "rentals"} matching your criteria in this view • Powered by live{" "}
+                  <a href="https://www.nantucketrentals.com" className="font-medium text-[var(--privet-green)] underline" target="_blank" rel="noopener noreferrer">
+                    nantucketrentals.com
+                  </a>{" "}
+                  data.
+                </p>
+              ) : null}
+              {linkFilterActiveCount > 0 && (mapMode === "sale" || mapMode === "sold" || mapMode === "all") ? (
+                <p className="rounded-md border border-blue-700/20 bg-blue-50/90 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
+                  {mapMode === "all" ? (
+                    <>
+                      Showing <strong>{filteredLinkActiveFc.features.length}</strong> active and{" "}
+                      <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                    </>
+                  ) : mapMode === "sale" ? (
+                    <>
+                      Showing <strong>{filteredLinkActiveFc.features.length}</strong> active LINK listings matching your criteria in this view • Live MLS feed.
+                    </>
+                  ) : (
+                    <>
+                      Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                    </>
+                  )}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <aside
             id="parcel-zoning-panel"
             className={cn(
-              "brand-surface hidden lg:flex lg:min-h-0 lg:flex-col lg:gap-3",
-              isPropertyMap ? "lg:max-h-[calc(100dvh-10rem)]" : "",
+              "brand-surface hidden lg:flex lg:min-h-0 lg:flex-col",
+              isPropertyMap
+                ? "lg:max-h-[calc(100dvh-5rem-2rem)] lg:overflow-hidden"
+                : "lg:gap-3 lg:overflow-y-auto",
             )}
           >
             {isPropertyMap ? (
-              <div className="flex max-h-[min(28rem,55vh)] shrink-0 flex-col gap-2 overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+                {rentFilterActiveCount > 0 && (mapMode === "rent" || mapMode === "all") ? (
+                  <p className="shrink-0 rounded-md border border-emerald-700/20 bg-emerald-50/90 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
+                    Showing <strong>{filteredRentals.length}</strong>{" "}
+                    {filteredRentals.length === 1 ? "rental" : "rentals"} matching your criteria in this view • Powered by live{" "}
+                    <a href="https://www.nantucketrentals.com" className="font-medium text-[var(--privet-green)] underline" target="_blank" rel="noopener noreferrer">
+                      nantucketrentals.com
+                    </a>{" "}
+                    data.
+                  </p>
+                ) : null}
+                {linkFilterActiveCount > 0 && (mapMode === "sale" || mapMode === "sold" || mapMode === "all") ? (
+                  <p className="shrink-0 rounded-md border border-blue-700/20 bg-blue-50/90 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
+                    {mapMode === "all" ? (
+                      <>
+                        Showing <strong>{filteredLinkActiveFc.features.length}</strong> active and{" "}
+                        <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                      </>
+                    ) : mapMode === "sale" ? (
+                      <>
+                        Showing <strong>{filteredLinkActiveFc.features.length}</strong> active LINK listings matching your criteria in this view • Live MLS feed.
+                      </>
+                    ) : (
+                      <>
+                        Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                      </>
+                    )}
+                  </p>
+                ) : null}
+                <div className="flex max-h-[min(28rem,55vh)] shrink-0 flex-col gap-2 overflow-y-auto">
                 {mapMode === "rent" || mapMode === "all" ? (
-                  <div className="max-h-44 shrink-0 overflow-y-auto rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-3 shadow-sm">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">Rentals</p>
+                  <div className="shrink-0 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-3 shadow-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">
+                          {filteredRentals.length} Active Vacation Rentals in view
+                        </p>
+                        {rentFilterActiveCount > 0 && rentalResults.length !== filteredRentals.length ? (
+                          <p className="text-[10px] font-normal text-[var(--nantucket-gray)]">{rentalResults.length} before filters</p>
+                        ) : null}
+                      </div>
                       {rentalsLoading ? <span className="text-[10px] text-[var(--nantucket-gray)]">Loading…</span> : null}
                     </div>
                     {!rentalsLoading && rentalResults.length === 0 ? (
-                      <p className="text-xs text-[var(--nantucket-gray)]">None in view.</p>
-                    ) : (
-                      <ul className="space-y-2">
-                        {rentalResults.map((r) => (
-                          <li key={r.nrPropertyId}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedParcel(null);
-                                setSelectedLink(null);
-                                setSelectedRental(r);
-                              }}
-                              className={cn(
-                                "flex w-full flex-col items-start rounded-md border px-2 py-2 text-left text-sm transition-colors",
-                                selectedRental?.nrPropertyId === r.nrPropertyId
-                                  ? "border-[var(--privet-green)] bg-[var(--privet-green)]/10"
-                                  : "border-[var(--cedar-shingle)]/20 bg-white hover:bg-[var(--sandstone)]",
-                              )}
-                            >
-                              <span className="font-medium text-[var(--atlantic-navy)]">{r.headline}</span>
-                              <span className="text-xs text-[var(--nantucket-gray)]">{r.streetAddress}</span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                      <p className="mt-2 text-xs text-[var(--nantucket-gray)]">None in view.</p>
+                    ) : !rentalsLoading && filteredRentals.length === 0 ? (
+                      <p className="mt-2 text-xs text-[var(--nantucket-gray)]">No rentals match your filters in this view.</p>
+                    ) : null}
                   </div>
                 ) : null}
                 {mapMode === "sale" || mapMode === "all" ? (
@@ -819,9 +1719,11 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     </div>
                     {linkActiveFc.features.length === 0 && !linkListingsLoading ? (
                       <p className="text-xs text-[var(--nantucket-gray)]">None matched to a parcel in view.</p>
+                    ) : filteredLinkActiveFc.features.length === 0 ? (
+                      <p className="text-xs text-[var(--nantucket-gray)]">No listings match your filters in this view.</p>
                     ) : (
                       <ul className="space-y-2">
-                        {linkActiveFc.features.map((f) => {
+                        {filteredLinkActiveFc.features.map((f) => {
                           const p = f.properties;
                           return (
                             <li key={p.linkId}>
@@ -857,9 +1759,11 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     </div>
                     {linkSoldFc.features.length === 0 && !linkListingsLoading ? (
                       <p className="text-xs text-[var(--nantucket-gray)]">None matched to a parcel in view.</p>
+                    ) : filteredLinkSoldFc.features.length === 0 ? (
+                      <p className="text-xs text-[var(--nantucket-gray)]">No listings match your filters in this view.</p>
                     ) : (
                       <ul className="space-y-2">
-                        {linkSoldFc.features.map((f) => {
+                        {filteredLinkSoldFc.features.map((f) => {
                           const p = f.properties;
                           return (
                             <li key={p.linkId}>
@@ -890,64 +1794,51 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     )}
                   </div>
                 ) : null}
+                </div>
+              <div className="shrink-0 px-1 pb-1">
+                <PropertyIntelligencePanel
+                  selectedParcel={selectedParcel}
+                  selectedRental={selectedRental}
+                  selectedLink={selectedLink}
+                  linkListingId={linkListingIdForSelection}
+                  parcelLinkListingMatch={effectiveParcelLinkMatch}
+                  vacationRentalSlug={vacationRentalSlugForSelection}
+                  districtMatch={districtMatch}
+                  zoningLabel={zoningLabel}
+                  parcelMapCenter={isPropertyMap ? parcelMapCenter : null}
+                  onWatchChange={() => setWatchTick((t) => t + 1)}
+                  onViewComparableRentals={handleViewComparableRentals}
+                />
               </div>
-            ) : null}
-            {isPropertyMap && selectedLink ? (
-              <div className="shrink-0 space-y-3 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">
-                  {selectedLink.pool === "sold" ? "LINK — Sold" : "LINK — For sale"}
-                </p>
-                {selectedLink.thumbUrl ? (
-                  <div className="relative aspect-[16/10] max-h-40 w-full overflow-hidden rounded-lg">
-                    <Image
-                      src={selectedLink.thumbUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="(min-width: 1024px) 28vw, 100vw"
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-                <p className="text-lg font-semibold text-[var(--atlantic-navy)]">{selectedLink.address}</p>
-                <p className="text-sm text-[var(--nantucket-gray)]">
-                  {selectedLink.pool === "sold" ? (
-                    <>
-                      {selectedLink.closePrice ? <>Sold {selectedLink.closePrice}</> : null}
-                      {selectedLink.closePrice && selectedLink.closeDate ? " · " : null}
-                      {selectedLink.closeDate ? <span>Closed {selectedLink.closeDate}</span> : null}
-                      {!selectedLink.closePrice && selectedLink.listPrice ? <span>Listed {selectedLink.listPrice}</span> : null}
-                    </>
-                  ) : (
-                    <span>{selectedLink.listPrice}</span>
-                  )}
-                </p>
-                <Button
-                  asChild
-                  className={cn(
-                    "w-full text-white",
-                    selectedLink.pool === "sold" ? "bg-slate-600 hover:bg-slate-700" : "bg-blue-600 hover:bg-blue-700",
-                  )}
-                >
-                  <a href={nantucketLinkListingUrl(selectedLink.linkId)} target="_blank" rel="noopener noreferrer">
-                    View LINK listing
-                  </a>
-                </Button>
-                <p className="text-xs text-[var(--nantucket-gray)]">
-                  Pin is at the matched tax parcel centroid; confirm on the official listing.
-                </p>
+              {selectedParcel ? (
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <ParcelDetailPanel
+                    {...parcelMapCtas}
+                    selectedParcel={selectedParcel}
+                    zoningLabel={zoningLabel}
+                    districtMatch={districtMatch}
+                    zoningUseRows={zoningUseRows}
+                    linkListingId={linkListingIdForSelection}
+                    vacationRentalSlug={vacationRentalSlugForSelection}
+                  />
+                </div>
+              ) : null}
+                </div>
+                <MapResearchHubStickyFooter className="border-t border-[var(--cedar-shingle)]/20 bg-white/90 px-2 pb-2 pt-3 backdrop-blur-sm" />
               </div>
-            ) : null}
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <ParcelDetailPanel
-                selectedParcel={selectedParcel}
-                zoningLabel={zoningLabel}
-                districtMatch={districtMatch}
-                zoningUseRows={zoningUseRows}
-                linkListingId={linkListingIdForSelection}
-                vacationRentalSlug={vacationRentalSlugForSelection}
-              />
-            </div>
+            ) : (
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <ParcelDetailPanel
+                  {...parcelMapCtas}
+                  selectedParcel={selectedParcel}
+                  zoningLabel={zoningLabel}
+                  districtMatch={districtMatch}
+                  zoningUseRows={zoningUseRows}
+                  linkListingId={linkListingIdForSelection}
+                  vacationRentalSlug={vacationRentalSlugForSelection}
+                />
+              </div>
+            )}
           </aside>
         </div>
       </div>
@@ -956,15 +1847,10 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
         open={mobilePanelOpen && (!!selectedParcel || !!selectedRental || !!selectedLink)}
         onOpenChange={(open) => {
           setMobilePanelOpen(open);
-          if (!open) {
-            setSelectedParcel(null);
-            setSelectedRental(null);
-            setSelectedLink(null);
-          }
         }}
       >
-        <DrawerContent className="lg:hidden">
-          <DrawerHeader>
+        <DrawerContent className="flex max-h-[78vh] flex-col overflow-hidden lg:hidden">
+          <DrawerHeader className="sr-only shrink-0">
             <DrawerTitle>
               {selectedParcel?.location ??
                 selectedRental?.streetAddress ??
@@ -973,20 +1859,192 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 "Detail"}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="max-h-[75vh] overflow-y-auto">
-            {selectedRental ? (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {isPropertyMap ? (
+              <div className="space-y-4 p-4">
+                <PropertyIntelligencePanel
+                  compactHero
+                  selectedParcel={selectedParcel}
+                  selectedRental={selectedRental}
+                  selectedLink={selectedLink}
+                  linkListingId={linkListingIdForSelection}
+                  parcelLinkListingMatch={effectiveParcelLinkMatch}
+                  vacationRentalSlug={vacationRentalSlugForSelection}
+                  districtMatch={districtMatch}
+                  zoningLabel={zoningLabel}
+                  parcelMapCenter={isPropertyMap ? parcelMapCenter : null}
+                  onWatchChange={() => setWatchTick((t) => t + 1)}
+                  onViewComparableRentals={handleViewComparableRentals}
+                />
+                {selectedParcel && selectedRental ? (
+                  <>
+                    <div className="inline-flex rounded-full border border-[var(--cedar-shingle)]/25 bg-white p-1">
+                      <button
+                        type="button"
+                        onClick={() => setMobileDrawerTab("rental")}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs font-medium",
+                          mobileDrawerTab === "rental"
+                            ? "bg-[var(--privet-green)] text-white"
+                            : "text-[var(--atlantic-navy)]",
+                        )}
+                      >
+                        Rental details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMobileDrawerTab("parcel")}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs font-medium",
+                          mobileDrawerTab === "parcel"
+                            ? "bg-[var(--atlantic-navy)] text-white"
+                            : "text-[var(--atlantic-navy)]",
+                        )}
+                      >
+                        Parcel &amp; zoning
+                      </button>
+                    </div>
+                    {mobileDrawerTab === "parcel" ? (
+                      <ParcelDetailPanel
+                        {...parcelMapCtas}
+                        selectedParcel={selectedParcel}
+                        zoningLabel={zoningLabel}
+                        districtMatch={districtMatch}
+                        zoningUseRows={zoningUseRows}
+                        linkListingId={linkListingIdForSelection}
+                        vacationRentalSlug={vacationRentalSlugForSelection}
+                      />
+                    ) : null}
+                  </>
+                ) : selectedParcel ? (
+                  <ParcelDetailPanel
+                    {...parcelMapCtas}
+                    selectedParcel={selectedParcel}
+                    zoningLabel={zoningLabel}
+                    districtMatch={districtMatch}
+                    zoningUseRows={zoningUseRows}
+                    linkListingId={linkListingIdForSelection}
+                    vacationRentalSlug={vacationRentalSlugForSelection}
+                  />
+                ) : null}
+              </div>
+            ) : selectedRental && selectedParcel ? (
+              <div className="space-y-4 p-4">
+                <div className="inline-flex rounded-full border border-[var(--cedar-shingle)]/25 bg-white p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMobileDrawerTab("rental")}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium",
+                      mobileDrawerTab === "rental"
+                        ? "bg-[var(--privet-green)] text-white"
+                        : "text-[var(--atlantic-navy)]",
+                    )}
+                  >
+                    Rental Details
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileDrawerTab("parcel")}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium",
+                      mobileDrawerTab === "parcel"
+                        ? "bg-[var(--atlantic-navy)] text-white"
+                        : "text-[var(--atlantic-navy)]",
+                    )}
+                  >
+                    Parcel & Zoning
+                  </button>
+                </div>
+                {mobileDrawerTab === "rental" ? (
+                  <div className="space-y-4">
+                    {selectedRental.thumbUrl ? (
+                      selectedRental.slug?.trim() ? (
+                        <a
+                          href={nantucketVacationRentalListingUrl(selectedRental.slug.trim())}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block cursor-pointer overflow-hidden rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
+                          aria-label="Open vacation rental listing on Nantucket Rentals (photos)"
+                        >
+                          <div className="relative aspect-[16/10] max-h-48 w-full">
+                            <Image
+                              src={selectedRental.thumbUrl}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="100vw"
+                              unoptimized
+                            />
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="relative aspect-[16/10] max-h-48 w-full overflow-hidden rounded-lg">
+                          <Image
+                            src={selectedRental.thumbUrl}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            sizes="100vw"
+                            unoptimized
+                          />
+                        </div>
+                      )
+                    ) : null}
+                    <p className="text-lg font-semibold text-[var(--atlantic-navy)]">{selectedRental.headline}</p>
+                    <p className="text-sm text-[var(--nantucket-gray)]">{selectedRental.streetAddress}</p>
+                    <Button asChild className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]">
+                      <a href={nantucketVacationRentalListingUrl(selectedRental.slug)} target="_blank" rel="noopener noreferrer">
+                        View Vacation Rental Listing
+                      </a>
+                    </Button>
+                  </div>
+                ) : (
+                  <ParcelDetailPanel
+                    {...parcelMapCtas}
+                    selectedParcel={selectedParcel}
+                    zoningLabel={zoningLabel}
+                    districtMatch={districtMatch}
+                    zoningUseRows={zoningUseRows}
+                    linkListingId={linkListingIdForSelection}
+                    vacationRentalSlug={vacationRentalSlugForSelection}
+                  />
+                )}
+              </div>
+            ) : selectedRental ? (
               <div className="space-y-4 p-4">
                 {selectedRental.thumbUrl ? (
-                  <div className="relative aspect-[16/10] max-h-48 w-full overflow-hidden rounded-lg">
-                    <Image
-                      src={selectedRental.thumbUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="100vw"
-                      unoptimized
-                    />
-                  </div>
+                  selectedRental.slug?.trim() ? (
+                    <a
+                      href={nantucketVacationRentalListingUrl(selectedRental.slug.trim())}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block cursor-pointer overflow-hidden rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
+                      aria-label="Open vacation rental listing on Nantucket Rentals (photos)"
+                    >
+                      <div className="relative aspect-[16/10] max-h-48 w-full">
+                        <Image
+                          src={selectedRental.thumbUrl}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="100vw"
+                          unoptimized
+                        />
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="relative aspect-[16/10] max-h-48 w-full overflow-hidden rounded-lg">
+                      <Image
+                        src={selectedRental.thumbUrl}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        unoptimized
+                      />
+                    </div>
+                  )
                 ) : null}
                 <p className="text-lg font-semibold text-[var(--atlantic-navy)]">{selectedRental.headline}</p>
                 <p className="text-sm text-[var(--nantucket-gray)]">{selectedRental.streetAddress}</p>
@@ -1002,16 +2060,24 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
             ) : selectedLink ? (
               <div className="space-y-4 p-4">
                 {selectedLink.thumbUrl ? (
-                  <div className="relative aspect-[16/10] max-h-48 w-full overflow-hidden rounded-lg">
-                    <Image
-                      src={selectedLink.thumbUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="100vw"
-                      unoptimized
-                    />
-                  </div>
+                  <a
+                    href={nantucketLinkListingUrl(selectedLink.linkId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block overflow-hidden rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
+                    aria-label="Open LINK MLS listing (photos)"
+                  >
+                    <div className="relative aspect-[16/10] max-h-48 w-full">
+                      <Image
+                        src={selectedLink.thumbUrl}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        unoptimized
+                      />
+                    </div>
+                  </a>
                 ) : null}
                 <p className="text-lg font-semibold text-[var(--atlantic-navy)]">{selectedLink.address}</p>
                 <p className="text-sm text-[var(--nantucket-gray)]">
@@ -1047,6 +2113,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
               </div>
             ) : (
               <ParcelDetailPanel
+                {...parcelMapCtas}
                 selectedParcel={selectedParcel}
                 zoningLabel={zoningLabel}
                 districtMatch={districtMatch}
@@ -1056,8 +2123,50 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
               />
             )}
           </div>
+          {isPropertyMap ? (
+            <DrawerFooter className="mt-0 shrink-0 gap-0 border-t border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)] p-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <MapResearchHubStickyFooter className="px-3 pt-3" />
+            </DrawerFooter>
+          ) : null}
         </DrawerContent>
       </Drawer>
+
+      {isPropertyMap && layoutNarrow ? (
+        <Sheet open={mapGuideSheetOpen} onOpenChange={setMapGuideSheetOpen}>
+          <SheetContent
+            side="bottom"
+            className="max-h-[85vh] gap-0 overflow-y-auto rounded-t-2xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden"
+          >
+            <SheetHeader className="space-y-1 pb-3 text-left">
+              <SheetTitle>Layers</SheetTitle>
+              <SheetDescription>Basemap, filters, and pin legend.</SheetDescription>
+            </SheetHeader>
+            <div className="space-y-4 border-t border-[var(--cedar-shingle)]/15 pt-3">
+              <PropertyMapLayersSheetBody
+                showZoningColors={showZoningColors}
+                onShowZoningColors={setShowZoningColors}
+                parcelBaseLayer={parcelBaseLayer}
+                onParcelBaseLayer={setParcelBaseLayer}
+                reMarketAreaAbbrv={reMarketAreaAbbrv}
+                onReMarketAreaChange={setReMarketAreaAbbrv}
+                onRequestFlyToReDistrict={(abbrv) => {
+                  if (!abbrv.trim() || !reDistrictsGeoJson) return;
+                  const b = bboxForReDistrictAbbrv(reDistrictsGeoJson, abbrv);
+                  if (b) setMapFlyTo({ id: bumpFlyId(), bounds: b });
+                }}
+                onOpenFilters={() => {
+                  setMapGuideSheetOpen(false);
+                  setFiltersOpen(true);
+                }}
+                filterBadgeCount={filterBadgeCount}
+              />
+              <div className="border-t border-[var(--cedar-shingle)]/15 pt-3">
+                <MapLegend showRentalsLegend={showRentalPinsOnMap} showLinkPinsLegend={showLinkPinsOnMap} />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      ) : null}
     </section>
   );
 }
