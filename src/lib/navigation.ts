@@ -107,14 +107,14 @@ export const NAV_STRUCTURE: Record<string, NavEntry> = {
 export const primaryNavItems: NavEntry[] = [
   NAV_STRUCTURE.marketPulse,
   NAV_STRUCTURE.neighborhoods,
-  NAV_STRUCTURE.propertyMap,
   NAV_STRUCTURE.resources,
   NAV_STRUCTURE.about,
 ];
 
+/** Primary header CTA (desktop + mobile). Opportunity desk routes stay live under /opportunities for deep links. */
 export const navCta = {
-  label: "Post an Opportunity",
-  path: "/opportunities",
+  label: "Property Map",
+  path: "/map",
 };
 
 // Compatibility exports for existing footer/sitemap consumers.
