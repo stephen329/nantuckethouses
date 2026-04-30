@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-base text-[var(--atlantic-navy)] font-semibold mb-2">Contact</h2>
               <p>
-                For privacy-related questions, contact <a className="text-[var(--privet-green)] hover:underline" href="mailto:stephen@nantuckethouses.com">stephen@nantuckethouses.com</a>.
+                For privacy-related questions, contact <a className="text-[var(--privet-green)] hover:underline" href="mailto:stephen@maury.net">stephen@maury.net</a>.
               </p>
             </div>
           </div>

@@ -130,7 +130,7 @@ export default async function ResourcesPage() {
               Join early access for a Nantucket-specific build and renovation calculator with local assumptions.
             </p>
             <a
-              href="mailto:stephen@nantuckethouses.com?subject=Cost%20Calculator%20Beta%20Early%20Access"
+              href="mailto:stephen@maury.net?subject=Cost%20Calculator%20Beta%20Early%20Access"
               className="inline-flex items-center gap-2 brand-btn brand-btn-primary px-5 py-2.5 text-sm"
             >
               Join Early Access

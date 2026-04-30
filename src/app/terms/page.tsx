@@ -60,7 +60,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-base text-[var(--atlantic-navy)] font-semibold mb-2">Contact</h2>
               <p>
-                Questions about these terms can be sent to <a className="text-[var(--privet-green)] hover:underline" href="mailto:stephen@nantuckethouses.com">stephen@nantuckethouses.com</a>.
+                Questions about these terms can be sent to <a className="text-[var(--privet-green)] hover:underline" href="mailto:stephen@maury.net">stephen@maury.net</a>.
               </p>
             </div>
           </div>

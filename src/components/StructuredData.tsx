@@ -26,7 +26,7 @@ export function StructuredData() {
       addressCountry: "US",
     },
     telephone: "+1-508-451-0191",
-    email: "stephen@nantuckethouses.com",
+    email: "stephen@maury.net",
     areaServed: {
       "@type": "City",
       name: "Nantucket",

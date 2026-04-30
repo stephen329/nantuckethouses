@@ -61,6 +61,9 @@ import { PropertyIntelligencePanel } from "@/components/map/PropertyIntelligence
 import type { OmniboxActiveListing, OmniboxRentalHit, OmniboxSoldComp } from "@/lib/map-omnibox-types";
 import { MAP_NEIGHBORHOOD_BOUNDS } from "@/lib/map-neighborhood-bounds";
 import { centroidFromGeometry } from "@/lib/geo-centroid";
+import { formatLinkMlsDateDisplay } from "@/lib/link-listing-date-format";
+import { findParcelFeatureByListingAddress, findParcelFeatureForLinkPin } from "@/lib/link-pin-parcel-resolve";
+import { findParcelFeatureForNrRental } from "@/lib/rental-parcel-resolve";
 import { bboxForReDistrictAbbrv } from "@/lib/re-districts-map";
 type RecentSoldParcelsFeed = {
   parcelIds: string[];
@@ -548,12 +551,24 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const slugByParcelIdForRentals = useMemo(() => nrRentalFeed.slugByParcelId, []);
 
   const vacationRentalSlugForSelection = useMemo(() => {
-    const pid = selectedParcel?.parcel_id;
-    if (!pid) return null;
-    return slugByParcelIdForRentals[String(pid).trim()] ?? null;
-  }, [selectedParcel?.parcel_id, slugByParcelIdForRentals]);
+    if (!selectedParcel?.parcel_id) return null;
+    const pid = String(selectedParcel.parcel_id).trim();
+    const tmKey = `${selectedParcel.tax_map ?? ""} ${selectedParcel.parcel ?? ""}`.trim();
+    return slugByParcelIdForRentals[pid] ?? slugByParcelIdForRentals[tmKey] ?? null;
+  }, [selectedParcel, slugByParcelIdForRentals]);
 
   rentalResultsRef.current = rentalResults;
+
+  /** When a lot has an NR slug on file and that listing is in the current viewport feed, attach it for rental pulse / hero. */
+  useEffect(() => {
+    if (!isPropertyMap || !selectedParcel?.parcel_id || selectedRental) return;
+    const pid = String(selectedParcel.parcel_id).trim();
+    const tmKey = `${selectedParcel.tax_map ?? ""} ${selectedParcel.parcel ?? ""}`.trim();
+    const slug = (slugByParcelIdForRentals[pid] || slugByParcelIdForRentals[tmKey])?.trim().toLowerCase();
+    if (!slug) return;
+    const hit = rentalResults.find((r) => (r.slug || "").trim().toLowerCase() === slug);
+    if (hit) setSelectedRental(hit);
+  }, [isPropertyMap, selectedParcel, selectedRental, slugByParcelIdForRentals, rentalResults]);
 
   const filteredRentals = useMemo(
     () => applyRentalFilters(rentalResults, rentalFilters),
@@ -597,50 +612,68 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
 
   const handleParcelSelectFromMap = useCallback((feature: ParcelFeature) => {
     setSelectedLink(null);
+    setSelectedRental(null);
     setSelectedParcel(feature.properties ?? null);
     setSearchStatus(null);
     setMobileDrawerTab("parcel");
     if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
   }, []);
 
-  const handleRentalPinSelect = useCallback((feature: RentalPinFeature) => {
-    const p = feature.properties;
-    const coords = (feature.geometry as Point).coordinates;
-    const id = Number(p.nrPropertyId);
-    const full = rentalResultsRef.current.find((r) => r.nrPropertyId === id);
-    setSelectedLink(null);
-    setSelectedRental(
-      full ?? {
-        nrPropertyId: id,
-        slug: p.slug,
-        streetAddress: p.streetAddress,
-        headline: p.headline,
-        latitude: coords[1],
-        longitude: coords[0],
-        thumbUrl: p.thumbUrl,
-        weeklyRentEstimate: null,
-        totalBedrooms: null,
-        totalBathrooms: null,
-        totalCapacity: null,
-        hasPool: false,
-        walkToBeach: false,
-        averageNightlyRate: null,
-        petFriendlyHint: false,
-        waterfrontHint: false,
-        renovatedHint: false,
-        townWalkHint: false,
-      },
-    );
-    setMobileDrawerTab("rental");
-    if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
-  }, []);
+  const handleRentalPinSelect = useCallback(
+    (feature: RentalPinFeature) => {
+      const p = feature.properties;
+      const coords = (feature.geometry as Point).coordinates;
+      const id = Number(p.nrPropertyId);
+      const full = rentalResultsRef.current.find((r) => r.nrPropertyId === id);
+      const rentalRow: NrMapRentalResult =
+        full ?? {
+          nrPropertyId: id,
+          slug: p.slug,
+          streetAddress: p.streetAddress,
+          headline: p.headline,
+          latitude: coords[1],
+          longitude: coords[0],
+          thumbUrl: p.thumbUrl,
+          weeklyRentEstimate: null,
+          totalBedrooms: null,
+          totalBathrooms: null,
+          totalCapacity: null,
+          hasPool: false,
+          walkToBeach: false,
+          averageNightlyRate: null,
+          petFriendlyHint: false,
+          waterfrontHint: false,
+          renovatedHint: false,
+          townWalkHint: false,
+        };
+      setSelectedLink(null);
+      setSelectedRental(rentalRow);
+      if (isPropertyMap) {
+        const parcelHit = findParcelFeatureForNrRental(rentalRow, slugByParcelIdForRentals, geojson?.features ?? []);
+        setSelectedParcel(parcelHit?.properties ?? null);
+      }
+      setMobileDrawerTab("parcel");
+      if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+    },
+    [isPropertyMap, slugByParcelIdForRentals, geojson?.features],
+  );
 
-  const handleLinkListingPinSelect = useCallback((feature: LinkListingPinFeature) => {
-    setSelectedParcel(null);
-    setSelectedRental(null);
-    setSelectedLink(feature.properties);
-    if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
-  }, []);
+  const handleLinkListingPinSelect = useCallback(
+    (feature: LinkListingPinFeature) => {
+      const props = feature.properties;
+      setSelectedRental(null);
+      setSelectedLink(props);
+      if (isPropertyMap) {
+        const parcelHit = findParcelFeatureForLinkPin(props, geojson?.features ?? []);
+        setSelectedParcel(parcelHit?.properties ?? null);
+      } else {
+        setSelectedParcel(null);
+      }
+      setMobileDrawerTab("parcel");
+      if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+    },
+    [isPropertyMap, geojson?.features],
+  );
 
   const handleViewportBoundsChange = useCallback((b: { west: number; south: number; east: number; north: number }) => {
     setMapBounds(b);
@@ -930,50 +963,65 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     [features],
   );
 
-  const handleOmniboxRentalHit = useCallback((hit: OmniboxRentalHit) => {
-    setSelectedParcel(null);
-    setSelectedLink(null);
-    const full = rentalResultsRef.current.find((r) => r.nrPropertyId === hit.nrPropertyId);
-    const slug = (hit.slug?.trim() || full?.slug || "").trim();
-    setSelectedRental(
-      full ?? {
-        nrPropertyId: hit.nrPropertyId,
-        slug,
-        streetAddress: hit.address,
-        headline: hit.headline,
-        latitude: hit.lat,
-        longitude: hit.lng,
-        thumbUrl: null,
-        weeklyRentEstimate: null,
-        totalBedrooms: null,
-        totalBathrooms: null,
-        totalCapacity: null,
-        hasPool: false,
-        walkToBeach: false,
-        averageNightlyRate: null,
-        petFriendlyHint: false,
-        waterfrontHint: false,
-        renovatedHint: false,
-        townWalkHint: false,
-      },
-    );
-    setMapFlyTo({ id: bumpFlyId(), lng: hit.lng, lat: hit.lat, zoom: 15 });
-    setMobileDrawerTab("rental");
-    if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
-  }, []);
+  const handleOmniboxRentalHit = useCallback(
+    (hit: OmniboxRentalHit) => {
+      setSelectedLink(null);
+      const full = rentalResultsRef.current.find((r) => r.nrPropertyId === hit.nrPropertyId);
+      const slug = (hit.slug?.trim() || full?.slug || "").trim();
+      const rentalRow: NrMapRentalResult =
+        full ?? {
+          nrPropertyId: hit.nrPropertyId,
+          slug,
+          streetAddress: hit.address,
+          headline: hit.headline,
+          latitude: hit.lat,
+          longitude: hit.lng,
+          thumbUrl: null,
+          weeklyRentEstimate: null,
+          totalBedrooms: null,
+          totalBathrooms: null,
+          totalCapacity: null,
+          hasPool: false,
+          walkToBeach: false,
+          averageNightlyRate: null,
+          petFriendlyHint: false,
+          waterfrontHint: false,
+          renovatedHint: false,
+          townWalkHint: false,
+        };
+      setSelectedRental(rentalRow);
+      if (isPropertyMap) {
+        const parcelHit = findParcelFeatureForNrRental(rentalRow, slugByParcelIdForRentals, geojson?.features ?? []);
+        setSelectedParcel(parcelHit?.properties ?? null);
+      } else {
+        setSelectedParcel(null);
+      }
+      setMapFlyTo({ id: bumpFlyId(), lng: hit.lng, lat: hit.lat, zoom: 15 });
+      setMobileDrawerTab("parcel");
+      if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
+    },
+    [isPropertyMap, slugByParcelIdForRentals, geojson?.features],
+  );
 
   const handleOmniboxLinkHit = useCallback(
     (hit: OmniboxActiveListing | OmniboxSoldComp, pool: "active" | "sold") => {
-      setSelectedParcel(null);
       setSelectedRental(null);
       const onMap = findLinkPropsOnMap(hit.id, pool);
-      setSelectedLink(onMap ?? linkPinFromOmniboxHit(hit, pool));
+      const props = onMap ?? linkPinFromOmniboxHit(hit, pool);
+      setSelectedLink(props);
+      if (isPropertyMap) {
+        const parcelFeat = findParcelFeatureByListingAddress(hit.address, geojson?.features ?? []);
+        setSelectedParcel(parcelFeat?.properties ?? null);
+      } else {
+        setSelectedParcel(null);
+      }
       if (hit.lat != null && hit.lng != null) {
         setMapFlyTo({ id: bumpFlyId(), lng: hit.lng, lat: hit.lat, zoom: 15 });
       }
+      setMobileDrawerTab("parcel");
       if (isNarrowForParcelDrawer()) setMobilePanelOpen(true);
     },
-    [findLinkPropsOnMap],
+    [findLinkPropsOnMap, isPropertyMap, geojson?.features],
   );
 
   const handleViewComparableRentals = useCallback(() => {
@@ -1070,9 +1118,6 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     return rows;
   }, [selectedParcel?.zoning]);
 
-  const selectedRentalPinKey = selectedRental ? String(selectedRental.nrPropertyId) : null;
-  const selectedLinkPinKey = selectedLink?.linkId ?? null;
-
   const showRentalPinsOnMap = isPropertyMap && (mapMode === "rent" || mapMode === "all");
   const showLinkPinsOnMap = isPropertyMap && (mapMode === "sale" || mapMode === "sold" || mapMode === "all");
 
@@ -1140,17 +1185,17 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
 
   const mapAddressPillLabel =
     selectedParcel?.location ??
+    selectedLink?.address ??
     selectedRental?.streetAddress ??
     selectedRental?.headline ??
-    selectedLink?.address ??
     "";
 
   const mapPillZoneBadge = useMemo(() => {
     if (districtMatch?.code) return districtMatch.code.toUpperCase().slice(0, 8);
     const z = selectedParcel?.zoning?.trim();
     if (z) return z.toUpperCase().slice(0, 8);
-    if (selectedRental) return "RENT";
     if (selectedLink) return (selectedLink.pool === "sold" ? "SOLD" : "LINK").slice(0, 8);
+    if (selectedRental) return "RENT";
     return "—";
   }, [districtMatch?.code, selectedParcel?.zoning, selectedRental, selectedLink]);
 
@@ -1418,13 +1463,13 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     onParcelSelect={handleParcelSelectFromMap}
                     showRentalPins={isPropertyMap}
                     rentalGeoJson={isPropertyMap ? rentalGeoJson : null}
-                    selectedRentalFeatureId={isPropertyMap ? selectedRentalPinKey : null}
+                    selectedRentalFeatureId={null}
                     onRentalPinSelect={isPropertyMap ? handleRentalPinSelect : undefined}
                     onViewportBoundsChange={isPropertyMap ? handleViewportBoundsChange : undefined}
                     showLinkPins={isPropertyMap}
                     linkActiveGeoJson={isPropertyMap ? filteredLinkActiveFc : null}
                     linkSoldGeoJson={isPropertyMap ? filteredLinkSoldFc : null}
-                    selectedLinkListingId={isPropertyMap ? selectedLinkPinKey : null}
+                    selectedLinkListingId={null}
                     onLinkListingPinSelect={isPropertyMap ? handleLinkListingPinSelect : undefined}
                     flyTo={isPropertyMap ? mapFlyTo : null}
                     reDistrictsGeoJson={isPropertyMap ? reDistrictsGeoJson : null}
@@ -1704,26 +1749,6 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   </p>
                 ) : null}
                 <div className="flex max-h-[min(28rem,55vh)] shrink-0 flex-col gap-2 overflow-y-auto">
-                {mapMode === "rent" || mapMode === "all" ? (
-                  <div className="shrink-0 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-3 shadow-sm">
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">
-                          {filteredRentals.length} Active Vacation Rentals in view
-                        </p>
-                        {rentFilterActiveCount > 0 && rentalResults.length !== filteredRentals.length ? (
-                          <p className="text-[10px] font-normal text-[var(--nantucket-gray)]">{rentalResults.length} before filters</p>
-                        ) : null}
-                      </div>
-                      {rentalsLoading ? <span className="text-[10px] text-[var(--nantucket-gray)]">Loading…</span> : null}
-                    </div>
-                    {!rentalsLoading && rentalResults.length === 0 ? (
-                      <p className="mt-2 text-xs text-[var(--nantucket-gray)]">None in view.</p>
-                    ) : !rentalsLoading && filteredRentals.length === 0 ? (
-                      <p className="mt-2 text-xs text-[var(--nantucket-gray)]">No rentals match your filters in this view.</p>
-                    ) : null}
-                  </div>
-                ) : null}
                 {mapMode === "sale" || mapMode === "all" ? (
                   <div className="max-h-44 shrink-0 overflow-y-auto rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-3 shadow-sm">
                     <div className="mb-2 flex items-center justify-between gap-2">
@@ -1743,9 +1768,10 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setSelectedParcel(null);
                                   setSelectedRental(null);
                                   setSelectedLink(p);
+                                  const feat = findParcelFeatureForLinkPin(p, features);
+                                  setSelectedParcel(feat?.properties ?? null);
                                 }}
                                 className={cn(
                                   "flex w-full flex-col items-start rounded-md border px-2 py-2 text-left text-sm transition-colors",
@@ -1767,7 +1793,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 {mapMode === "sold" || mapMode === "all" ? (
                   <div className="max-h-44 shrink-0 overflow-y-auto rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-3 shadow-sm">
                     <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">LINK — Sold</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--atlantic-navy)]">Sold Listings</p>
                       {linkListingsLoading ? <span className="text-[10px] text-[var(--nantucket-gray)]">Loading…</span> : null}
                     </div>
                     {linkSoldFc.features.length === 0 && !linkListingsLoading ? (
@@ -1783,9 +1809,10 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setSelectedParcel(null);
                                   setSelectedRental(null);
                                   setSelectedLink(p);
+                                  const feat = findParcelFeatureForLinkPin(p, features);
+                                  setSelectedParcel(feat?.properties ?? null);
                                 }}
                                 className={cn(
                                   "flex w-full flex-col items-start rounded-md border px-2 py-2 text-left text-sm transition-colors",
@@ -1797,7 +1824,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                                 <span className="font-medium text-[var(--atlantic-navy)]">{p.address}</span>
                                 <span className="text-xs text-[var(--nantucket-gray)]">
                                   {p.closePrice ? `Sold ${p.closePrice}` : p.listPrice}
-                                  {p.closeDate ? ` · ${p.closeDate}` : ""}
+                                  {p.closeDate ? ` · ${formatLinkMlsDateDisplay(p.closeDate)}` : ""}
                                 </span>
                               </button>
                             </li>
@@ -1889,47 +1916,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   onWatchChange={() => setWatchTick((t) => t + 1)}
                   onViewComparableRentals={handleViewComparableRentals}
                 />
-                {selectedParcel && selectedRental ? (
-                  <>
-                    <div className="inline-flex rounded-full border border-[var(--cedar-shingle)]/25 bg-white p-1">
-                      <button
-                        type="button"
-                        onClick={() => setMobileDrawerTab("rental")}
-                        className={cn(
-                          "rounded-full px-3 py-1 text-xs font-medium",
-                          mobileDrawerTab === "rental"
-                            ? "bg-[var(--privet-green)] text-white"
-                            : "text-[var(--atlantic-navy)]",
-                        )}
-                      >
-                        Rental details
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMobileDrawerTab("parcel")}
-                        className={cn(
-                          "rounded-full px-3 py-1 text-xs font-medium",
-                          mobileDrawerTab === "parcel"
-                            ? "bg-[var(--atlantic-navy)] text-white"
-                            : "text-[var(--atlantic-navy)]",
-                        )}
-                      >
-                        Parcel &amp; zoning
-                      </button>
-                    </div>
-                    {mobileDrawerTab === "parcel" ? (
-                      <ParcelDetailPanel
-                        {...parcelMapCtas}
-                        selectedParcel={selectedParcel}
-                        zoningLabel={zoningLabel}
-                        districtMatch={districtMatch}
-                        zoningUseRows={zoningUseRows}
-                        linkListingId={linkListingIdForSelection}
-                        vacationRentalSlug={vacationRentalSlugForSelection}
-                      />
-                    ) : null}
-                  </>
-                ) : selectedParcel ? (
+                {selectedParcel ? (
                   <ParcelDetailPanel
                     {...parcelMapCtas}
                     selectedParcel={selectedParcel}
@@ -1939,6 +1926,11 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     linkListingId={linkListingIdForSelection}
                     vacationRentalSlug={vacationRentalSlugForSelection}
                   />
+                ) : selectedRental ? (
+                  <p className="rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-center text-xs text-[var(--nantucket-gray)]">
+                    This vacation rental pin did not match a loaded tax parcel. Zoom to Nantucket or tap a lot on the map
+                    for full parcel and zoning detail.
+                  </p>
                 ) : null}
               </div>
             ) : selectedRental && selectedParcel ? (
@@ -2098,7 +2090,9 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     <>
                       {selectedLink.closePrice ? <>Sold {selectedLink.closePrice}</> : null}
                       {selectedLink.closePrice && selectedLink.closeDate ? " · " : null}
-                      {selectedLink.closeDate ? <span>Closed {selectedLink.closeDate}</span> : null}
+                      {selectedLink.closeDate ? (
+                        <span>Closed {formatLinkMlsDateDisplay(selectedLink.closeDate)}</span>
+                      ) : null}
                       {!selectedLink.closePrice && selectedLink.listPrice ? (
                         <span>Listed {selectedLink.listPrice}</span>
                       ) : null}
@@ -2121,7 +2115,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   </a>
                 </Button>
                 <p className="text-center text-xs text-[var(--nantucket-gray)]">
-                  Pin is placed at the matched tax parcel centroid; verify on the official listing.
+                  Pin is placed inside the matched tax parcel (interior label point); verify on the official listing.
                 </p>
               </div>
             ) : (

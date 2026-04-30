@@ -116,9 +116,7 @@ export default async function RegulatoryHubPage() {
             viability — zoning constraints, HDC likelihood, and timeline expectations.
           </p>
           <a
-            href="https://calendly.com/stephen-maury/gut-check"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="mailto:stephen@maury.net?subject=Project%20Feasibility%20Gut%20Check"
             className="inline-block bg-[var(--privet-green)] text-white px-8 py-3 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors"
           >
             Project Feasibility Gut Check

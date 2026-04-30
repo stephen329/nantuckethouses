@@ -32,11 +32,11 @@ export function MapResearchHubStickyFooter({ className }: Props) {
           ·
         </span>
         <a
-          href="mailto:stephen@nantuckethouses.com"
+          href="mailto:stephen@maury.net"
           className="inline-flex min-h-10 max-w-full items-center rounded-md px-2 underline-offset-2 hover:underline"
-          aria-label="Email stephen@nantuckethouses.com"
+          aria-label="Email stephen@maury.net"
         >
-          stephen@nantuckethouses.com
+          stephen@maury.net
         </a>
       </p>
       <nav

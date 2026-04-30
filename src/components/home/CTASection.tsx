@@ -24,9 +24,7 @@ export function CTASection() {
             Talk to Stephen
           </a>
           <a
-            href="https://calendly.com/stephen-maury/gut-check"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="mailto:stephen@maury.net?subject=Project%20Feasibility%20Gut%20Check"
             className="inline-flex items-center gap-2 brand-btn brand-btn-secondary px-8 py-4 text-sm"
           >
             <ClipboardCheck className="w-4 h-4" />

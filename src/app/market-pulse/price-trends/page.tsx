@@ -511,7 +511,7 @@ export default function PriceTrendsPage() {
                 Request Custom Valuation
               </Link>
               <a
-                href="mailto:stephen@nantuckethouses.com?subject=Download%20Full%20Q1%202026%20Report"
+                href="mailto:stephen@maury.net?subject=Download%20Full%20Q1%202026%20Report"
                 className="inline-flex items-center justify-center bg-white/10 text-white px-5 py-2.5 rounded-md text-sm font-medium hover:bg-white/20 transition-colors"
               >
                 Download Full Q1 2026 Report

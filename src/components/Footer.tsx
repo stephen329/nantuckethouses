@@ -44,7 +44,7 @@ export function Footer() {
                 <Linkedin className="w-4 h-4" />
               </a>
               <a
-                href="mailto:stephen@nantuckethouses.com"
+                href="mailto:stephen@maury.net"
                 className="p-2 rounded-md bg-white/10 hover:bg-[var(--privet-green)] transition-colors"
                 aria-label="Email"
               >
@@ -138,8 +138,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:stephen@nantuckethouses.com" className="hover:text-white transition-colors">
-                  stephen@nantuckethouses.com
+                <a href="mailto:stephen@maury.net" className="hover:text-white transition-colors">
+                  stephen@maury.net
                 </a>
               </li>
             </ul>

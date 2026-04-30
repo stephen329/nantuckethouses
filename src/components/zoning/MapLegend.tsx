@@ -63,7 +63,7 @@ export function MapLegend({ showRentalsLegend = false, showLinkPinsLegend = fals
         <PinLegendRows
           showRentalsLegend={showRentalsLegend}
           showLinkPinsLegend={showLinkPinsLegend}
-          soldLabel="LINK — sold (matched to lot)"
+          soldLabel="Sold Listings (matched to lot)"
         />
       </div>
 
@@ -77,7 +77,7 @@ export function MapLegend({ showRentalsLegend = false, showLinkPinsLegend = fals
             <PinLegendRows
               showRentalsLegend={showRentalsLegend}
               showLinkPinsLegend={showLinkPinsLegend}
-              soldLabel="LINK — sold"
+              soldLabel="Sold Listings"
             />
           </div>
         ) : null}
