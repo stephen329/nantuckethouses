@@ -121,6 +121,66 @@ function hitListingOrClusterAtPoint(map: mapboxgl.Map, point: mapboxgl.PointLike
   return map.queryRenderedFeatures(point, { layers }).length > 0;
 }
 
+function pointInRing(lng: number, lat: number, ring: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i]![0];
+    const yi = ring[i]![1];
+    const xj = ring[j]![0];
+    const yj = ring[j]![1];
+    const intersects =
+      yi > lat !== yj > lat &&
+      lng < ((xj - xi) * (lat - yi)) / (yj - yi + Number.EPSILON) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInPolygonGeometry(lng: number, lat: number, geom: Geometry): boolean {
+  if (geom.type === "Polygon") {
+    const rings = geom.coordinates;
+    const outer = rings[0];
+    if (!outer || !pointInRing(lng, lat, outer)) return false;
+    for (let h = 1; h < rings.length; h++) {
+      if (pointInRing(lng, lat, rings[h]!)) return false;
+    }
+    return true;
+  }
+  if (geom.type === "MultiPolygon") {
+    for (const poly of geom.coordinates) {
+      const outer = poly[0];
+      if (!outer || !pointInRing(lng, lat, outer)) continue;
+      let inHole = false;
+      for (let hi = 1; hi < poly.length; hi++) {
+        if (pointInRing(lng, lat, poly[hi]!)) {
+          inHole = true;
+          break;
+        }
+      }
+      if (!inHole) return true;
+    }
+  }
+  return false;
+}
+
+function mlsAreaForPoint(
+  lng: number,
+  lat: number,
+  fc: FeatureCollection<Geometry, { Abbrv?: string; District?: string }> | null,
+): string | null {
+  if (!fc?.features?.length) return null;
+  for (const feature of fc.features) {
+    if (!feature.geometry) continue;
+    if (!pointInPolygonGeometry(lng, lat, feature.geometry)) continue;
+    const district = String(feature.properties?.District ?? "").trim();
+    const abbrv = String(feature.properties?.Abbrv ?? "").trim();
+    if (district && abbrv) return `${district} (${abbrv})`;
+    if (district) return district;
+    if (abbrv) return abbrv;
+  }
+  return null;
+}
+
 /** Fill opacity with hover lift (requires `promoteId: "parcel_id"` + feature-state). */
 const PARCEL_FILL_OPACITY_HOVER: mapboxgl.ExpressionSpecification = [
   "case",
@@ -751,11 +811,16 @@ export function ZoningMap({
 
         if (!popupRef.current) return;
         const address = feature.properties?.location ?? "Address unavailable";
-        const zoning = feature.properties?.zoning ?? "Unknown zoning";
+        const mlsArea = mlsAreaForPoint(event.lngLat.lng, event.lngLat.lat, reDistrictsGeoJson ?? null) ?? "Unknown";
 
         popupRef.current
           .setLngLat(event.lngLat)
-          .setHTML(`<div style="font-size:12px;"><strong>${address}</strong><br />${zoning}</div>`)
+          .setHTML(
+            `<div style="font-size:12px;">
+              <div><strong>Address:</strong> ${address}</div>
+              <div><strong>MLS Area:</strong> ${mlsArea}</div>
+            </div>`,
+          )
           .addTo(map);
       });
 

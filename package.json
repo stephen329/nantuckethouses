@@ -6,7 +6,8 @@
     "dev": "next dev -H 127.0.0.1",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:neighborhood-zoning": "node scripts/build-neighborhood-zoning-coverage.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
