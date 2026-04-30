@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3, Eye, Handshake, Landmark, ShieldCheck, Users } from "lucide-react";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 export const metadata: Metadata = {
   title: "About | NantucketHouses.com",
@@ -92,7 +93,7 @@ export default function AboutPage() {
             Stephen Maury.
           </p>
           <a
-            href="https://calendly.com/stephen-maury/30min"
+            href={SCHEDULE_CALL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex mt-6 brand-btn brand-btn-primary px-6 py-3 text-sm"
@@ -221,7 +222,7 @@ export default function AboutPage() {
                 Request a Custom Valuation Report
               </Link>
               <a
-                href="https://calendly.com/stephen-maury/30min"
+                href={SCHEDULE_CALL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center bg-white/10 text-white px-5 py-2.5 rounded-md text-sm font-medium hover:bg-white/20 transition-colors"

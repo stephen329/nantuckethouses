@@ -52,15 +52,13 @@ function linkMlsNeighborhood(mlsArea: string | null | undefined): string | null 
 function rentalPulseRows(listPrice: number | null, weeklyRent: number | null) {
   const peak = weeklyRent ?? (listPrice != null && listPrice > 0 ? Math.max(8000, Math.round(listPrice * 0.0011)) : null);
   if (peak == null) return null;
-  const lowW = 18;
-  const highW = 26;
-  const annualLow = Math.round(peak * lowW * 0.92);
-  const annualHigh = Math.round(peak * highW * 1.05);
+  /** Rule of thumb: ~10 peak summer weeks of gross rent (simplified annual revenue). */
+  const annualRevenue = Math.round(peak * 10);
   const cap =
     listPrice != null && listPrice > 0
-      ? `${(((annualLow + annualHigh) / 2 / listPrice) * 100).toFixed(1)}% (at list)`
+      ? `${((annualRevenue / listPrice) * 100).toFixed(1)}% (at list)`
       : "—";
-  return { peak, annualLow, annualHigh, cap };
+  return { peak, annualRevenue, cap };
 }
 
 function buildTimeline(link: LinkListingPinProperties | null): TimelineEntry[] {
@@ -434,9 +432,7 @@ export function PropertyIntelligencePanel({
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-[var(--nantucket-gray)]">Est. annual revenue</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">
-                  {formatMoney(rentalPulse.annualLow)}–{formatMoney(rentalPulse.annualHigh)}
-                </dd>
+                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(rentalPulse.annualRevenue)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-[var(--nantucket-gray)]">Est. cap rate</dt>
@@ -565,8 +561,9 @@ export function PropertyIntelligencePanel({
               href={`mailto:stephen@nantuckethouses.com?subject=${encodeURIComponent(`Property: ${title} — valuation / tour`)}`}
               target="_blank"
               rel="noopener noreferrer"
+              title="Custom valuation or property tour — opens your email app"
             >
-              Message Stephen — custom valuation / tour
+              Message Stephen
             </a>
           </Button>
         </div>

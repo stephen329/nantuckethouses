@@ -1,4 +1,5 @@
 import { Phone, ClipboardCheck } from "lucide-react";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 export function CTASection() {
   return (
@@ -14,7 +15,7 @@ export function CTASection() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="https://calendly.com/stephen-maury/30min"
+            href={SCHEDULE_CALL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 brand-btn brand-btn-primary px-8 py-4 text-sm"

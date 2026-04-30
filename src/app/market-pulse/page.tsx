@@ -10,6 +10,7 @@ import { PriceDistributionChart } from "@/components/charts/PriceDistributionCha
 import { NeighborhoodSalesTable } from "@/components/charts/NeighborhoodSalesTable";
 import { WhaleWatch } from "@/components/home/WhaleWatch";
 import type { WhaleWatchSale } from "@/types";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 type MonthlyData = {
   month: string;
@@ -285,7 +286,7 @@ export default function MarketPulsePage() {
             neighborhood, price point, or development plans — let&apos;s talk.
           </p>
           <a
-            href="https://calendly.com/stephen-maury/30min"
+            href={SCHEDULE_CALL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-[var(--privet-green)] text-white px-8 py-3 text-sm font-medium rounded-md hover:bg-[var(--privet-green)]/90 transition-colors"

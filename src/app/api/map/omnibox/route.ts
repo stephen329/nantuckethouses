@@ -5,11 +5,13 @@ import type { Feature, Geometry } from "geojson";
 import { fetchListings, type CncListing } from "@/lib/cnc-api";
 import { centroidFromGeometry } from "@/lib/geo-centroid";
 import { MAP_NEIGHBORHOOD_BOUNDS } from "@/lib/map-neighborhood-bounds";
+import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
 import type {
   OmniboxActiveListing,
   OmniboxCategories,
   OmniboxNeighborhoodHit,
   OmniboxParcelHit,
+  OmniboxParcelListingMatch,
   OmniboxResponse,
   OmniboxRentalHit,
   OmniboxSoldComp,
@@ -140,6 +142,89 @@ function pointInBbox(lng: number, lat: number, b: { west: number; south: number;
   return lng >= b.west && lng <= b.east && lat >= b.south && lat <= b.north;
 }
 
+function parcelIdFromStreetLine(
+  streetLine: string,
+  streetIndex: Map<string, { lng: number; lat: number; parcel_id: string }>,
+): string | null {
+  const stem = listingAddressStem(streetLine);
+  if (!stem || !looksLikeStreetAddress(stem)) return null;
+  const key = streetMatchKey(stem);
+  if (!key) return null;
+  const hit = streetIndex.get(key);
+  return hit ? String(hit.parcel_id).trim() : null;
+}
+
+const LISTING_KIND_RANK: Record<OmniboxParcelListingMatch["kind"], number> = {
+  link_active: 3,
+  link_sold: 2,
+  rental: 1,
+};
+
+/**
+ * Attach LINK / rental stats to parcel rows that appear in omnibox results; drop duplicate
+ * listing/rental rows that map to the same assessor parcel_id.
+ */
+function mergeListingsIntoParcels(
+  parcels: OmniboxParcelHit[],
+  active: OmniboxActiveListing[],
+  sold: OmniboxSoldComp[],
+  rentals: OmniboxRentalHit[],
+): {
+  activeListings: OmniboxActiveListing[];
+  soldComps: OmniboxSoldComp[];
+  rentals: OmniboxRentalHit[];
+} {
+  const parcelIds = new Set(parcels.map((p) => p.parcel_id));
+
+  const consider = (pid: string | null | undefined, m: OmniboxParcelListingMatch): void => {
+    if (!pid || !parcelIds.has(pid)) return;
+    const parcel = parcels.find((x) => x.parcel_id === pid);
+    if (!parcel) return;
+    const cur = parcel.matchedListing;
+    if (!cur || LISTING_KIND_RANK[m.kind] > LISTING_KIND_RANK[cur.kind]) {
+      parcel.matchedListing = m;
+    }
+  };
+
+  for (const l of active) {
+    if (l.parcelId) {
+      consider(l.parcelId, {
+        kind: "link_active",
+        linkId: l.id,
+        priceLabel: l.priceLabel,
+        statusLabel: "Active · LINK",
+      });
+    }
+  }
+  for (const l of sold) {
+    if (l.parcelId) {
+      consider(l.parcelId, {
+        kind: "link_sold",
+        linkId: l.id,
+        priceLabel: l.priceLabel,
+        statusLabel: "Sold · LINK",
+      });
+    }
+  }
+  for (const r of rentals) {
+    if (r.parcelId) {
+      consider(r.parcelId, {
+        kind: "rental",
+        nrPropertyId: r.nrPropertyId,
+        rentalSlug: r.slug ?? null,
+        priceLabel: r.priceLabel ?? "—",
+        statusLabel: "Vacation rental",
+      });
+    }
+  }
+
+  return {
+    activeListings: active.filter((l) => !l.parcelId || !parcelIds.has(l.parcelId)),
+    soldComps: sold.filter((l) => !l.parcelId || !parcelIds.has(l.parcelId)),
+    rentals: rentals.filter((r) => !r.parcelId || !parcelIds.has(r.parcelId)),
+  };
+}
+
 function buildCategories(o: {
   activeListings: OmniboxActiveListing[];
   soldComps: OmniboxSoldComp[];
@@ -168,11 +253,14 @@ function buildCategories(o: {
     parcels: o.parcels.map((p) => ({
       id: p.parcel_id,
       type: "parcel" as const,
-      label: `${p.address} • ${p.taxMap}-${p.parcel}`,
+      label: p.matchedListing
+        ? `${p.address} • ${p.matchedListing.statusLabel} · ${p.matchedListing.priceLabel}`
+        : `${p.address} • ${p.taxMap}-${p.parcel}`,
       zone: p.zone ?? "—",
       expansionVerdict: p.expansionVerdict ?? null,
       lat: p.lat,
       lng: p.lng,
+      matchedListing: p.matchedListing ?? null,
     })),
     neighborhoods: o.neighborhoods.map((n) => ({
       id: n.slug,
@@ -340,6 +428,7 @@ export async function GET(request: Request) {
         priceLabel: formatMoney(row.ListPrice ?? pt.listPrice),
         lat: pt.latitude,
         lng: pt.longitude,
+        parcelId: pt.parcel_id,
         source: "LINK",
         status: "for_sale",
       });
@@ -358,6 +447,7 @@ export async function GET(request: Request) {
         closeDate: row.CloseDate ?? null,
         lat: pt.latitude,
         lng: pt.longitude,
+        parcelId: pt.parcel_id,
         source: "LINK",
         status: "sold",
       });
@@ -379,14 +469,16 @@ export async function GET(request: Request) {
           if (id == null || lat == null || lng == null) continue;
           const wk = Math.max(0, ...(row.NrRentalRates?.map((r) => r.propertyWeeklyRentInteger ?? 0) ?? []));
           const weekly = wk > 0 ? wk : row.averageNightlyRate ? Math.round(row.averageNightlyRate * 7) : null;
+          const addrLine = String(row.streetAddress ?? "").trim() || "Rental";
           rentals.push({
             nrPropertyId: id,
             slug: row.slug?.trim() || null,
-            address: String(row.streetAddress ?? "").trim() || "Rental",
+            address: addrLine,
             headline: String(row.headline ?? "").trim(),
             priceLabel: weekly ? `${formatMoney(weekly)}/wk est.` : null,
             lat,
             lng,
+            parcelId: parcelIdFromStreetLine(addrLine, index),
           });
           if (rentals.length >= 10) break;
         }
@@ -395,17 +487,29 @@ export async function GET(request: Request) {
       }
     }
 
-    const categories = buildCategories({ activeListings, soldComps, parcels, neighborhoods });
+    const { activeListings: mergedActive, soldComps: mergedSold, rentals: mergedRentals } = mergeListingsIntoParcels(
+      parcels,
+      activeListings,
+      soldComps,
+      rentals,
+    );
+
+    const categories = buildCategories({
+      activeListings: mergedActive,
+      soldComps: mergedSold,
+      parcels,
+      neighborhoods,
+    });
 
     const out: OmniboxResponse = {
       query: q,
       suggestions: nlSuggestions,
       categories,
-      activeListings,
-      soldComps,
+      activeListings: mergedActive,
+      soldComps: mergedSold,
       parcels,
       neighborhoods,
-      rentals,
+      rentals: mergedRentals,
       nlSuggestions: NL_SUGGESTIONS,
     };
 

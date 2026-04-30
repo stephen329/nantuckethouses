@@ -1,5 +1,15 @@
 export type ExpansionVerdictOmnibox = "HIGH" | "MODERATE" | "MAXED";
 
+/** When a LINK or NR rental row maps to this parcel, omnibox shows one parcel row (no duplicate listing rows). */
+export type OmniboxParcelListingMatch = {
+  kind: "link_active" | "link_sold" | "rental";
+  linkId?: string;
+  nrPropertyId?: number;
+  rentalSlug?: string | null;
+  priceLabel: string;
+  statusLabel: string;
+};
+
 export type OmniboxActiveListing = {
   id: string;
   address: string;
@@ -7,6 +17,8 @@ export type OmniboxActiveListing = {
   priceLabel: string;
   lat: number | null;
   lng: number | null;
+  /** Assessor parcel_id when street matched parcel centroid index (omnibox may merge into parcel row). */
+  parcelId?: string | null;
   source: "LINK";
   status: "for_sale";
 };
@@ -19,6 +31,7 @@ export type OmniboxSoldComp = {
   closeDate: string | null;
   lat: number | null;
   lng: number | null;
+  parcelId?: string | null;
   source: "LINK";
   status: "sold";
 };
@@ -33,6 +46,8 @@ export type OmniboxParcelHit = {
   /** Normalized zoning code when available from parcel GIS. */
   zone?: string | null;
   expansionVerdict?: ExpansionVerdictOmnibox | null;
+  /** Highest-priority listing/rental merged into this parcel row (active LINK beats sold beats rental). */
+  matchedListing?: OmniboxParcelListingMatch | null;
 };
 
 export type OmniboxNeighborhoodHit = {
@@ -52,6 +67,7 @@ export type OmniboxRentalHit = {
   priceLabel: string | null;
   lat: number;
   lng: number;
+  parcelId?: string | null;
 };
 
 export type OmniboxNlSuggestion = {
@@ -87,6 +103,7 @@ export type OmniboxCategories = {
     expansionVerdict: ExpansionVerdictOmnibox | null;
     lat: number;
     lng: number;
+    matchedListing: OmniboxParcelListingMatch | null;
   }>;
   neighborhoods: Array<{
     id: string;

@@ -356,6 +356,11 @@ export function MapOmnibox({
                             {p.zone ? ` · ${p.zone}` : ""}
                             {p.expansionVerdict ? ` · ${p.expansionVerdict}` : ""}
                           </p>
+                          {p.matchedListing ? (
+                            <p className="mt-0.5 text-xs font-medium text-[var(--atlantic-navy)]">
+                              {p.matchedListing.statusLabel} · {p.matchedListing.priceLabel}
+                            </p>
+                          ) : null}
                         </div>
                       </CommandItem>
                     ))}

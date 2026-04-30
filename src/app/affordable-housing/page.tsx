@@ -5,6 +5,7 @@ import { FeaturedPartnerBanner } from "@/components/partners/FeaturedPartnerBann
 import housingData from "@/data/affordable-housing.json";
 import partnersData from "@/data/partners.json";
 import type { Partner } from "@/types";
+import { SCHEDULE_CALL_URL } from "@/lib/schedule-call-url";
 
 function formatCurrency(n: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -258,7 +259,7 @@ export default function AffordableHousingPage() {
               Submit to Opportunity Desk
             </Link>
             <a
-              href="https://calendly.com/stephen-maury/30min"
+              href={SCHEDULE_CALL_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white/10 text-white px-6 py-3 text-sm font-medium rounded-md hover:bg-white/20 transition-colors"
