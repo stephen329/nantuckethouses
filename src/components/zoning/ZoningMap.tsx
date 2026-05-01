@@ -332,6 +332,8 @@ export function ZoningMap({
   const highlightSoldRef = useRef(highlightSoldParcels);
   const soldParcelIdsRef = useRef(soldParcelIds);
   const showZoningColorsRef = useRef(showZoningColors);
+  const parcelBaseLayerRef = useRef(parcelBaseLayer);
+  const highlightedReDistrictAbbrvRef = useRef(highlightedReDistrictAbbrv);
   const onRentalPinSelectRef = useRef(onRentalPinSelect);
   const onViewportBoundsChangeRef = useRef(onViewportBoundsChange);
   const showRentalPinsRef = useRef(showRentalPins);
@@ -367,10 +369,21 @@ export function ZoningMap({
     highlightSoldRef.current = highlightSoldParcels;
     soldParcelIdsRef.current = soldParcelIds;
     showZoningColorsRef.current = showZoningColors;
+    parcelBaseLayerRef.current = parcelBaseLayer;
+    highlightedReDistrictAbbrvRef.current = highlightedReDistrictAbbrv;
     onRentalPinSelectRef.current = onRentalPinSelect;
     onViewportBoundsChangeRef.current = onViewportBoundsChange;
     showRentalPinsRef.current = showRentalPins;
-  }, [highlightSoldParcels, soldParcelIds, showZoningColors, onRentalPinSelect, onViewportBoundsChange, showRentalPins]);
+  }, [
+    highlightSoldParcels,
+    soldParcelIds,
+    showZoningColors,
+    parcelBaseLayer,
+    highlightedReDistrictAbbrv,
+    onRentalPinSelect,
+    onViewportBoundsChange,
+    showRentalPins,
+  ]);
 
   const applySoldParcelHighlight = (map: mapboxgl.Map) => {
     if (!map.getLayer("parcels-sold-outline")) return;
@@ -994,7 +1007,22 @@ export function ZoningMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    syncParcelAndReOverlay(map, { showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv });
+    const runSync = () =>
+      syncParcelAndReOverlay(map, {
+        showZoningColors: showZoningColorsRef.current,
+        parcelBaseLayer: parcelBaseLayerRef.current,
+        highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+      });
+    runSync();
+    /** MLS overlay needs RE layers; they may land a frame after `parcelBaseLayer` updates — bump sync. */
+    if (parcelBaseLayer !== "re_market_areas") return;
+    const bump = () => runSync();
+    const rafId = requestAnimationFrame(bump);
+    map.once("idle", bump);
+    return () => {
+      cancelAnimationFrame(rafId);
+      map.off("idle", bump);
+    };
   }, [showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
   useEffect(() => {
@@ -1005,7 +1033,7 @@ export function ZoningMap({
 
     /** Returns true once MLS district sources/layers are in place (or already were). */
     const ensureLayers = (): boolean => {
-      if (cancelled) return true;
+      if (cancelled) return false;
       if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return false;
       const data = reDistrictsGeoJson;
       if (!data) return true;
@@ -1084,7 +1112,11 @@ export function ZoningMap({
         }
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
       }
-      syncParcelAndReOverlay(map, { showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv });
+      syncParcelAndReOverlay(map, {
+        showZoningColors: showZoningColorsRef.current,
+        parcelBaseLayer: parcelBaseLayerRef.current,
+        highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+      });
       return true;
     };
 

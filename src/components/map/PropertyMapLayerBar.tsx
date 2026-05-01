@@ -123,16 +123,16 @@ export function PropertyMapOverlayChip({
   const [open, setOpen] = useState(false);
   const currentLabel = overlayOptionLabel(parcelBaseLayer);
   const isMlsAreas = parcelBaseLayer === "re_market_areas";
-  const buttonCaption = isMlsAreas ? "Overlay" : `Overlay: ${currentLabel}`;
 
   return (
-    <div className={cn("flex min-w-0 flex-wrap items-center gap-1.5", className)}>
+    <div className={cn(className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
             className={cn(
               "inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/35 bg-white/95 px-2.5 py-0.5 text-[11px] font-semibold normal-case text-[var(--atlantic-navy)] shadow-sm transition-colors hover:border-[var(--cedar-shingle)]/55 hover:bg-[var(--sandstone)]/90",
+              isMlsAreas && "border-blue-700/30 bg-blue-50/95 hover:border-blue-700/45 hover:bg-blue-50",
               layout === "stack" && "w-full justify-center",
               triggerClassName,
             )}
@@ -140,7 +140,18 @@ export function PropertyMapOverlayChip({
             aria-expanded={open}
             aria-label={`Map overlay: ${currentLabel}. Change overlay.`}
           >
-            <span className="max-w-[11rem] truncate sm:max-w-[14rem]">{buttonCaption}</span>
+            {isMlsAreas ? (
+              <span className="flex min-w-0 max-w-[min(100vw-8rem,18rem)] items-center gap-1.5 truncate">
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-[var(--nantucket-gray)]">
+                  Overlay
+                </span>
+                <span className="min-w-0 truncate text-[11px] font-semibold text-blue-900" title="Neighborhood-style MLS district polygons">
+                  MLS Areas
+                </span>
+              </span>
+            ) : (
+              <span className="max-w-[11rem] truncate sm:max-w-[14rem]">Overlay: {currentLabel}</span>
+            )}
             <ChevronDown
               className={cn("h-3.5 w-3.5 shrink-0 opacity-70 transition-transform", open && "rotate-180")}
               aria-hidden
@@ -177,14 +188,6 @@ export function PropertyMapOverlayChip({
           </div>
         </PopoverContent>
       </Popover>
-      {isMlsAreas ? (
-        <span
-          className="shrink-0 text-[11px] font-semibold leading-tight tracking-tight text-blue-900"
-          title="Neighborhood-style MLS district polygons"
-        >
-          MLS Areas
-        </span>
-      ) : null}
     </div>
   );
 }
