@@ -424,7 +424,7 @@ function ParcelDetailPanel({
 
   const parcelInfoInner = (
     <>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Parcel Data</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Property Info</p>
       {parcelMetricsOnly}
     </>
   );
@@ -437,21 +437,26 @@ function ParcelDetailPanel({
     />
   );
 
+  const compsOutlineBtn =
+    "w-full border border-[var(--atlantic-navy)] bg-white text-[var(--atlantic-navy)] shadow-none hover:bg-[var(--sandstone)]/50 disabled:border-[var(--cedar-shingle)]/40 disabled:text-[var(--nantucket-gray)]";
+
   const mapCompsButtons =
     onViewNearbySales || onViewComparableRentals ? (
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
-          className="w-full bg-[var(--atlantic-navy)] text-white hover:bg-[var(--atlantic-navy)]/90"
+          variant="outline"
+          className={compsOutlineBtn}
           disabled={!onViewNearbySales}
           title={!onViewNearbySales ? undefined : "Show sold LINK comps near this lot on the map"}
           onClick={() => onViewNearbySales?.()}
         >
-          View Nearby Sales
+          Nearby Sales
         </Button>
         <Button
           type="button"
-          className="w-full bg-[var(--privet-green)] text-white hover:bg-[var(--brass-hover)]"
+          variant="outline"
+          className={compsOutlineBtn}
           disabled={!onViewComparableRentals}
           title={!onViewComparableRentals ? undefined : "Show vacation rentals near this lot on the map"}
           onClick={() => onViewComparableRentals?.()}
@@ -651,6 +656,24 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
       primaryCtaHref: slug ? nantucketVacationRentalListingUrl(slug) : nantucketRentalsPropertySearchUrl({}),
     };
   }, [selectedRental]);
+
+  /** Same headline logic as `PropertyIntelligencePanel` — used for mobile drawer mailto + footer stack. */
+  const propertyMapMobileMessageMailtoHref = useMemo(() => {
+    if (!isPropertyMap) return undefined;
+    const panelTitle =
+      selectedLink?.address ??
+      (selectedParcel?.location && selectedRental != null
+        ? selectedParcel.location
+        : selectedRental?.streetAddress ?? selectedRental?.headline ?? selectedParcel?.location ?? "Property");
+    return `mailto:stephen@maury.net?subject=${encodeURIComponent(`Property: ${panelTitle} — valuation / tour`)}`;
+  }, [
+    isPropertyMap,
+    selectedLink?.address,
+    selectedParcel?.location,
+    selectedRental,
+    selectedRental?.streetAddress,
+    selectedRental?.headline,
+  ]);
 
   useEffect(() => {
     setMapModes(parseMapModes(searchParams.get("mode")));
@@ -2255,6 +2278,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
       </div>
 
       <Drawer
+        direction="bottom"
         open={mobilePanelOpen && (!!selectedParcel || !!selectedRental || !!selectedLink)}
         onOpenChange={(open) => {
           setMobilePanelOpen(open);
@@ -2280,9 +2304,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
               Back to map
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto" data-property-map-drawer-scroll>
+          <div
+            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+            data-property-map-drawer-scroll
+          >
             {isPropertyMap ? (
-              <div className="flex flex-col pb-4">
+              <div className="flex flex-col pb-0">
                 <PropertyIntelligencePanel
                   compactHero
                   repeatHeroTitleBelow={false}
@@ -2550,7 +2577,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
               <MapResearchHubStickyFooter
                 showContactLinks={false}
                 showLegalNav={false}
-                className="px-3 pt-3"
+                className="px-3 pt-0"
+                messageStephenMailtoHref={propertyMapMobileMessageMailtoHref}
                 {...(mapResearchHubPrimaryCta ?? {})}
               />
             </DrawerFooter>

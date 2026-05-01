@@ -18,7 +18,7 @@ type VisibleMap = Partial<Record<PropertyMapSectionKey, boolean>>;
 
 const CHIP_LABELS: Record<PropertyMapSectionKey, string> = {
   ourTake: "Our Take",
-  parcelInfo: "Parcel Info",
+  parcelInfo: "Property Info",
   zoning: "Zoning",
   uses: "Allowable Uses",
   timeline: "Timeline",
@@ -27,9 +27,21 @@ const CHIP_LABELS: Record<PropertyMapSectionKey, string> = {
 
 const CHIP_ORDER: PropertyMapSectionKey[] = ["ourTake", "parcelInfo", "zoning", "uses", "timeline", "comps"];
 
+/**
+ * Sticky bar height budget for scroll spy + section scroll-margin (address + chip row).
+ * Keep in sync with `propertyMapSectionScrollClass` (Tailwind needs a literal `scroll-mt-[…]` in source).
+ */
+const STICKY_NAV_TOP_OFFSET_PX = 92;
+
 function scrollSectionIntoView(id: string) {
   const el = document.getElementById(id);
-  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const root = el?.closest("[data-property-map-drawer-scroll]") as HTMLElement | null;
+  if (!el || !root) return;
+  /** Scroll the drawer column only on Y — `scrollIntoView` can nudge the page horizontally on some layouts. */
+  const rootRect = root.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const deltaY = elRect.top - rootRect.top - STICKY_NAV_TOP_OFFSET_PX;
+  root.scrollBy({ top: deltaY, left: 0, behavior: "smooth" });
 }
 
 function visibleChipKeys(visible: VisibleMap): PropertyMapSectionKey[] {
@@ -44,12 +56,6 @@ type Props = {
   /** Fires when the highlighted section changes (scroll spy or chip tap). */
   onActiveSectionChange?: (section: PropertyMapSectionKey) => void;
 };
-
-/**
- * Sticky bar height budget for scroll spy + section scroll-margin (address + chip row).
- * Keep in sync with `propertyMapSectionScrollClass` (Tailwind needs a literal `scroll-mt-[…]` in source).
- */
-const STICKY_NAV_TOP_OFFSET_PX = 92;
 
 /** Horizontal chip strip; sticky within the drawer scroll area, below the hero. */
 export function PropertyMapSlideUpSectionNav({ visible, addressLine, className, onActiveSectionChange }: Props) {
@@ -127,17 +133,17 @@ export function PropertyMapSlideUpSectionNav({ visible, addressLine, className, 
     <div
       ref={navRef}
       className={cn(
-        "sticky top-0 z-20 -mx-4 border-b border-[var(--cedar-shingle)]/15 bg-white/95 px-4 pb-2 pt-2 backdrop-blur-sm",
+        "sticky top-0 z-20 border-b border-[var(--cedar-shingle)]/15 bg-white/95 px-4 pb-2 pt-2 backdrop-blur-sm",
         className,
       )}
     >
       {trimmedAddress ? (
-        <p className="mb-1.5 line-clamp-2 text-center text-sm font-semibold leading-snug text-[var(--atlantic-navy)]">
+        <p className="mb-1.5 line-clamp-2 text-left text-sm font-semibold leading-snug text-[var(--atlantic-navy)]">
           {trimmedAddress}
         </p>
       ) : null}
       <div
-        className="flex flex-wrap justify-center gap-1.5 pb-0.5"
+        className="flex flex-wrap justify-start gap-1.5 pb-0.5"
         role="tablist"
         aria-label={trimmedAddress ? `Parcel sections · ${trimmedAddress}` : "Parcel detail sections"}
       >

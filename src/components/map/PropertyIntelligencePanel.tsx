@@ -485,6 +485,26 @@ export function PropertyIntelligencePanel({
 
   const sectionScroll = propertyMapSectionScrollClass();
 
+  /** Mobile drawer sticky strip: `Street | MLS area | Zoning` (skip empty middle/end segments). */
+  const slideUpAddressLine = useMemo(() => {
+    if (!propertyMapSlideUpNav) return "";
+    const addr = title.trim();
+    const mls = (parcelLinkListingMatch?.mlsArea ?? selectedLink?.mlsArea ?? "").trim();
+    const zoneRaw = (selectedParcel?.zoning ?? zoningLabel).trim();
+    const parts: string[] = [];
+    if (addr) parts.push(addr);
+    if (mls) parts.push(mls);
+    if (zoneRaw && zoneRaw !== "Unknown") parts.push(zoneRaw);
+    return parts.join(" | ");
+  }, [
+    propertyMapSlideUpNav,
+    title,
+    parcelLinkListingMatch?.mlsArea,
+    selectedLink?.mlsArea,
+    selectedParcel?.zoning,
+    zoningLabel,
+  ]);
+
   const takeColumn = (
     <>
       {repeatHeroTitleBelow ? (
@@ -612,7 +632,12 @@ export function PropertyIntelligencePanel({
     </section>
   );
 
-  const ctaColumn = (
+  const ctaHasContent =
+    Boolean(selectedRental?.slug?.trim()) ||
+    Boolean(vacationRentalSlug && !selectedRental) ||
+    !propertyMapSlideUpNav;
+
+  const ctaColumn = !ctaHasContent ? null : (
     <div className="flex flex-col gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
       {selectedRental?.slug?.trim() ? (
         <Button asChild variant="outline" className="w-full text-sm">
@@ -628,16 +653,18 @@ export function PropertyIntelligencePanel({
           </a>
         </Button>
       ) : null}
-      <a
-        href={`mailto:stephen@maury.net?subject=${encodeURIComponent(`Property: ${title} — valuation / tour`)}`}
-        className={cn(
-          buttonVariants({ size: "default" }),
-          "w-full bg-[var(--atlantic-navy)] text-sm text-white hover:bg-[var(--atlantic-navy)]/90",
-        )}
-        title="Custom valuation or property tour — opens your email app"
-      >
-        Message Stephen
-      </a>
+      {propertyMapSlideUpNav ? null : (
+        <a
+          href={`mailto:stephen@maury.net?subject=${encodeURIComponent(`Property: ${title} — valuation / tour`)}`}
+          className={cn(
+            buttonVariants({ size: "default" }),
+            "w-full bg-[var(--atlantic-navy)] text-sm text-white hover:bg-[var(--atlantic-navy)]/90",
+          )}
+          title="Custom valuation or property tour — opens your email app"
+        >
+          Message Stephen
+        </a>
+      )}
     </div>
   );
 
@@ -670,7 +697,7 @@ export function PropertyIntelligencePanel({
       {propertyMapSlideUpNav ? (
         <>
           <PropertyMapSlideUpSectionNav
-            addressLine={title}
+            addressLine={slideUpAddressLine}
             visible={{
               ourTake: true,
               parcelInfo: Boolean(parcelInfoSlot),
