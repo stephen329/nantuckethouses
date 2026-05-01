@@ -168,7 +168,8 @@ function pointInPolygonGeometry(lng: number, lat: number, geom: Geometry): boole
   return false;
 }
 
-function mlsAreaForPoint(
+/** Full MLS market area name only (`District`); never the short code (`Abbrv`). */
+function mlsDistrictNameForPoint(
   lng: number,
   lat: number,
   fc: FeatureCollection<Geometry, { Abbrv?: string; District?: string }> | null,
@@ -178,12 +179,18 @@ function mlsAreaForPoint(
     if (!feature.geometry) continue;
     if (!pointInPolygonGeometry(lng, lat, feature.geometry)) continue;
     const district = String(feature.properties?.District ?? "").trim();
-    const abbrv = String(feature.properties?.Abbrv ?? "").trim();
-    if (district && abbrv) return `${district} (${abbrv})`;
     if (district) return district;
-    if (abbrv) return abbrv;
   }
   return null;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /** Fill opacity with hover lift (requires `promoteId: "parcel_id"` + feature-state). */
@@ -349,6 +356,7 @@ export function ZoningMap({
   const linkSoldGeoJsonRef = useRef(linkSoldGeoJson);
   const onLinkListingPinSelectRef = useRef(onLinkListingPinSelect);
   const showLinkPinsRef = useRef(showLinkPins);
+  const reDistrictsGeoJsonRef = useRef(reDistrictsGeoJson);
 
   useEffect(() => {
     rentalGeoJsonRef.current = rentalGeoJson ?? null;
@@ -361,6 +369,10 @@ export function ZoningMap({
   useEffect(() => {
     linkSoldGeoJsonRef.current = linkSoldGeoJson ?? null;
   }, [linkSoldGeoJson]);
+
+  useEffect(() => {
+    reDistrictsGeoJsonRef.current = reDistrictsGeoJson ?? null;
+  }, [reDistrictsGeoJson]);
 
   useEffect(() => {
     onLinkListingPinSelectRef.current = onLinkListingPinSelect;
@@ -832,8 +844,13 @@ export function ZoningMap({
         }
 
         if (!popupRef.current) return;
-        const address = feature.properties?.location ?? "Address unavailable";
-        const mlsArea = mlsAreaForPoint(event.lngLat.lng, event.lngLat.lat, reDistrictsGeoJson ?? null) ?? "Unknown";
+        const addressRaw = String(feature.properties?.location ?? "").trim() || "Address unavailable";
+        const zoningRaw = String(feature.properties?.zoning ?? "").trim() || "Unknown";
+        const mlsDistrict =
+          mlsDistrictNameForPoint(event.lngLat.lng, event.lngLat.lat, reDistrictsGeoJsonRef.current) ?? "Unknown";
+        const address = escapeHtml(addressRaw);
+        const zoning = escapeHtml(zoningRaw);
+        const mlsArea = escapeHtml(mlsDistrict);
 
         popupRef.current
           .setLngLat(event.lngLat)
@@ -841,6 +858,7 @@ export function ZoningMap({
             `<div style="font-size:12px;">
               <div><strong>Address:</strong> ${address}</div>
               <div><strong>MLS Area:</strong> ${mlsArea}</div>
+              <div><strong>Zoning:</strong> ${zoning}</div>
             </div>`,
           )
           .addTo(map);
