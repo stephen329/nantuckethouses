@@ -27,6 +27,23 @@ export type LinkPropertyTypeKey = "houses" | "land" | "commercial";
 /** Sold-pool “closed in the last …” window; empty = no date filter. */
 export type LinkFiltersSoldInLast = "" | "7d" | "30d" | "90d" | "6m" | "12m" | "24m" | "36m";
 
+/**
+ * Default sold closings lookback for `/api/map/link-listings` bbox requests (days).
+ * Client-side `soldInLast` narrows further; when cleared, pins still respect this feed window.
+ */
+export const LINK_MAP_DEFAULT_SOLD_FEED_DAYS = 1095;
+
+/** Human label for {@link LINK_MAP_DEFAULT_SOLD_FEED_DAYS} (keep in sync with map API default). */
+export function linkMapImplicitSoldFeedLabel(): string {
+  const d = LINK_MAP_DEFAULT_SOLD_FEED_DAYS;
+  if (d >= 330) {
+    const y = Math.max(1, Math.round(d / 365));
+    return y === 1 ? "~1 year" : `~${y} years`;
+  }
+  const m = Math.max(1, Math.round(d / 30));
+  return `~${m} months`;
+}
+
 /** Preset rows for the “Sold in last” control (no “any time” row — empty state uses a hidden `option`). */
 export const LINK_FILTERS_SOLD_IN_LAST_OPTIONS: { value: Exclude<LinkFiltersSoldInLast, "">; label: string }[] = [
   { value: "7d", label: "7 days" },
@@ -216,6 +233,8 @@ export type MapAppliedFilterChip = {
   id: string;
   source: "rental" | "link";
   label: string;
+  /** When false, toolbar shows the pill without a remove control (informational). */
+  dismissable?: boolean;
 };
 
 function soldInLastPresetLabel(preset: LinkFiltersSoldInLast): string {
@@ -275,12 +294,21 @@ export function buildMapAppliedFilterChips(params: {
       const lab = LINK_PROPERTY_TYPE_LABELS.find((x) => x.key === k)?.label ?? k;
       chips.push({ id: `link:ptype:${k}`, source: "link", label: lab });
     }
-    if (showSold && l.soldInLast) {
-      chips.push({
-        id: "link:soldInLast",
-        source: "link",
-        label: `Sold: last ${soldInLastPresetLabel(l.soldInLast)}`,
-      });
+    if (showSold) {
+      if (l.soldInLast) {
+        chips.push({
+          id: "link:soldInLast",
+          source: "link",
+          label: `Sold: ${soldInLastPresetLabel(l.soldInLast)}`,
+        });
+      } else {
+        chips.push({
+          id: "link:soldFeedImplicit",
+          source: "link",
+          label: `Sold: ${linkMapImplicitSoldFeedLabel()}`,
+          dismissable: false,
+        });
+      }
     }
     if (l.minDom.trim()) chips.push({ id: "link:domMin", source: "link", label: `DOM ≥ ${l.minDom}` });
     if (l.maxDom.trim()) chips.push({ id: "link:domMax", source: "link", label: `DOM ≤ ${l.maxDom}` });

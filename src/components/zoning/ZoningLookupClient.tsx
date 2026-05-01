@@ -45,6 +45,7 @@ import {
   DEFAULT_LINK_FILTERS,
   DEFAULT_RENTAL_FILTERS,
   filterLinkFeatureCollection,
+  LINK_MAP_DEFAULT_SOLD_FEED_DAYS,
   removeMapAppliedFilterChip,
   type LinkFiltersState,
   type PropertyMapMode,
@@ -604,7 +605,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     const pool = hasSaleMode && hasSoldMode ? "both" : hasSaleMode ? "active" : "sold";
     const ac = new AbortController();
     fetch(
-      `/api/map/link-listings?parcel_id=${encodeURIComponent(pid)}&pool=${encodeURIComponent(pool)}&soldDays=1095`,
+      `/api/map/link-listings?parcel_id=${encodeURIComponent(pid)}&pool=${encodeURIComponent(pool)}&soldDays=${LINK_MAP_DEFAULT_SOLD_FEED_DAYS}`,
       { signal: ac.signal },
     )
       .then(async (r) => {
@@ -1398,42 +1399,58 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   role="list"
                   aria-label="Active map filters"
                 >
-                  {appliedFilterChips.map((chip) => (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      role="listitem"
-                      aria-label={`Remove filter: ${chip.label}`}
-                      className={cn(
-                        "inline-flex max-w-full items-center gap-1 rounded-full border py-0.5 pl-2.5 pr-1 text-[11px] font-medium leading-tight shadow-sm transition-colors",
-                        chip.source === "rental"
-                          ? "border-emerald-700/25 bg-emerald-50/95 text-emerald-950 hover:border-emerald-700/40 hover:bg-emerald-50"
-                          : "border-blue-700/25 bg-blue-50/95 text-blue-950 hover:border-blue-700/40 hover:bg-blue-50",
-                      )}
-                      onClick={() => {
-                        const { rental: nextR, link: nextL } = removeMapAppliedFilterChip(
-                          chip.id,
-                          rentalFilters,
-                          linkFilters,
-                        );
-                        setRentalFilters(nextR);
-                        setLinkFilters(nextL);
-                      }}
-                    >
-                      <span className="min-w-0 truncate">{chip.label}</span>
+                  {appliedFilterChips.map((chip) =>
+                    chip.dismissable === false ? (
                       <span
+                        key={chip.id}
+                        role="listitem"
+                        title="Sold pins use the map feed lookback. Open Filters to narrow by a shorter window."
                         className={cn(
-                          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                          "inline-flex max-w-full items-center rounded-full border py-0.5 pl-2.5 pr-2.5 text-[11px] font-medium leading-tight text-blue-950 shadow-sm",
                           chip.source === "rental"
-                            ? "bg-emerald-700/15 text-emerald-900 hover:bg-emerald-700/25"
-                            : "bg-blue-700/15 text-blue-900 hover:bg-blue-700/25",
+                            ? "border-emerald-700/25 bg-emerald-50/95"
+                            : "border-blue-700/25 bg-blue-50/95",
                         )}
-                        aria-hidden
                       >
-                        <X className="h-3 w-3" strokeWidth={2.5} />
+                        <span className="min-w-0 truncate">{chip.label}</span>
                       </span>
-                    </button>
-                  ))}
+                    ) : (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        role="listitem"
+                        aria-label={`Remove filter: ${chip.label}`}
+                        className={cn(
+                          "inline-flex max-w-full items-center gap-1 rounded-full border py-0.5 pl-2.5 pr-1 text-[11px] font-medium leading-tight shadow-sm transition-colors",
+                          chip.source === "rental"
+                            ? "border-emerald-700/25 bg-emerald-50/95 text-emerald-950 hover:border-emerald-700/40 hover:bg-emerald-50"
+                            : "border-blue-700/25 bg-blue-50/95 text-blue-950 hover:border-blue-700/40 hover:bg-blue-50",
+                        )}
+                        onClick={() => {
+                          const { rental: nextR, link: nextL } = removeMapAppliedFilterChip(
+                            chip.id,
+                            rentalFilters,
+                            linkFilters,
+                          );
+                          setRentalFilters(nextR);
+                          setLinkFilters(nextL);
+                        }}
+                      >
+                        <span className="min-w-0 truncate">{chip.label}</span>
+                        <span
+                          className={cn(
+                            "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                            chip.source === "rental"
+                              ? "bg-emerald-700/15 text-emerald-900 hover:bg-emerald-700/25"
+                              : "bg-blue-700/15 text-blue-900 hover:bg-blue-700/25",
+                          )}
+                          aria-hidden
+                        >
+                          <X className="h-3 w-3" strokeWidth={2.5} />
+                        </span>
+                      </button>
+                    ),
+                  )}
                 </div>
               ) : null}
 
