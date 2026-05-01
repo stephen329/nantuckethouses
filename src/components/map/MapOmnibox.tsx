@@ -275,12 +275,21 @@ export function MapOmnibox({
         className={cn(
           "z-[60] max-w-none border-[var(--cedar-shingle)]/20 bg-white p-0 text-[var(--atlantic-navy)] shadow-lg",
           "w-[var(--radix-popover-trigger-width)] min-w-[min(100%,18rem)] max-w-[min(calc(100vw-2rem),36rem)] rounded-xl",
+          compact &&
+            "max-h-[min(calc(100dvh-6rem),calc(100svh-6rem),85dvh)] overflow-y-auto overscroll-y-contain",
         )}
         onOpenAutoFocus={(e) => e.preventDefault()}
         onPointerDownOutside={() => clearPreview()}
       >
         <Command className="rounded-md bg-white" shouldFilter={false}>
-          <CommandList className="max-h-[min(70vh,28rem)] overflow-y-auto bg-white p-1">
+          <CommandList
+            className={cn(
+              "overflow-y-auto overscroll-y-contain bg-white p-1",
+              compact
+                ? "max-h-[min(16rem,calc(100svh-11rem),calc(100dvh-11rem))] sm:max-h-[min(70vh,28rem)]"
+                : "max-h-[min(70vh,28rem)]",
+            )}
+          >
             {value.trim().length < 2 ? (
               <>
                 <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--nantucket-gray)]">Stephen&apos;s quick picks</p>

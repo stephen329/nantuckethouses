@@ -1265,6 +1265,22 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     dismissWelcomeSession();
   }, [isPropertyMap, omniboxOpen, dismissWelcomeSession]);
 
+  /** Narrow + open omnibox: lock page scroll so the keyboard / dropdown does not grow the document past the viewport. */
+  useEffect(() => {
+    if (!isPropertyMap || !layoutNarrow || typeof document === "undefined") return;
+    if (!omniboxOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [isPropertyMap, layoutNarrow, omniboxOpen]);
+
   useEffect(() => {
     if (!isPropertyMap || !filtersOpen) return;
     dismissWelcomeSession();
@@ -1369,12 +1385,6 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     </button>
                   ))}
                 </div>
-                <PropertyMapOverlayChip
-                  className="shrink-0 lg:hidden"
-                  triggerClassName="px-2 py-0.5 sm:px-2.5 sm:py-1 sm:text-sm"
-                  parcelBaseLayer={parcelBaseLayer}
-                  onParcelBaseLayer={applyParcelBaseLayer}
-                />
                 {hasListingTypeSelected ? (
                   <button
                     type="button"
@@ -1537,14 +1547,16 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
 
         <div
           className={cn(
-            "map-content-area grid gap-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:gap-4",
-            isPropertyMap && "-mx-4 min-h-[calc(100dvh-8.75rem)] flex-1 sm:-mx-6 lg:mx-0 lg:min-h-0",
+            "map-content-area gap-2",
+            isPropertyMap
+              ? "-mx-4 flex min-h-0 flex-1 flex-col overflow-hidden sm:-mx-6 lg:mx-0 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:gap-4"
+              : "grid lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:gap-4",
           )}
         >
           <div
             className={cn(
               "brand-surface overflow-hidden p-1.5 lg:p-2",
-              isPropertyMap && "flex min-h-[calc(100dvh-8.75rem)] flex-1 flex-col rounded-none p-0 lg:min-h-0 lg:rounded-xl lg:p-2",
+              isPropertyMap && "flex min-h-0 flex-1 flex-col rounded-none p-0 lg:rounded-xl lg:p-2",
             )}
           >
             {isLoading ? (
@@ -1568,25 +1580,33 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 ) : null}
                 {isPropertyMap ? (
                   <div className={cn("absolute inset-x-0 top-0 z-[12] px-2 pt-2 lg:px-4 lg:pt-3", mapUiHidden && "pointer-events-none opacity-0")}>
-                    <div className="pointer-events-auto mx-auto w-full max-w-3xl">
-                      <MapOmnibox
-                        mapMode={mapModeForOmnibox}
-                        open={omniboxOpen}
-                        onOpenChange={setOmniboxOpen}
-                        onApplyNlPreset={handleApplyNlPreset}
-                        onSelectParcelId={handleOmniboxParcelSelect}
-                        onSelectRentalHit={handleOmniboxRentalHit}
-                        onSelectLinkHit={handleOmniboxLinkHit}
-                        onSelectNeighborhoodSlug={handleOmniboxNeighborhoodSlug}
-                        mapBounds={mapBounds}
-                        prefillNonce={omniboxPrefillNonce}
-                        prefillQuery={omniboxPrefillQuery}
-                        compact
-                        onPreviewChange={(p) => {
-                          if (!p) setOmniboxPreview(null);
-                          else if (p.parcelId) setOmniboxPreview({ parcelId: p.parcelId });
-                          else if (p.lng != null && p.lat != null) setOmniboxPreview({ lng: p.lng, lat: p.lat });
-                        }}
+                    <div className="pointer-events-auto mx-auto flex w-full max-w-3xl items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <MapOmnibox
+                          mapMode={mapModeForOmnibox}
+                          open={omniboxOpen}
+                          onOpenChange={setOmniboxOpen}
+                          onApplyNlPreset={handleApplyNlPreset}
+                          onSelectParcelId={handleOmniboxParcelSelect}
+                          onSelectRentalHit={handleOmniboxRentalHit}
+                          onSelectLinkHit={handleOmniboxLinkHit}
+                          onSelectNeighborhoodSlug={handleOmniboxNeighborhoodSlug}
+                          mapBounds={mapBounds}
+                          prefillNonce={omniboxPrefillNonce}
+                          prefillQuery={omniboxPrefillQuery}
+                          compact
+                          onPreviewChange={(p) => {
+                            if (!p) setOmniboxPreview(null);
+                            else if (p.parcelId) setOmniboxPreview({ parcelId: p.parcelId });
+                            else if (p.lng != null && p.lat != null) setOmniboxPreview({ lng: p.lng, lat: p.lat });
+                          }}
+                        />
+                      </div>
+                      <PropertyMapOverlayChip
+                        className="shrink-0 lg:hidden"
+                        triggerClassName="h-10 px-2 py-0 sm:px-2.5"
+                        parcelBaseLayer={parcelBaseLayer}
+                        onParcelBaseLayer={applyParcelBaseLayer}
                       />
                     </div>
                   </div>
