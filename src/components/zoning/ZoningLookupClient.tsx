@@ -32,7 +32,11 @@ import {
 } from "@/lib/link-listings-parcel-match";
 import type { NrMapRentalResult, RentalPinFeature } from "@/lib/nr-map-rentals";
 import { rentalsToGeoJson } from "@/lib/nr-map-rentals";
-import { nantucketVacationRentalListingUrl } from "@/lib/nr-vacation-rental-url";
+import {
+  nantucketRentalsComparableSearchUrlFromListingBedrooms,
+  nantucketRentalsPropertySearchUrl,
+  nantucketVacationRentalListingUrl,
+} from "@/lib/nr-vacation-rental-url";
 import {
   applyRentalFilters,
   countActiveLinkFilters,
@@ -48,7 +52,7 @@ import { PropertyMapFiltersSheet } from "@/components/map/PropertyMapFiltersShee
 import {
   PropertyMapDesktopLayerBar,
   PropertyMapLayerHelpTrigger,
-  PropertyMapLayerPillsRow,
+  PropertyMapOverlayChip,
   ZoningLookupColorsStrip,
 } from "@/components/map/PropertyMapLayerBar";
 import { MapLegalNoticeButton } from "@/components/map/MapLegalNoticeButton";
@@ -81,23 +85,27 @@ type SelectableMapMode = Exclude<PropertyMapMode, "all">;
 const EMPTY_LINK_FC: FeatureCollection<Point, LinkListingPinProperties> = { type: "FeatureCollection", features: [] };
 
 function parseMapModes(v: string | null): SelectableMapMode[] {
-  if (!v) return ["rent"];
-  if (v === "all") return ["rent", "sale", "sold"];
+  if (v == null) return ["rent"];
+  const t = v.trim();
+  if (t === "" || t === "none") return [];
+  if (t === "all") return ["rent", "sale", "sold"];
   const parts = v
     .split(",")
     .map((x) => x.trim())
     .filter((x): x is SelectableMapMode => x === "rent" || x === "sale" || x === "sold");
   const unique = Array.from(new Set(parts));
-  return unique.length ? unique : ["rent"];
+  return unique.length ? unique : [];
 }
 
 function serializeMapModes(modes: SelectableMapMode[]): string {
   const uniq = Array.from(new Set(modes));
+  if (!uniq.length) return "none";
   const order: SelectableMapMode[] = ["sale", "rent", "sold"];
   return order.filter((m) => uniq.includes(m)).join(",");
 }
 
 function effectiveModeForOmnibox(modes: SelectableMapMode[]): PropertyMapMode {
+  if (modes.length === 0) return "all";
   const hasRent = modes.includes("rent");
   const hasSale = modes.includes("sale");
   const hasSold = modes.includes("sold");
@@ -438,6 +446,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   > | null>(null);
   const [parcelBaseLayer, setParcelBaseLayer] = useState<ParcelBaseMapLayer>("tax_zoning");
   const [reMarketAreaAbbrv, setReMarketAreaAbbrv] = useState<string>("");
+  const applyParcelBaseLayer = useCallback((next: ParcelBaseMapLayer) => {
+    setParcelBaseLayer(next);
+    if (next !== "re_market_areas") setReMarketAreaAbbrv("");
+    if (next === "tax_zoning") setShowZoningColors(true);
+    else if (next === "none") setShowZoningColors(false);
+  }, []);
   const [mobileDrawerTab, setMobileDrawerTab] = useState<"rental" | "parcel">("rental");
   const [, setWatchTick] = useState(0);
   const [rentalFilters, setRentalFilters] = useState<RentalFiltersState>(() => ({ ...DEFAULT_RENTAL_FILTERS }));
@@ -448,6 +462,15 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const hasSaleMode = mapModes.includes("sale");
   const hasSoldMode = mapModes.includes("sold");
   const mapModeForOmnibox = effectiveModeForOmnibox(mapModes);
+
+  const mapResearchHubPrimaryCta = useMemo(() => {
+    if (!selectedRental) return null;
+    const slug = selectedRental.slug?.trim();
+    return {
+      primaryCtaLabel: "Check Availability" as const,
+      primaryCtaHref: slug ? nantucketVacationRentalListingUrl(slug) : nantucketRentalsPropertySearchUrl({}),
+    };
+  }, [selectedRental]);
 
   useEffect(() => {
     setMapModes(parseMapModes(searchParams.get("mode")));
@@ -463,7 +486,6 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const setMapModesAndUrl = useCallback(
     (nextModes: SelectableMapMode[]) => {
       const normalized = Array.from(new Set(nextModes));
-      if (!normalized.length) return;
       setMapModes(normalized);
       const sp = new URLSearchParams(searchParams.toString());
       sp.set("mode", serializeMapModes(normalized));
@@ -476,7 +498,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     (mode: SelectableMapMode) => {
       setMapModes((prev) => {
         const exists = prev.includes(mode);
-        const next = exists ? (prev.length > 1 ? prev.filter((m) => m !== mode) : prev) : [...prev, mode];
+        const next = exists ? prev.filter((m) => m !== mode) : [...prev, mode];
         const normalized = Array.from(new Set(next));
         const sp = new URLSearchParams(searchParams.toString());
         sp.set("mode", serializeMapModes(normalized));
@@ -1090,29 +1112,14 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   );
 
   const handleViewComparableRentals = useCallback(() => {
-    selectMapMode("rent");
-    setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
-    setSelectedLink(null);
-    const pid = String(selectedParcel?.parcel_id ?? "").trim();
-    const feat = features.find((f) => String(f.properties?.parcel_id ?? "").trim() === pid);
-    const geom = feat?.geometry;
-    if (geom) {
-      const c = centroidFromGeometry(geom);
-      if (c) {
-        const pad = 0.022;
-        setMapFlyTo({
-          id: bumpFlyId(),
-          bounds: {
-            west: c.lng - pad,
-            east: c.lng + pad,
-            south: c.lat - pad,
-            north: c.lat + pad,
-          },
-        });
-      }
-    }
-    if (isNarrowForParcelDrawer()) setMobilePanelOpen(false);
-  }, [features, selectMapMode, selectedParcel?.parcel_id]);
+    const baseBedrooms =
+      selectedLink?.bedrooms ??
+      effectiveParcelLinkMatch?.bedrooms ??
+      selectedRental?.totalBedrooms ??
+      null;
+    const url = nantucketRentalsComparableSearchUrlFromListingBedrooms(baseBedrooms);
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, [selectedLink?.bedrooms, effectiveParcelLinkMatch?.bedrooms, selectedRental?.totalBedrooms]);
 
   const handleViewNearbySales = useCallback(() => {
     selectMapMode("sold");
@@ -1340,28 +1347,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     </button>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setParcelBaseLayer((prev) => {
-                      const next = prev === "tax_zoning" ? "re_market_areas" : "tax_zoning";
-                      if (next === "tax_zoning") {
-                        setShowZoningColors(true);
-                        setReMarketAreaAbbrv("");
-                      }
-                      return next;
-                    });
-                  }}
-                  className={cn(
-                    "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors sm:px-3 sm:py-1 sm:text-sm lg:hidden",
-                    parcelBaseLayer === "re_market_areas"
-                      ? "border-blue-700 bg-blue-700 text-white shadow-sm"
-                      : "border-[var(--cedar-shingle)]/30 bg-white/90 text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]",
-                  )}
-                  aria-label="Toggle map base layer"
-                >
-                  {parcelBaseLayer === "tax_zoning" ? "Show MLS Areas" : "Show Zoning Districts"}
-                </button>
+                <PropertyMapOverlayChip
+                  className="shrink-0 lg:hidden"
+                  triggerClassName="px-2 py-0.5 sm:px-2.5 sm:py-1 sm:text-sm"
+                  parcelBaseLayer={parcelBaseLayer}
+                  onParcelBaseLayer={applyParcelBaseLayer}
+                />
                 <button
                   type="button"
                   onClick={() => setFiltersOpen(true)}
@@ -1377,23 +1368,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   ) : null}
                 </button>
               </div>
-              <div className="hidden min-w-0 items-center gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
-                <PropertyMapLayerPillsRow
-                  layout="row"
-                  showZoningColors={showZoningColors}
-                  onShowZoningColors={setShowZoningColors}
-                  parcelBaseLayer={parcelBaseLayer}
-                  onParcelBaseLayer={setParcelBaseLayer}
-                  onOpenFilters={() => setFiltersOpen(true)}
-                  filterBadgeCount={filterBadgeCount}
-                />
-              </div>
               <div className="hidden min-w-0 lg:block">
                 <PropertyMapDesktopLayerBar
                   showZoningColors={showZoningColors}
                   onShowZoningColors={setShowZoningColors}
                   parcelBaseLayer={parcelBaseLayer}
-                  onParcelBaseLayer={setParcelBaseLayer}
+                  onParcelBaseLayer={applyParcelBaseLayer}
                   reMarketAreaAbbrv={reMarketAreaAbbrv}
                   onReMarketAreaChange={setReMarketAreaAbbrv}
                   onRequestFlyToReDistrict={(abbrv) => {
@@ -1781,15 +1761,15 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   {hasSaleMode && hasSoldMode ? (
                     <>
                       Showing <strong>{filteredLinkActiveFc.features.length}</strong> active and{" "}
-                      <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                      <strong>{filteredLinkSoldFc.features.length}</strong> sold MLS listings matching your criteria in this view • Live MLS feed.
                     </>
                   ) : hasSaleMode ? (
                     <>
-                      Showing <strong>{filteredLinkActiveFc.features.length}</strong> active LINK listings matching your criteria in this view • Live MLS feed.
+                      Showing <strong>{filteredLinkActiveFc.features.length}</strong> active MLS listings matching your criteria in this view • Live MLS feed.
                     </>
                   ) : (
                     <>
-                      Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                      Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold MLS listings matching your criteria in this view • Live MLS feed.
                     </>
                   )}
                 </p>
@@ -1824,15 +1804,15 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                     {hasSaleMode && hasSoldMode ? (
                       <>
                         Showing <strong>{filteredLinkActiveFc.features.length}</strong> active and{" "}
-                        <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                        <strong>{filteredLinkSoldFc.features.length}</strong> sold MLS listings matching your criteria in this view • Live MLS feed.
                       </>
                     ) : hasSaleMode ? (
                       <>
-                        Showing <strong>{filteredLinkActiveFc.features.length}</strong> active LINK listings matching your criteria in this view • Live MLS feed.
+                        Showing <strong>{filteredLinkActiveFc.features.length}</strong> active MLS listings matching your criteria in this view • Live MLS feed.
                       </>
                     ) : (
                       <>
-                        Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold LINK listings matching your criteria in this view • Live MLS feed.
+                        Showing <strong>{filteredLinkSoldFc.features.length}</strong> sold MLS listings matching your criteria in this view • Live MLS feed.
                       </>
                     )}
                   </p>
@@ -1953,7 +1933,10 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 </div>
               ) : null}
                 </div>
-                <MapResearchHubStickyFooter className="border-t border-[var(--cedar-shingle)]/20 bg-white/90 px-2 pb-2 pt-3 backdrop-blur-sm" />
+                <MapResearchHubStickyFooter
+                  className="border-t border-[var(--cedar-shingle)]/20 bg-white/90 px-2 pb-2 pt-3 backdrop-blur-sm"
+                  {...(mapResearchHubPrimaryCta ?? {})}
+                />
               </div>
             ) : (
               <div className="min-h-0 flex-1 overflow-y-auto">
@@ -2000,7 +1983,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             {isPropertyMap ? (
-              <div className="space-y-4 p-4">
+              <div className="flex flex-col pb-4">
                 <PropertyIntelligencePanel
                   compactHero
                   selectedParcel={selectedParcel}
@@ -2016,17 +1999,19 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   onViewComparableRentals={handleViewComparableRentals}
                 />
                 {selectedParcel ? (
-                  <ParcelDetailPanel
-                    {...parcelMapCtas}
-                    selectedParcel={selectedParcel}
-                    zoningLabel={zoningLabel}
-                    districtMatch={districtMatch}
-                    zoningUseRows={zoningUseRows}
-                    linkListingId={linkListingIdForSelection}
-                    vacationRentalSlug={vacationRentalSlugForSelection}
-                  />
+                  <div className="space-y-4 px-4 pt-4">
+                    <ParcelDetailPanel
+                      {...parcelMapCtas}
+                      selectedParcel={selectedParcel}
+                      zoningLabel={zoningLabel}
+                      districtMatch={districtMatch}
+                      zoningUseRows={zoningUseRows}
+                      linkListingId={linkListingIdForSelection}
+                      vacationRentalSlug={vacationRentalSlugForSelection}
+                    />
+                  </div>
                 ) : selectedRental ? (
-                  <p className="rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-center text-xs text-[var(--nantucket-gray)]">
+                  <p className="mx-4 mt-4 rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-center text-xs text-[var(--nantucket-gray)]">
                     This vacation rental pin did not match a loaded tax parcel. Zoom to Nantucket or tap a lot on the map
                     for full parcel and zoning detail.
                   </p>
@@ -2231,7 +2216,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
           </div>
           {isPropertyMap ? (
             <DrawerFooter className="mt-0 shrink-0 gap-0 border-t border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)] p-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-              <MapResearchHubStickyFooter className="px-3 pt-3" />
+              <MapResearchHubStickyFooter
+                showContactLinks={false}
+                showLegalNav={false}
+                className="px-3 pt-3"
+                {...(mapResearchHubPrimaryCta ?? {})}
+              />
             </DrawerFooter>
           ) : null}
         </DrawerContent>

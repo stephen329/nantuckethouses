@@ -11,7 +11,10 @@ import type { LinkListingPinProperties, ParcelMapLinkListingMatch } from "@/lib/
 import type { NrMapRentalResult } from "@/lib/nr-map-rentals";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 import { formatLinkMlsDateDisplay } from "@/lib/link-listing-date-format";
-import { nantucketVacationRentalListingUrl } from "@/lib/nr-vacation-rental-url";
+import {
+  nantucketRentalsComparableSearchUrlFromListingBedrooms,
+  nantucketVacationRentalListingUrl,
+} from "@/lib/nr-vacation-rental-url";
 import {
   formatExpansionIdea,
   getExpansionIntelligence,
@@ -45,9 +48,37 @@ function linkListPriceNum(p: LinkListingPinProperties): number {
   return p.listPriceNum;
 }
 
-function linkMlsNeighborhood(mlsArea: string | null | undefined): string | null {
-  const s = mlsArea?.trim();
-  return s ? s : null;
+function parseListingDateMs(s: string | null | undefined): number | null {
+  if (!s?.trim()) return null;
+  const t = Date.parse(s);
+  return Number.isNaN(t) ? null : t;
+}
+
+/** Hero pill: active `For Sale | … days on market`; sold `Sold | … days on market` (list → close). */
+function formatRealEstateHeroPill(input: {
+  pool: "active" | "sold";
+  onMarketDate: string | null;
+  closeDate?: string | null;
+}): string {
+  const start = parseListingDateMs(input.onMarketDate);
+  if (input.pool === "active") {
+    if (start == null) return "For Sale | —";
+    const days = Math.max(0, Math.floor((Date.now() - start) / 86_400_000));
+    return `For Sale | ${days} ${days === 1 ? "day" : "days"} on market`;
+  }
+  const end = parseListingDateMs(input.closeDate);
+  if (start == null || end == null) return "Sold | —";
+  const days = Math.max(0, Math.floor((end - start) / 86_400_000));
+  return `Sold | ${days} ${days === 1 ? "day" : "days"} on market`;
+}
+
+function isLandOrCommercialPropertyType(propertyType: string | null | undefined): boolean {
+  const t = (propertyType ?? "").trim().toLowerCase();
+  if (!t) return false;
+  if (/\bcommercial\b/.test(t)) return true;
+  if (t === "land") return true;
+  if (t.includes("lots") && t.includes("land")) return true;
+  return false;
 }
 
 function rentalPulseRows(listPrice: number | null, weeklyRent: number | null) {
@@ -249,19 +280,19 @@ export function PropertyIntelligencePanel({
   const [watched, setWatched] = useState(false);
 
   useEffect(() => {
-    if (!parcelId) {
+    if (compactHero || !parcelId) {
       setWatched(false);
       return;
     }
     setWatched(parcelIsWatched(parcelId));
-  }, [parcelId]);
+  }, [compactHero, parcelId]);
 
   const onToggleWatch = useCallback(() => {
-    if (!parcelId) return;
+    if (compactHero || !parcelId) return;
     toggleWatchParcelId(parcelId);
     setWatched(parcelIsWatched(parcelId));
     onWatchChange?.();
-  }, [parcelId, onWatchChange]);
+  }, [compactHero, parcelId, onWatchChange]);
 
   const lotSqft = useMemo(() => {
     if (selectedParcel?.lot_area_sqft != null && selectedParcel.lot_area_sqft > 0) return selectedParcel.lot_area_sqft;
@@ -289,6 +320,14 @@ export function PropertyIntelligencePanel({
   }, [selectedRental?.weeklyRentEstimate, listPriceForPulse]);
 
   const timeline = useMemo(() => buildTimeline(selectedLink), [selectedLink]);
+
+  const comparableRentalsHref = useMemo(
+    () =>
+      nantucketRentalsComparableSearchUrlFromListingBedrooms(
+        selectedLink?.bedrooms ?? parcelLinkListingMatch?.bedrooms ?? selectedRental?.totalBedrooms ?? null,
+      ),
+    [selectedLink?.bedrooms, parcelLinkListingMatch?.bedrooms, selectedRental?.totalBedrooms],
+  );
 
   if (!has) {
     return (
@@ -367,18 +406,27 @@ export function PropertyIntelligencePanel({
       ? { lng: selectedRental.longitude, lat: selectedRental.latitude }
       : null;
 
-  const statusLabel =
-    selectedLink?.pool === "sold"
-      ? linkMlsNeighborhood(selectedLink.mlsArea) ?? "Sold"
-      : selectedLink
-        ? linkMlsNeighborhood(selectedLink.mlsArea) ?? "For sale"
-        : parcelLinkListingMatch?.pool === "sold"
-          ? linkMlsNeighborhood(parcelLinkListingMatch.mlsArea) ?? "Sold"
-          : parcelLinkListingMatch?.pool === "active"
-            ? linkMlsNeighborhood(parcelLinkListingMatch.mlsArea) ?? "For sale"
-            : selectedRental
-              ? "For rent"
-              : linkMlsNeighborhood(parcelLinkListingMatch?.mlsArea) ?? "Parcel";
+  const mlsPropertyTypeForRules =
+    selectedLink?.propertyType ?? parcelLinkListingMatch?.propertyType ?? null;
+
+  const statusLabel = selectedRental
+    ? "Vacation Rental"
+    : selectedLink
+      ? formatRealEstateHeroPill({
+          pool: selectedLink.pool,
+          onMarketDate: selectedLink.onMarketDate,
+          closeDate: selectedLink.closeDate?.trim() ? selectedLink.closeDate : null,
+        })
+      : parcelLinkListingMatch
+        ? formatRealEstateHeroPill({
+            pool: parcelLinkListingMatch.pool,
+            onMarketDate: parcelLinkListingMatch.onMarketDate,
+            closeDate: parcelLinkListingMatch.closeDate,
+          })
+        : "Parcel";
+
+  const pulse = rentalPulse;
+  const showRentalPulseBlock = Boolean(pulse) && !isLandOrCommercialPropertyType(mlsPropertyTypeForRules);
 
   const heroListingHref = (() => {
     if (selectedLink != null) return nantucketLinkListingUrl(selectedLink.linkId);
@@ -392,7 +440,14 @@ export function PropertyIntelligencePanel({
   })();
 
   return (
-    <div className="space-y-0 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white shadow-sm">
+    <div
+      className={cn(
+        "space-y-0 bg-white shadow-sm",
+        compactHero
+          ? "rounded-b-xl border-b border-[var(--cedar-shingle)]/20"
+          : "rounded-lg border border-[var(--cedar-shingle)]/20",
+      )}
+    >
       <PropertyIntelligenceHero
         heroUrl={heroUrl}
         heroListingHref={heroListingHref}
@@ -424,21 +479,21 @@ export function PropertyIntelligencePanel({
           </p>
         ) : null}
 
-        {rentalPulse ? (
+        {showRentalPulseBlock && pulse ? (
           <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
             <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Rental pulse</h3>
             <dl className="space-y-1 text-[11px]">
               <div className="flex justify-between gap-2">
                 <dt className="text-[var(--nantucket-gray)]">Peak weekly (Jul–Aug)</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(rentalPulse.peak)}</dd>
+                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.peak)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-[var(--nantucket-gray)]">Est. annual revenue</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(rentalPulse.annualRevenue)}</dd>
+                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.annualRevenue)}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-[var(--nantucket-gray)]">Est. cap rate</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{rentalPulse.cap}</dd>
+                <dd className="font-medium text-[var(--atlantic-navy)]">{pulse.cap}</dd>
               </div>
             </dl>
             {expansion ? (
@@ -466,7 +521,9 @@ export function PropertyIntelligencePanel({
               </Button>
             ) : (
               <Button asChild variant="outline" className="mt-3 w-full text-xs">
-                <Link href="/map?mode=rent">View comparable rentals →</Link>
+                <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
+                  View comparable rentals →
+                </a>
               </Button>
             )}
           </section>
@@ -493,7 +550,9 @@ export function PropertyIntelligencePanel({
               </Button>
             ) : (
               <Button asChild variant="outline" className="mt-3 w-full text-xs">
-                <Link href="/map?mode=rent">View comparable rentals →</Link>
+                <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
+                  View comparable rentals →
+                </a>
               </Button>
             )}
           </section>

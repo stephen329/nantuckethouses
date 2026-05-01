@@ -1,6 +1,7 @@
 "use client";
 
-import { Building2, CircleHelp, MapPinned, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
+import { Ban, Building2, ChevronDown, CircleHelp, MapPinned, SlidersHorizontal } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/components/ui/utils";
 import type { ParcelBaseMapLayer } from "@/components/zoning/ZoningMap";
@@ -23,27 +24,14 @@ function layerPillActiveSolid() {
   );
 }
 
-function layerPillActiveSoft() {
-  return cn(
-    layerPillBase,
-    "border-[var(--privet-green)]/40 bg-[var(--sandstone)] text-[var(--atlantic-navy)] hover:border-[var(--privet-green)]/55 hover:bg-[var(--fog-gray)]",
-  );
-}
-
 export function MapLayersHowToText() {
   return (
     <div className="space-y-2 text-xs leading-relaxed text-[var(--nantucket-gray)]">
       <p>
-        <span className="font-semibold text-[var(--atlantic-navy)]">Tax zoning</span> follows assessor district codes on each lot
-        (R-10, ROH, LUG…).
-      </p>
-      <p>
-        <span className="font-semibold text-[var(--atlantic-navy)]">LINK market areas</span> group neighborhoods the way buyers search
-        (Surfside, Town, Sconset…).
-      </p>
-      <p>
-        Turn <span className="font-semibold text-[var(--atlantic-navy)]">Zoning Districts</span> tint on to compare districts; turn it off
-        for a neutral basemap when pins need to stand out.
+        <span className="font-semibold text-[var(--atlantic-navy)]">MLS Areas</span> shows neighborhood-style polygons (Surfside, Town,
+        Sconset…). <span className="font-semibold text-[var(--atlantic-navy)]">Zoning</span> tints lots by assessor district code (R-10,
+        ROH, LUG…). <span className="font-semibold text-[var(--atlantic-navy)]">None</span> hides both overlays so pins stand out on a
+        neutral basemap.
       </p>
     </div>
   );
@@ -102,65 +90,110 @@ type LayerPillsProps = {
   filterBadgeCount: number;
 };
 
+const OVERLAY_OPTIONS = [
+  { layer: "re_market_areas" as const, label: "MLS Areas", icon: MapPinned },
+  { layer: "tax_zoning" as const, label: "Zoning", icon: Building2 },
+  { layer: "none" as const, label: "None", icon: Ban },
+];
+
+function overlayOptionLabel(layer: ParcelBaseMapLayer): string {
+  return OVERLAY_OPTIONS.find((o) => o.layer === layer)?.label ?? "Zoning";
+}
+
+type OverlayChipProps = {
+  parcelBaseLayer: ParcelBaseMapLayer;
+  onParcelBaseLayer: (v: ParcelBaseMapLayer) => void;
+  layout?: "row" | "stack";
+  /** Classes on outer wrapper (e.g. responsive visibility). */
+  className?: string;
+  /** Extra classes merged onto the trigger button. */
+  triggerClassName?: string;
+};
+
+/** Single control: shows `Overlay: …` and opens a menu for MLS Areas / Zoning / None. */
+export function PropertyMapOverlayChip({
+  parcelBaseLayer,
+  onParcelBaseLayer,
+  layout = "row",
+  className,
+  triggerClassName,
+}: OverlayChipProps) {
+  const [open, setOpen] = useState(false);
+  const currentLabel = overlayOptionLabel(parcelBaseLayer);
+
+  return (
+    <div className={cn(className)}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/35 bg-white/95 px-2.5 py-0.5 text-[11px] font-semibold normal-case text-[var(--atlantic-navy)] shadow-sm transition-colors hover:border-[var(--cedar-shingle)]/55 hover:bg-[var(--sandstone)]/90",
+              layout === "stack" && "w-full justify-center",
+              triggerClassName,
+            )}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            aria-label={`Map overlay: ${currentLabel}. Change overlay.`}
+          >
+            <span className="max-w-[11rem] truncate sm:max-w-[14rem]">
+              Overlay: {currentLabel}
+            </span>
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 shrink-0 opacity-70 transition-transform", open && "rotate-180")}
+              aria-hidden
+            />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-[min(100vw-2rem,14rem)] border-[var(--cedar-shingle)]/20 p-1" sideOffset={6}>
+          <p className="px-2 pb-1 pt-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--nantucket-gray)]">Overlay</p>
+          <div role="listbox" aria-label="Map overlay" className="flex flex-col gap-0.5">
+            {OVERLAY_OPTIONS.map(({ layer, label, icon: Icon }) => {
+              const selected = parcelBaseLayer === layer;
+              return (
+                <button
+                  key={layer}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onParcelBaseLayer(layer);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs font-medium transition-colors",
+                    selected
+                      ? "bg-blue-50 text-blue-950"
+                      : "text-[var(--atlantic-navy)] hover:bg-[var(--sandstone)]/80",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
 export function PropertyMapLayerPillsRow({
   layout = "row",
-  showZoningColors,
-  onShowZoningColors,
+  showZoningColors: _showZoningColors,
+  onShowZoningColors: _onShowZoningColors,
   parcelBaseLayer,
   onParcelBaseLayer,
   onOpenFilters,
   filterBadgeCount,
 }: LayerPillsProps) {
-  const taxSelected = parcelBaseLayer === "tax_zoning";
-  const linkMarketSelected = parcelBaseLayer === "re_market_areas";
-
-  const onZoningDistrictsClick = () => {
-    if (!taxSelected) {
-      onParcelBaseLayer("tax_zoning");
-      onShowZoningColors(true);
-      return;
-    }
-    onShowZoningColors(!showZoningColors);
-  };
-
-  const zoningTintOn = taxSelected && showZoningColors;
-  const zoningTaxNoTint = taxSelected && !showZoningColors;
-  const zoningPillClass = zoningTintOn ? layerPillActiveSolid() : zoningTaxNoTint ? layerPillActiveSoft() : layerPillInactive();
-
   const filtersActive = filterBadgeCount > 0;
-
-  const zoningIconClass = zoningTintOn
-    ? "text-white"
-    : zoningTaxNoTint
-      ? "text-[var(--privet-green)]"
-      : "text-[var(--cedar-shingle)]";
-  const marketIconClass = linkMarketSelected ? "text-white" : "text-[var(--cedar-shingle)]";
   const filtersIconClass = filtersActive ? "text-white" : "text-[var(--cedar-shingle)]";
 
   return (
     <div className={cn("flex gap-1.5", layout === "stack" ? "flex-col items-stretch" : "flex-row flex-wrap items-center")}>
-      <button
-        type="button"
-        onClick={onZoningDistrictsClick}
-        className={cn(zoningPillClass, layout === "stack" && "justify-center")}
-        aria-pressed={taxSelected}
-        title={taxSelected && !showZoningColors ? "Tax lots — tap again for district colors" : undefined}
-      >
-        <Building2 className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", zoningIconClass)} aria-hidden />
-        Zoning
-      </button>
-      <button
-        type="button"
-        onClick={() => onParcelBaseLayer("re_market_areas")}
-        className={cn(
-          linkMarketSelected ? layerPillActiveSolid() : layerPillInactive(),
-          layout === "stack" && "justify-center",
-        )}
-        aria-pressed={linkMarketSelected}
-      >
-        <MapPinned className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", marketIconClass)} aria-hidden />
-        Market
-      </button>
+      <PropertyMapOverlayChip parcelBaseLayer={parcelBaseLayer} onParcelBaseLayer={onParcelBaseLayer} layout={layout} />
       <button
         type="button"
         onClick={onOpenFilters}
