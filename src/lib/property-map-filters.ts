@@ -24,6 +24,37 @@ export type RentalFiltersState = {
 
 export type LinkPropertyTypeKey = "houses" | "land" | "commercial";
 
+/** Sold-pool “closed in the last …” window; empty = no date filter. */
+export type LinkFiltersSoldInLast = "" | "7d" | "30d" | "90d" | "6m" | "12m" | "24m" | "36m";
+
+/**
+ * Default sold closings lookback for `/api/map/link-listings` bbox requests (days).
+ * Client-side `soldInLast` narrows further; when cleared, pins still respect this feed window.
+ */
+export const LINK_MAP_DEFAULT_SOLD_FEED_DAYS = 1095;
+
+/** Human label for {@link LINK_MAP_DEFAULT_SOLD_FEED_DAYS} (keep in sync with map API default). */
+export function linkMapImplicitSoldFeedLabel(): string {
+  const d = LINK_MAP_DEFAULT_SOLD_FEED_DAYS;
+  if (d >= 330) {
+    const y = Math.max(1, Math.round(d / 365));
+    return y === 1 ? "~1 year" : `~${y} years`;
+  }
+  const m = Math.max(1, Math.round(d / 30));
+  return `~${m} months`;
+}
+
+/** Preset rows for the “Sold in last” control (no “any time” row — empty state uses a hidden `option`). */
+export const LINK_FILTERS_SOLD_IN_LAST_OPTIONS: { value: Exclude<LinkFiltersSoldInLast, "">; label: string }[] = [
+  { value: "7d", label: "7 days" },
+  { value: "30d", label: "30 days" },
+  { value: "90d", label: "90 days" },
+  { value: "6m", label: "6 months" },
+  { value: "12m", label: "12 months" },
+  { value: "24m", label: "24 months" },
+  { value: "36m", label: "36 months" },
+];
+
 export type LinkFiltersState = {
   pricePreset: "" | "1-3" | "3-6" | "6+";
   minPrice: string;
@@ -33,15 +64,11 @@ export type LinkFiltersState = {
   minLotAcres: string;
   newConstruction: boolean;
   waterfront: boolean;
-  /** Keyword “walk to town” style (remarks / marketing). */
-  walkToTown: boolean;
-  /** Recently renovated / like-new (remarks heuristic). */
-  renoRecent: boolean;
+  /** Pool / swimming pool (remarks heuristic on LINK pins). */
+  pool: boolean;
   propertyTypes: LinkPropertyTypeKey[];
-  /** yyyy-mm-dd inclusive lower bound on sold close date (sold pool). */
-  soldCloseAfter: string;
-  /** yyyy-mm-dd inclusive upper bound on sold close date (sold pool). */
-  soldCloseBefore: string;
+  /** Sold listings only: require close date within this lookback from “now”. */
+  soldInLast: LinkFiltersSoldInLast;
   minDom: string;
   maxDom: string;
   /** Max $/sqft when living area is present on the pin (LINK feed). */
@@ -72,11 +99,9 @@ export const DEFAULT_LINK_FILTERS: LinkFiltersState = {
   minLotAcres: "",
   newConstruction: false,
   waterfront: false,
-  walkToTown: false,
-  renoRecent: false,
+  pool: false,
   propertyTypes: [],
-  soldCloseAfter: "",
-  soldCloseBefore: "",
+  soldInLast: "",
   minDom: "",
   maxDom: "",
   maxPricePerSqft: "",
@@ -196,13 +221,164 @@ export function countActiveLinkFilters(f: LinkFiltersState): number {
   if (f.minLotAcres.trim()) n += 1;
   if (f.newConstruction) n += 1;
   if (f.waterfront) n += 1;
-  if (f.walkToTown) n += 1;
-  if (f.renoRecent) n += 1;
+  if (f.pool) n += 1;
   if (f.propertyTypes.length) n += 1;
-  if (f.soldCloseAfter.trim() || f.soldCloseBefore.trim()) n += 1;
+  if (f.soldInLast) n += 1;
   if (f.minDom.trim() || f.maxDom.trim()) n += 1;
   if (f.maxPricePerSqft.trim()) n += 1;
   return n;
+}
+
+export type MapAppliedFilterChip = {
+  id: string;
+  source: "rental" | "link";
+  label: string;
+  /** When false, toolbar shows the pill without a remove control (informational). */
+  dismissable?: boolean;
+};
+
+function soldInLastPresetLabel(preset: LinkFiltersSoldInLast): string {
+  if (!preset) return "";
+  return LINK_FILTERS_SOLD_IN_LAST_OPTIONS.find((o) => o.value === preset)?.label ?? preset;
+}
+
+function removeLinkPropertyTypeKey(keys: LinkPropertyTypeKey[], k: LinkPropertyTypeKey): LinkPropertyTypeKey[] {
+  return keys.filter((x) => x !== k);
+}
+
+/** Toolbar chips for active vacation-rental / MLS filters (IDs consumed by `removeMapAppliedFilterChip`). */
+export function buildMapAppliedFilterChips(params: {
+  rental: RentalFiltersState;
+  link: LinkFiltersState;
+  showRent: boolean;
+  showLink: boolean;
+  showSold: boolean;
+}): MapAppliedFilterChip[] {
+  const { rental: r, link: l, showRent, showLink, showSold } = params;
+  const chips: MapAppliedFilterChip[] = [];
+
+  if (showRent) {
+    if (r.minRate.trim() || r.maxRate.trim()) {
+      const a = r.minRate.trim() ? `$${r.minRate.trim()}` : "Any";
+      const b = r.maxRate.trim() ? `$${r.maxRate.trim()}` : "Any";
+      chips.push({ id: "rent:rate", source: "rental", label: `Rate (${r.ratePeriod}): ${a} – ${b}` });
+    }
+    if (r.beachDistance === "walk") chips.push({ id: "rent:beach", source: "rental", label: "Walk to beach" });
+    if (r.beachDistance === "not_walk") chips.push({ id: "rent:beach", source: "rental", label: "Not walk-to-beach" });
+    if (r.minBedrooms.trim()) chips.push({ id: "rent:beds", source: "rental", label: `Beds ≥ ${r.minBedrooms}` });
+    if (r.minBaths.trim()) chips.push({ id: "rent:baths", source: "rental", label: `Baths ≥ ${r.minBaths}` });
+    if (r.minOccupancy.trim()) chips.push({ id: "rent:occ", source: "rental", label: `Sleeps ≥ ${r.minOccupancy}` });
+    if (r.pool) chips.push({ id: "rent:pool", source: "rental", label: "Pool" });
+    if (r.waterfront) chips.push({ id: "rent:water", source: "rental", label: "Waterfront / water view" });
+    if (r.petFriendly) chips.push({ id: "rent:pets", source: "rental", label: "Pet-friendly" });
+    if (r.renovated) chips.push({ id: "rent:reno", source: "rental", label: "Renovated / like-new" });
+    if (r.townWalk) chips.push({ id: "rent:town", source: "rental", label: "Walk to Town" });
+  }
+
+  if (showLink) {
+    if (l.pricePreset === "1-3") chips.push({ id: "link:price:preset", source: "link", label: "Price: $1M – $3M" });
+    else if (l.pricePreset === "3-6") chips.push({ id: "link:price:preset", source: "link", label: "Price: $3M – $6M" });
+    else if (l.pricePreset === "6+") chips.push({ id: "link:price:preset", source: "link", label: "Price: $6M+" });
+    else if (l.minPrice.trim() || l.maxPrice.trim()) {
+      const a = l.minPrice.trim() ? l.minPrice.trim() : "Any";
+      const b = l.maxPrice.trim() ? l.maxPrice.trim() : "Any";
+      chips.push({ id: "link:price:custom", source: "link", label: `List price: ${a} – ${b}` });
+    }
+    if (l.minBeds.trim()) chips.push({ id: "link:beds", source: "link", label: `Beds ≥ ${l.minBeds}` });
+    if (l.minBaths.trim()) chips.push({ id: "link:baths", source: "link", label: `Baths ≥ ${l.minBaths}` });
+    if (l.minLotAcres.trim()) chips.push({ id: "link:lot", source: "link", label: `Lot ≥ ${l.minLotAcres} ac` });
+    if (l.newConstruction) chips.push({ id: "link:new", source: "link", label: "New construction" });
+    if (l.waterfront) chips.push({ id: "link:water", source: "link", label: "Waterfront" });
+    if (l.pool) chips.push({ id: "link:pool", source: "link", label: "Pool" });
+    for (const k of l.propertyTypes) {
+      const lab = LINK_PROPERTY_TYPE_LABELS.find((x) => x.key === k)?.label ?? k;
+      chips.push({ id: `link:ptype:${k}`, source: "link", label: lab });
+    }
+    if (showSold) {
+      if (l.soldInLast) {
+        chips.push({
+          id: "link:soldInLast",
+          source: "link",
+          label: `Sold: ${soldInLastPresetLabel(l.soldInLast)}`,
+        });
+      } else {
+        chips.push({
+          id: "link:soldFeedImplicit",
+          source: "link",
+          label: `Sold: ${linkMapImplicitSoldFeedLabel()}`,
+          dismissable: false,
+        });
+      }
+    }
+    if (l.minDom.trim()) chips.push({ id: "link:domMin", source: "link", label: `DOM ≥ ${l.minDom}` });
+    if (l.maxDom.trim()) chips.push({ id: "link:domMax", source: "link", label: `DOM ≤ ${l.maxDom}` });
+    if (l.maxPricePerSqft.trim()) chips.push({ id: "link:ppsf", source: "link", label: `≤ $${l.maxPricePerSqft.trim()}/sq ft` });
+  }
+
+  return chips;
+}
+
+/** Apply a single chip removal (toolbar dismiss). */
+export function removeMapAppliedFilterChip(
+  chipId: string,
+  rental: RentalFiltersState,
+  link: LinkFiltersState,
+): { rental: RentalFiltersState; link: LinkFiltersState } {
+  let r = { ...rental };
+  let l = { ...link };
+
+  if (chipId === "rent:rate") {
+    r = { ...r, minRate: "", maxRate: "" };
+  } else if (chipId === "rent:beach") {
+    r = { ...r, beachDistance: "any" };
+  } else if (chipId === "rent:beds") {
+    r = { ...r, minBedrooms: "" };
+  } else if (chipId === "rent:baths") {
+    r = { ...r, minBaths: "" };
+  } else if (chipId === "rent:occ") {
+    r = { ...r, minOccupancy: "" };
+  } else if (chipId === "rent:pool") {
+    r = { ...r, pool: false };
+  } else if (chipId === "rent:water") {
+    r = { ...r, waterfront: false };
+  } else if (chipId === "rent:pets") {
+    r = { ...r, petFriendly: false };
+  } else if (chipId === "rent:reno") {
+    r = { ...r, renovated: false };
+  } else if (chipId === "rent:town") {
+    r = { ...r, townWalk: false };
+  } else if (chipId === "link:price:preset") {
+    l = { ...l, pricePreset: "", minPrice: "", maxPrice: "" };
+  } else if (chipId === "link:price:custom") {
+    l = { ...l, minPrice: "", maxPrice: "" };
+  } else if (chipId === "link:beds") {
+    l = { ...l, minBeds: "" };
+  } else if (chipId === "link:baths") {
+    l = { ...l, minBaths: "" };
+  } else if (chipId === "link:lot") {
+    l = { ...l, minLotAcres: "" };
+  } else if (chipId === "link:new") {
+    l = { ...l, newConstruction: false };
+  } else if (chipId === "link:water") {
+    l = { ...l, waterfront: false };
+  } else if (chipId === "link:pool") {
+    l = { ...l, pool: false };
+  } else if (chipId === "link:soldInLast") {
+    l = { ...l, soldInLast: "" };
+  } else if (chipId === "link:domMin") {
+    l = { ...l, minDom: "" };
+  } else if (chipId === "link:domMax") {
+    l = { ...l, maxDom: "" };
+  } else if (chipId === "link:ppsf") {
+    l = { ...l, maxPricePerSqft: "" };
+  } else if (chipId.startsWith("link:ptype:")) {
+    const k = chipId.slice("link:ptype:".length) as LinkPropertyTypeKey;
+    if (k === "houses" || k === "land" || k === "commercial") {
+      l = { ...l, propertyTypes: removeLinkPropertyTypeKey(l.propertyTypes, k) };
+    }
+  }
+
+  return { rental: r, link: l };
 }
 
 export function applyRentalFilters(results: NrMapRentalResult[], f: RentalFiltersState): NrMapRentalResult[] {
@@ -246,6 +422,22 @@ function linkTransactionPrice(p: LinkListingPinProperties, pool: "active" | "sol
   return typeof p.listPriceNum === "number" && !Number.isNaN(p.listPriceNum) ? p.listPriceNum : 0;
 }
 
+/** Start of “sold in last …” window (inclusive), in ms since epoch. */
+export function soldInLastStartMs(preset: LinkFiltersSoldInLast, now: Date): number | null {
+  if (!preset) return null;
+  const DAY = 86_400_000;
+  const t = now.getTime();
+  if (preset === "7d") return t - 7 * DAY;
+  if (preset === "30d") return t - 30 * DAY;
+  if (preset === "90d") return t - 90 * DAY;
+  const months =
+    preset === "6m" ? 6 : preset === "12m" ? 12 : preset === "24m" ? 24 : preset === "36m" ? 36 : 0;
+  if (!months) return null;
+  const d = new Date(t);
+  d.setMonth(d.getMonth() - months);
+  return d.getTime();
+}
+
 export function filterLinkFeatureCollection(
   fc: FeatureCollection<Point, LinkListingPinProperties>,
   f: LinkFiltersState,
@@ -270,9 +462,9 @@ export function filterLinkFeatureCollection(
   const minDom = parsePositiveInt(f.minDom);
   const maxDom = parsePositiveInt(f.maxDom);
   const maxPpsf = parsePositiveFloat(f.maxPricePerSqft);
-  const afterMs = f.soldCloseAfter.trim() ? parseListingDateMs(f.soldCloseAfter) : null;
-  const beforeMs = f.soldCloseBefore.trim() ? parseListingDateMs(f.soldCloseBefore) : null;
   const now = new Date();
+  const soldWindowStartMs = pool === "sold" ? soldInLastStartMs(f.soldInLast, now) : null;
+  const soldWindowEndMs = now.getTime();
 
   const feats = fc.features.filter((feat) => {
     const p = feat.properties;
@@ -297,8 +489,7 @@ export function filterLinkFeatureCollection(
     }
     if (f.newConstruction && !nc) return false;
     if (f.waterfront && !wf) return false;
-    if (f.walkToTown && !p.townWalkHint) return false;
-    if (f.renoRecent && !p.renoHint) return false;
+    if (f.pool && !p.hasPool) return false;
     if (!linkMatchesPropertyTypes(p.propertyType, f.propertyTypes)) return false;
 
     if (maxPpsf != null) {
@@ -307,11 +498,11 @@ export function filterLinkFeatureCollection(
       if (price / sq > maxPpsf) return false;
     }
 
-    if (pool === "sold" && (afterMs != null || beforeMs != null)) {
+    if (pool === "sold" && soldWindowStartMs != null) {
       const closeMs = parseListingDateMs(p.closeDate);
       if (closeMs == null) return false;
-      if (afterMs != null && closeMs < afterMs) return false;
-      if (beforeMs != null && closeMs >= beforeMs + 86_400_000) return false;
+      if (closeMs < soldWindowStartMs) return false;
+      if (closeMs > soldWindowEndMs) return false;
     }
 
     if (minDom != null || maxDom != null) {

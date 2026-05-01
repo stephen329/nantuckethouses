@@ -12,6 +12,7 @@ import {
   type LinkListingRow,
   type ParcelProps,
 } from "@/lib/link-listings-parcel-match";
+import { LINK_MAP_DEFAULT_SOLD_FEED_DAYS } from "@/lib/property-map-filters";
 
 const GEOJSON_PATH = path.join(process.cwd(), "src/data/zoning-tool/nantucket-tax-parcels.clean.geojson");
 
@@ -29,7 +30,7 @@ function loadParcelFeatures(): Feature<Geometry, ParcelProps>[] {
 }
 
 /**
- * GET /api/map/link-listings?bbox=west,south,east,north&pool=active|sold|both&soldDays=1095
+ * GET /api/map/link-listings?bbox=west,south,east,north&pool=active|sold|both&soldDays=…
  *
  * Active and sold LINK (C&C) listings placed on parcel centroids by normalized street address.
  */
@@ -38,7 +39,10 @@ export async function GET(request: Request) {
   const parcelIdParam = searchParams.get("parcel_id")?.trim() ?? "";
   const bboxRaw = searchParams.get("bbox");
   const pool = (searchParams.get("pool") ?? "both").toLowerCase();
-  const soldDays = Math.min(Math.max(parseInt(searchParams.get("soldDays") ?? "1095", 10), 30), 3650);
+  const soldDays = Math.min(
+    Math.max(parseInt(searchParams.get("soldDays") ?? String(LINK_MAP_DEFAULT_SOLD_FEED_DAYS), 10), 30),
+    3650,
+  );
 
   if (parcelIdParam) {
     if (!["active", "sold", "both"].includes(pool)) {

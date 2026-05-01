@@ -88,6 +88,8 @@ type LayerPillsProps = {
   onParcelBaseLayer: (v: ParcelBaseMapLayer) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  /** When false, hide the Filters control (e.g. no listing-type chip selected). */
+  showFiltersButton?: boolean;
 };
 
 const OVERLAY_OPTIONS = [
@@ -120,6 +122,7 @@ export function PropertyMapOverlayChip({
 }: OverlayChipProps) {
   const [open, setOpen] = useState(false);
   const currentLabel = overlayOptionLabel(parcelBaseLayer);
+  const isMlsAreas = parcelBaseLayer === "re_market_areas";
 
   return (
     <div className={cn(className)}>
@@ -129,6 +132,7 @@ export function PropertyMapOverlayChip({
             type="button"
             className={cn(
               "inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/35 bg-white/95 px-2.5 py-0.5 text-[11px] font-semibold normal-case text-[var(--atlantic-navy)] shadow-sm transition-colors hover:border-[var(--cedar-shingle)]/55 hover:bg-[var(--sandstone)]/90",
+              isMlsAreas && "border-blue-700/30 bg-blue-50/95 hover:border-blue-700/45 hover:bg-blue-50",
               layout === "stack" && "w-full justify-center",
               triggerClassName,
             )}
@@ -136,9 +140,18 @@ export function PropertyMapOverlayChip({
             aria-expanded={open}
             aria-label={`Map overlay: ${currentLabel}. Change overlay.`}
           >
-            <span className="max-w-[11rem] truncate sm:max-w-[14rem]">
-              Overlay: {currentLabel}
-            </span>
+            {isMlsAreas ? (
+              <span className="flex min-w-0 max-w-[min(100vw-8rem,18rem)] items-center gap-1.5 truncate">
+                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-[var(--nantucket-gray)]">
+                  Overlay
+                </span>
+                <span className="min-w-0 truncate text-[11px] font-semibold text-blue-900" title="Neighborhood-style MLS district polygons">
+                  MLS Areas
+                </span>
+              </span>
+            ) : (
+              <span className="max-w-[11rem] truncate sm:max-w-[14rem]">Overlay: {currentLabel}</span>
+            )}
             <ChevronDown
               className={cn("h-3.5 w-3.5 shrink-0 opacity-70 transition-transform", open && "rotate-180")}
               aria-hidden
@@ -187,30 +200,38 @@ export function PropertyMapLayerPillsRow({
   onParcelBaseLayer,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: LayerPillsProps) {
   const filtersActive = filterBadgeCount > 0;
   const filtersIconClass = filtersActive ? "text-white" : "text-[var(--cedar-shingle)]";
 
   return (
-    <div className={cn("flex gap-1.5", layout === "stack" ? "flex-col items-stretch" : "flex-row flex-wrap items-center")}>
+    <div
+      className={cn(
+        "flex min-w-0 gap-1.5",
+        layout === "stack" ? "flex-col items-stretch" : "flex-row flex-wrap items-center",
+      )}
+    >
       <PropertyMapOverlayChip parcelBaseLayer={parcelBaseLayer} onParcelBaseLayer={onParcelBaseLayer} layout={layout} />
-      <button
-        type="button"
-        onClick={onOpenFilters}
-        className={cn(
-          filtersActive ? layerPillActiveSolid() : layerPillInactive(),
-          "gap-1",
-          layout === "stack" && "justify-center",
-        )}
-      >
-        <SlidersHorizontal className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", filtersIconClass)} aria-hidden />
-        Filters
-        {filterBadgeCount > 0 ? (
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-white/25 px-1 text-[9px] font-bold text-white">
-            {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
-          </span>
-        ) : null}
-      </button>
+      {showFiltersButton ? (
+        <button
+          type="button"
+          onClick={onOpenFilters}
+          className={cn(
+            filtersActive ? layerPillActiveSolid() : layerPillInactive(),
+            "gap-1",
+            layout === "stack" && "justify-center",
+          )}
+        >
+          <SlidersHorizontal className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", filtersIconClass)} aria-hidden />
+          Filters
+          {filterBadgeCount > 0 ? (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-white/25 px-1 text-[9px] font-bold text-white">
+              {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -252,6 +273,7 @@ type DesktopBarProps = {
   onRequestFlyToReDistrict: (abbrv: string) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  showFiltersButton?: boolean;
 };
 
 export function PropertyMapDesktopLayerBar({
@@ -264,6 +286,7 @@ export function PropertyMapDesktopLayerBar({
   onRequestFlyToReDistrict,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: DesktopBarProps) {
   const showFocus = parcelBaseLayer === "re_market_areas";
 
@@ -277,6 +300,7 @@ export function PropertyMapDesktopLayerBar({
           onParcelBaseLayer={onParcelBaseLayer}
           onOpenFilters={onOpenFilters}
           filterBadgeCount={filterBadgeCount}
+          showFiltersButton={showFiltersButton}
         />
         <PropertyMapLayerHelpTrigger />
       </div>
@@ -301,6 +325,7 @@ type SheetBodyProps = {
   onRequestFlyToReDistrict: (abbrv: string) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  showFiltersButton?: boolean;
 };
 
 export function PropertyMapLayersSheetBody({
@@ -313,6 +338,7 @@ export function PropertyMapLayersSheetBody({
   onRequestFlyToReDistrict,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: SheetBodyProps) {
   const showFocus = parcelBaseLayer === "re_market_areas";
 
@@ -331,6 +357,7 @@ export function PropertyMapLayersSheetBody({
           onParcelBaseLayer={onParcelBaseLayer}
           onOpenFilters={onOpenFilters}
           filterBadgeCount={filterBadgeCount}
+          showFiltersButton={showFiltersButton}
         />
       </div>
       {showFocus ? (

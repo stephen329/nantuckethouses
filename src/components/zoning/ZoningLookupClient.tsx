@@ -39,11 +39,14 @@ import {
 } from "@/lib/nr-vacation-rental-url";
 import {
   applyRentalFilters,
+  buildMapAppliedFilterChips,
   countActiveLinkFilters,
   countActiveRentalFilters,
   DEFAULT_LINK_FILTERS,
   DEFAULT_RENTAL_FILTERS,
   filterLinkFeatureCollection,
+  LINK_MAP_DEFAULT_SOLD_FEED_DAYS,
+  removeMapAppliedFilterChip,
   type LinkFiltersState,
   type PropertyMapMode,
   type RentalFiltersState,
@@ -199,6 +202,7 @@ function linkPinFromOmniboxHit(hit: OmniboxActiveListing | OmniboxSoldComp, pool
     livingAreaSqft: null,
     renoHint: false,
     townWalkHint: false,
+    hasPool: false,
     longitude: hit.lng ?? null,
     latitude: hit.lat ?? null,
   };
@@ -461,7 +465,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const hasRentMode = mapModes.includes("rent");
   const hasSaleMode = mapModes.includes("sale");
   const hasSoldMode = mapModes.includes("sold");
+  const hasListingTypeSelected = mapModes.length > 0;
   const mapModeForOmnibox = effectiveModeForOmnibox(mapModes);
+
+  useEffect(() => {
+    if (mapModes.length === 0) setFiltersOpen(false);
+  }, [mapModes.length]);
 
   const mapResearchHubPrimaryCta = useMemo(() => {
     if (!selectedRental) return null;
@@ -480,7 +489,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     setSelectedRental(null);
     setSelectedLink(null);
     setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
-    setLinkFilters({ ...DEFAULT_LINK_FILTERS });
+    const soldInLastDefault = mapModes.includes("sold") ? ("30d" as const) : ("" as const);
+    setLinkFilters({ ...DEFAULT_LINK_FILTERS, soldInLast: soldInLastDefault });
   }, [mapModes]);
 
   const setMapModesAndUrl = useCallback(
@@ -595,7 +605,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     const pool = hasSaleMode && hasSoldMode ? "both" : hasSaleMode ? "active" : "sold";
     const ac = new AbortController();
     fetch(
-      `/api/map/link-listings?parcel_id=${encodeURIComponent(pid)}&pool=${encodeURIComponent(pool)}&soldDays=1095`,
+      `/api/map/link-listings?parcel_id=${encodeURIComponent(pid)}&pool=${encodeURIComponent(pool)}&soldDays=${LINK_MAP_DEFAULT_SOLD_FEED_DAYS}`,
       { signal: ac.signal },
     )
       .then(async (r) => {
@@ -660,6 +670,18 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     const showLink = hasSaleMode || hasSoldMode;
     return (showRent ? countActiveRentalFilters(rentalFilters) : 0) + (showLink ? countActiveLinkFilters(linkFilters) : 0);
   }, [hasRentMode, hasSaleMode, hasSoldMode, rentalFilters, linkFilters]);
+
+  const appliedFilterChips = useMemo(
+    () =>
+      buildMapAppliedFilterChips({
+        rental: rentalFilters,
+        link: linkFilters,
+        showRent: hasRentMode,
+        showLink: hasSaleMode || hasSoldMode,
+        showSold: hasSoldMode,
+      }),
+    [rentalFilters, linkFilters, hasRentMode, hasSaleMode, hasSoldMode],
+  );
 
   useEffect(() => {
     if (!selectedRental) return;
@@ -1309,8 +1331,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   {(
                     [
                       { mode: "sale" as const, label: "For sale" },
-                      { mode: "rent" as const, label: "For rent" },
                       { mode: "sold" as const, label: "Sold" },
+                      { mode: "rent" as const, label: "Vacation Rentals" },
                     ] as const
                   ).map(({ mode, label }) => (
                     <button
@@ -1353,21 +1375,85 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   parcelBaseLayer={parcelBaseLayer}
                   onParcelBaseLayer={applyParcelBaseLayer}
                 />
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen(true)}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--atlantic-navy)] transition-colors hover:bg-[var(--sandstone)] lg:hidden"
-                  aria-label="Open filters"
-                >
-                  Filters
-                  <ChevronDown className="h-3.5 w-3.5 text-[var(--nantucket-gray)]" aria-hidden />
-                  {filterBadgeCount > 0 ? (
-                    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-700 px-1 text-[9px] font-semibold text-white">
-                      {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
-                    </span>
-                  ) : null}
-                </button>
+                {hasListingTypeSelected ? (
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen(true)}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--atlantic-navy)] transition-colors hover:bg-[var(--sandstone)] lg:hidden"
+                    aria-label="Open filters"
+                  >
+                    Filters
+                    <ChevronDown className="h-3.5 w-3.5 text-[var(--nantucket-gray)]" aria-hidden />
+                    {filterBadgeCount > 0 ? (
+                      <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-700 px-1 text-[9px] font-semibold text-white">
+                        {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
+                      </span>
+                    ) : null}
+                  </button>
+                ) : null}
               </div>
+
+              {hasListingTypeSelected && appliedFilterChips.length > 0 ? (
+                <div
+                  className="flex min-w-0 flex-wrap items-center gap-1.5 border-t border-[var(--cedar-shingle)]/10 pt-1.5 sm:pt-2"
+                  role="list"
+                  aria-label="Active map filters"
+                >
+                  {appliedFilterChips.map((chip) =>
+                    chip.dismissable === false ? (
+                      <span
+                        key={chip.id}
+                        role="listitem"
+                        title="Sold pins use the map feed lookback. Open Filters to narrow by a shorter window."
+                        className={cn(
+                          "inline-flex max-w-full items-center rounded-full border py-0.5 pl-2.5 pr-2.5 text-[11px] font-medium leading-tight text-blue-950 shadow-sm",
+                          chip.source === "rental"
+                            ? "border-emerald-700/25 bg-emerald-50/95"
+                            : "border-blue-700/25 bg-blue-50/95",
+                        )}
+                      >
+                        <span className="min-w-0 truncate">{chip.label}</span>
+                      </span>
+                    ) : (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        role="listitem"
+                        aria-label={`Remove filter: ${chip.label}`}
+                        className={cn(
+                          "inline-flex max-w-full items-center gap-1 rounded-full border py-0.5 pl-2.5 pr-1 text-[11px] font-medium leading-tight shadow-sm transition-colors",
+                          chip.source === "rental"
+                            ? "border-emerald-700/25 bg-emerald-50/95 text-emerald-950 hover:border-emerald-700/40 hover:bg-emerald-50"
+                            : "border-blue-700/25 bg-blue-50/95 text-blue-950 hover:border-blue-700/40 hover:bg-blue-50",
+                        )}
+                        onClick={() => {
+                          const { rental: nextR, link: nextL } = removeMapAppliedFilterChip(
+                            chip.id,
+                            rentalFilters,
+                            linkFilters,
+                          );
+                          setRentalFilters(nextR);
+                          setLinkFilters(nextL);
+                        }}
+                      >
+                        <span className="min-w-0 truncate">{chip.label}</span>
+                        <span
+                          className={cn(
+                            "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                            chip.source === "rental"
+                              ? "bg-emerald-700/15 text-emerald-900 hover:bg-emerald-700/25"
+                              : "bg-blue-700/15 text-blue-900 hover:bg-blue-700/25",
+                          )}
+                          aria-hidden
+                        >
+                          <X className="h-3 w-3" strokeWidth={2.5} />
+                        </span>
+                      </button>
+                    ),
+                  )}
+                </div>
+              ) : null}
+
               <div className="hidden min-w-0 lg:block">
                 <PropertyMapDesktopLayerBar
                   showZoningColors={showZoningColors}
@@ -1383,6 +1469,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   }}
                   onOpenFilters={() => setFiltersOpen(true)}
                   filterBadgeCount={filterBadgeCount}
+                  showFiltersButton={hasListingTypeSelected}
                 />
               </div>
             </div>
@@ -1559,7 +1646,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   <div className={cn(mapUiHidden && "pointer-events-none opacity-0")}>
                     <PropertyMapFiltersSheet
                       trigger="none"
-                      open={filtersOpen}
+                      open={filtersOpen && hasListingTypeSelected}
                       onOpenChange={setFiltersOpen}
                       side={isPropertyMap && layoutNarrow ? "top" : "bottom"}
                       mapMode={mapModeForOmnibox}

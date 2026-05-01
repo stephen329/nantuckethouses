@@ -15,7 +15,11 @@ import {
   parseMapViewFromSearchParams,
 } from "@/lib/map-view-url";
 import { mapboxZoningFillColorExpression } from "@/lib/zoning-colors";
-import { reDistrictFillColorExpression, reDistrictPolygonsToBoundaryLines } from "@/lib/re-districts-map";
+import {
+  reDistrictFillColorExpression,
+  reDistrictPolygonsToBoundaryLines,
+  reDistrictPolygonsToLabelPoints,
+} from "@/lib/re-districts-map";
 
 /** Parcel fill + optional RE (MLS-style) market polygons under parcels. */
 export type ParcelBaseMapLayer = "tax_zoning" | "re_market_areas" | "none";
@@ -98,6 +102,28 @@ const PARCEL_OUTLINE_MIN_ZOOM = 15;
 /** Parcel fill when zoning colors are hidden (single tone over basemap). */
 const PARCEL_FILL_NEUTRAL = "#cbd5e1";
 
+/** MLS (RE) district polygon fill — scaled down 30% from prior tuning for a lighter overlay. */
+const RE_DISTRICT_FILL_OPACITY_SCALE = 0.7;
+const RE_DISTRICT_FILL_OPACITY_INITIAL = 0.55 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_DEFAULT = 0.62 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_HIGHLIGHT = 0.78 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_DIM = 0.42 * RE_DISTRICT_FILL_OPACITY_SCALE;
+
+/** Between-MLS-area borders — half the prior zoom-based line widths. */
+const RE_DISTRICT_BOUNDARY_LINE_WIDTH: mapboxgl.ExpressionSpecification = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  10,
+  1,
+  12,
+  1.5,
+  14,
+  2,
+  16,
+  2.75,
+];
+
 function listingOverlayLayerIds(map: mapboxgl.Map): string[] {
   const ids = [
     "rentals-clusters",
@@ -164,7 +190,8 @@ function pointInPolygonGeometry(lng: number, lat: number, geom: Geometry): boole
   return false;
 }
 
-function mlsAreaForPoint(
+/** Full MLS market area name only (`District`); never the short code (`Abbrv`). */
+function mlsDistrictNameForPoint(
   lng: number,
   lat: number,
   fc: FeatureCollection<Geometry, { Abbrv?: string; District?: string }> | null,
@@ -174,12 +201,18 @@ function mlsAreaForPoint(
     if (!feature.geometry) continue;
     if (!pointInPolygonGeometry(lng, lat, feature.geometry)) continue;
     const district = String(feature.properties?.District ?? "").trim();
-    const abbrv = String(feature.properties?.Abbrv ?? "").trim();
-    if (district && abbrv) return `${district} (${abbrv})`;
     if (district) return district;
-    if (abbrv) return abbrv;
   }
   return null;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /** Fill opacity with hover lift (requires `promoteId: "parcel_id"` + feature-state). */
@@ -229,17 +262,20 @@ function syncParcelAndReOverlay(
   if (map.getLayer("re-districts-outline")) {
     map.setLayoutProperty("re-districts-outline", "visibility", "none");
   }
+  if (map.getLayer("re-districts-label")) {
+    map.setLayoutProperty("re-districts-label", "visibility", showReOverlay ? "visible" : "none");
+  }
   if (showReOverlay) {
     const hi = (opts.highlightedReDistrictAbbrv ?? "").trim();
     if (hi) {
       map.setPaintProperty("re-districts-fill", "fill-opacity", [
         "case",
         ["==", ["get", "Abbrv"], hi],
-        0.78,
-        0.42,
+        RE_DISTRICT_FILL_OPACITY_HIGHLIGHT,
+        RE_DISTRICT_FILL_OPACITY_DIM,
       ]);
     } else {
-      map.setPaintProperty("re-districts-fill", "fill-opacity", 0.62);
+      map.setPaintProperty("re-districts-fill", "fill-opacity", RE_DISTRICT_FILL_OPACITY_DEFAULT);
     }
   }
 }
@@ -332,6 +368,8 @@ export function ZoningMap({
   const highlightSoldRef = useRef(highlightSoldParcels);
   const soldParcelIdsRef = useRef(soldParcelIds);
   const showZoningColorsRef = useRef(showZoningColors);
+  const parcelBaseLayerRef = useRef(parcelBaseLayer);
+  const highlightedReDistrictAbbrvRef = useRef(highlightedReDistrictAbbrv);
   const onRentalPinSelectRef = useRef(onRentalPinSelect);
   const onViewportBoundsChangeRef = useRef(onViewportBoundsChange);
   const showRentalPinsRef = useRef(showRentalPins);
@@ -340,6 +378,7 @@ export function ZoningMap({
   const linkSoldGeoJsonRef = useRef(linkSoldGeoJson);
   const onLinkListingPinSelectRef = useRef(onLinkListingPinSelect);
   const showLinkPinsRef = useRef(showLinkPins);
+  const reDistrictsGeoJsonRef = useRef(reDistrictsGeoJson);
 
   useEffect(() => {
     rentalGeoJsonRef.current = rentalGeoJson ?? null;
@@ -352,6 +391,10 @@ export function ZoningMap({
   useEffect(() => {
     linkSoldGeoJsonRef.current = linkSoldGeoJson ?? null;
   }, [linkSoldGeoJson]);
+
+  useEffect(() => {
+    reDistrictsGeoJsonRef.current = reDistrictsGeoJson ?? null;
+  }, [reDistrictsGeoJson]);
 
   useEffect(() => {
     onLinkListingPinSelectRef.current = onLinkListingPinSelect;
@@ -367,10 +410,21 @@ export function ZoningMap({
     highlightSoldRef.current = highlightSoldParcels;
     soldParcelIdsRef.current = soldParcelIds;
     showZoningColorsRef.current = showZoningColors;
+    parcelBaseLayerRef.current = parcelBaseLayer;
+    highlightedReDistrictAbbrvRef.current = highlightedReDistrictAbbrv;
     onRentalPinSelectRef.current = onRentalPinSelect;
     onViewportBoundsChangeRef.current = onViewportBoundsChange;
     showRentalPinsRef.current = showRentalPins;
-  }, [highlightSoldParcels, soldParcelIds, showZoningColors, onRentalPinSelect, onViewportBoundsChange, showRentalPins]);
+  }, [
+    highlightSoldParcels,
+    soldParcelIds,
+    showZoningColors,
+    parcelBaseLayer,
+    highlightedReDistrictAbbrv,
+    onRentalPinSelect,
+    onViewportBoundsChange,
+    showRentalPins,
+  ]);
 
   const applySoldParcelHighlight = (map: mapboxgl.Map) => {
     if (!map.getLayer("parcels-sold-outline")) return;
@@ -812,8 +866,13 @@ export function ZoningMap({
         }
 
         if (!popupRef.current) return;
-        const address = feature.properties?.location ?? "Address unavailable";
-        const mlsArea = mlsAreaForPoint(event.lngLat.lng, event.lngLat.lat, reDistrictsGeoJson ?? null) ?? "Unknown";
+        const addressRaw = String(feature.properties?.location ?? "").trim() || "Address unavailable";
+        const zoningRaw = String(feature.properties?.zoning ?? "").trim() || "Unknown";
+        const mlsDistrict =
+          mlsDistrictNameForPoint(event.lngLat.lng, event.lngLat.lat, reDistrictsGeoJsonRef.current) ?? "Unknown";
+        const address = escapeHtml(addressRaw);
+        const zoning = escapeHtml(zoningRaw);
+        const mlsArea = escapeHtml(mlsDistrict);
 
         popupRef.current
           .setLngLat(event.lngLat)
@@ -821,6 +880,7 @@ export function ZoningMap({
             `<div style="font-size:12px;">
               <div><strong>Address:</strong> ${address}</div>
               <div><strong>MLS Area:</strong> ${mlsArea}</div>
+              <div><strong>Zoning:</strong> ${zoning}</div>
             </div>`,
           )
           .addTo(map);
@@ -994,21 +1054,107 @@ export function ZoningMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    syncParcelAndReOverlay(map, { showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv });
+    const runSync = () =>
+      syncParcelAndReOverlay(map, {
+        showZoningColors: showZoningColorsRef.current,
+        parcelBaseLayer: parcelBaseLayerRef.current,
+        highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+      });
+    runSync();
+    /** MLS overlay needs RE layers; they may land a frame after `parcelBaseLayer` updates — bump sync. */
+    if (parcelBaseLayer !== "re_market_areas") return;
+    const bump = () => runSync();
+    const rafId = requestAnimationFrame(bump);
+    map.once("idle", bump);
+    return () => {
+      cancelAnimationFrame(rafId);
+      map.off("idle", bump);
+    };
   }, [showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !reDistrictsGeoJson?.features?.length) return;
 
-    const ensureLayers = () => {
-      if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return;
+    let cancelled = false;
+
+    /** Returns true once MLS district sources/layers are in place (or already were). */
+    const ensureLayers = (): boolean => {
+      if (cancelled) return false;
+      if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return false;
       const data = reDistrictsGeoJson;
-      if (!data) return;
+      if (!data) return true;
 
       const boundaryLines = reDistrictPolygonsToBoundaryLines(
         data as FeatureCollection<Geometry, Record<string, unknown>>,
       );
+      const labelPoints = reDistrictPolygonsToLabelPoints(
+        data as FeatureCollection<Geometry, Record<string, unknown>>,
+      );
+
+      const upsertReDistrictLabelLayer = () => {
+        const textField: mapboxgl.ExpressionSpecification = [
+          "case",
+          [">", ["length", ["coalesce", ["get", "District"], ""]], 0],
+          ["get", "District"],
+          ["coalesce", ["get", "Abbrv"], ""],
+        ];
+        if (!map.getSource("re-districts-labels")) {
+          map.addSource("re-districts-labels", { type: "geojson", data: labelPoints });
+          map.addLayer(
+            {
+              id: "re-districts-label",
+              type: "symbol",
+              source: "re-districts-labels",
+              minzoom: 10,
+              layout: {
+                visibility: "none",
+                "text-field": textField,
+                "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 12, 11, 14, 12.5, 16, 13.5],
+                "text-allow-overlap": true,
+                "text-padding": 4,
+              },
+              paint: {
+                "text-color": "#0f172a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 3,
+                "text-halo-blur": 0.35,
+                "text-opacity": ["interpolate", ["linear"], ["zoom"], 9.5, 0, 10, 1],
+              },
+            },
+            "parcels-fill",
+          );
+        } else {
+          (map.getSource("re-districts-labels") as mapboxgl.GeoJSONSource).setData(labelPoints);
+          if (!map.getLayer("re-districts-label")) {
+            map.addLayer(
+              {
+                id: "re-districts-label",
+                type: "symbol",
+                source: "re-districts-labels",
+                minzoom: 10,
+                layout: {
+                  visibility: "none",
+                  "text-field": textField,
+                  "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                  "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 12, 11, 14, 12.5, 16, 13.5],
+                  "text-allow-overlap": true,
+                  "text-padding": 4,
+                },
+                paint: {
+                  "text-color": "#0f172a",
+                  "text-halo-color": "#ffffff",
+                  "text-halo-width": 3,
+                  "text-halo-blur": 0.35,
+                  "text-opacity": ["interpolate", ["linear"], ["zoom"], 9.5, 0, 10, 1],
+                },
+              },
+              "parcels-fill",
+            );
+          }
+        }
+      };
 
       if (!map.getSource("re-districts")) {
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
@@ -1025,7 +1171,7 @@ export function ZoningMap({
             layout: { visibility: "none" },
             paint: {
               "fill-color": reDistrictFillColorExpression() as mapboxgl.ExpressionSpecification,
-              "fill-opacity": 0.55,
+              "fill-opacity": RE_DISTRICT_FILL_OPACITY_INITIAL,
             },
           },
           "parcels-fill",
@@ -1039,12 +1185,13 @@ export function ZoningMap({
             layout: { visibility: "none" },
             paint: {
               "line-color": "#0f172a",
-              "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 12, 3, 14, 4, 16, 5.5],
+              "line-width": RE_DISTRICT_BOUNDARY_LINE_WIDTH,
               "line-opacity": 0.95,
             },
           },
           "parcels-sold-outline",
         );
+        upsertReDistrictLabelLayer();
       } else {
         (map.getSource("re-districts") as mapboxgl.GeoJSONSource).setData(data);
         let lineSrc = map.getSource("re-districts-boundaries") as mapboxgl.GeoJSONSource | undefined;
@@ -1071,7 +1218,7 @@ export function ZoningMap({
               layout: { visibility: "none" },
               paint: {
                 "line-color": "#0f172a",
-                "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 12, 3, 14, 4, 16, 5.5],
+                "line-width": RE_DISTRICT_BOUNDARY_LINE_WIDTH,
                 "line-opacity": 0.95,
               },
             },
@@ -1079,15 +1226,41 @@ export function ZoningMap({
           );
         }
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
+        upsertReDistrictLabelLayer();
       }
-      syncParcelAndReOverlay(map, { showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv });
+      syncParcelAndReOverlay(map, {
+        showZoningColors: showZoningColorsRef.current,
+        parcelBaseLayer: parcelBaseLayerRef.current,
+        highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+      });
+      return true;
     };
 
-    if (map.isStyleLoaded()) ensureLayers();
-    else map.once("load", ensureLayers);
+    /**
+     * RE GeoJSON often finishes loading before the map `load` handler adds `parcels-fill`.
+     * Previously `ensureLayers` no-op'd with no retry, so MLS Areas stayed blank until another
+     * prop tick (e.g. toggling the overlay). Retry on `load` and `idle` until base layers exist.
+     */
+    let attachAttempts = 0;
+    const maxAttachAttempts = 48;
+    const scheduleAttachWhenReady = () => {
+      if (cancelled) return;
+      if (ensureLayers()) return;
+      attachAttempts += 1;
+      if (attachAttempts > maxAttachAttempts) return;
+      if (!map.isStyleLoaded()) {
+        map.once("load", scheduleAttachWhenReady);
+      } else {
+        map.once("idle", scheduleAttachWhenReady);
+      }
+    };
+
+    scheduleAttachWhenReady();
 
     return () => {
-      map.off("load", ensureLayers);
+      cancelled = true;
+      map.off("load", scheduleAttachWhenReady);
+      map.off("idle", scheduleAttachWhenReady);
     };
   }, [reDistrictsGeoJson, showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
