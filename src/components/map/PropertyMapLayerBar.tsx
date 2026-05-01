@@ -122,9 +122,11 @@ export function PropertyMapOverlayChip({
 }: OverlayChipProps) {
   const [open, setOpen] = useState(false);
   const currentLabel = overlayOptionLabel(parcelBaseLayer);
+  const isMlsAreas = parcelBaseLayer === "re_market_areas";
+  const buttonCaption = isMlsAreas ? "Overlay" : `Overlay: ${currentLabel}`;
 
   return (
-    <div className={cn(className)}>
+    <div className={cn("flex min-w-0 flex-wrap items-center gap-1.5", className)}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
@@ -138,9 +140,7 @@ export function PropertyMapOverlayChip({
             aria-expanded={open}
             aria-label={`Map overlay: ${currentLabel}. Change overlay.`}
           >
-            <span className="max-w-[11rem] truncate sm:max-w-[14rem]">
-              Overlay: {currentLabel}
-            </span>
+            <span className="max-w-[11rem] truncate sm:max-w-[14rem]">{buttonCaption}</span>
             <ChevronDown
               className={cn("h-3.5 w-3.5 shrink-0 opacity-70 transition-transform", open && "rotate-180")}
               aria-hidden
@@ -177,6 +177,14 @@ export function PropertyMapOverlayChip({
           </div>
         </PopoverContent>
       </Popover>
+      {isMlsAreas ? (
+        <span
+          className="shrink-0 text-[11px] font-semibold leading-tight tracking-tight text-blue-900"
+          title="Neighborhood-style MLS district polygons"
+        >
+          MLS Areas
+        </span>
+      ) : null}
     </div>
   );
 }
