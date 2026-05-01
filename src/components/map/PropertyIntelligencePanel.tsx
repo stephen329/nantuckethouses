@@ -373,6 +373,32 @@ export function PropertyIntelligencePanel({
     [selectedLink?.bedrooms, parcelLinkListingMatch?.bedrooms, selectedRental?.totalBedrooms],
   );
 
+  const title =
+    selectedLink?.address ??
+    (selectedParcel?.location && selectedRental != null
+      ? selectedParcel.location
+      : selectedRental?.streetAddress ?? selectedRental?.headline ?? selectedParcel?.location ?? "Property");
+
+  /** Mobile drawer sticky strip: `Street | MLS area | Zoning` (skip empty middle/end segments). */
+  const slideUpAddressLine = useMemo(() => {
+    if (!propertyMapSlideUpNav) return "";
+    const addr = title.trim();
+    const mls = (parcelLinkListingMatch?.mlsArea ?? selectedLink?.mlsArea ?? "").trim();
+    const zoneRaw = (selectedParcel?.zoning ?? zoningLabel).trim();
+    const parts: string[] = [];
+    if (addr) parts.push(addr);
+    if (mls) parts.push(mls);
+    if (zoneRaw && zoneRaw !== "Unknown") parts.push(zoneRaw);
+    return parts.join(" | ");
+  }, [
+    propertyMapSlideUpNav,
+    title,
+    parcelLinkListingMatch?.mlsArea,
+    selectedLink?.mlsArea,
+    selectedParcel?.zoning,
+    zoningLabel,
+  ]);
+
   if (!has) {
     return (
       <div className="space-y-4 rounded-lg border border-[var(--cedar-shingle)]/20 bg-white p-4 shadow-sm">
@@ -407,11 +433,6 @@ export function PropertyIntelligencePanel({
     selectedLink != null
       ? selectedLink.thumbUrl
       : selectedRental?.thumbUrl ?? parcelLinkListingMatch?.thumbUrl ?? null;
-  const title =
-    selectedLink?.address ??
-    (selectedParcel?.location && selectedRental != null
-      ? selectedParcel.location
-      : selectedRental?.streetAddress ?? selectedRental?.headline ?? selectedParcel?.location ?? "Property");
   const subPrice =
     selectedLink != null
       ? `${selectedLink.pool === "sold" ? selectedLink.closePrice || selectedLink.listPrice : selectedLink.listPrice} • ${selectedLink.pool === "sold" ? "Sold" : "Active"} • LINK MLS`
@@ -484,26 +505,6 @@ export function PropertyIntelligencePanel({
   })();
 
   const sectionScroll = propertyMapSectionScrollClass();
-
-  /** Mobile drawer sticky strip: `Street | MLS area | Zoning` (skip empty middle/end segments). */
-  const slideUpAddressLine = useMemo(() => {
-    if (!propertyMapSlideUpNav) return "";
-    const addr = title.trim();
-    const mls = (parcelLinkListingMatch?.mlsArea ?? selectedLink?.mlsArea ?? "").trim();
-    const zoneRaw = (selectedParcel?.zoning ?? zoningLabel).trim();
-    const parts: string[] = [];
-    if (addr) parts.push(addr);
-    if (mls) parts.push(mls);
-    if (zoneRaw && zoneRaw !== "Unknown") parts.push(zoneRaw);
-    return parts.join(" | ");
-  }, [
-    propertyMapSlideUpNav,
-    title,
-    parcelLinkListingMatch?.mlsArea,
-    selectedLink?.mlsArea,
-    selectedParcel?.zoning,
-    zoningLabel,
-  ]);
 
   const takeColumn = (
     <>
