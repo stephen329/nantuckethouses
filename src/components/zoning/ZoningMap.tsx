@@ -102,6 +102,46 @@ const PARCEL_OUTLINE_MIN_ZOOM = 15;
 /** Parcel fill when zoning colors are hidden (single tone over basemap). */
 const PARCEL_FILL_NEUTRAL = "#cbd5e1";
 
+/** Stretchable capsule for LINK price labels (`icon-text-fit: width`). */
+const LINK_ACTIVE_PILL_IMAGE_ID = "link-active-pill-blue";
+const LINK_ACTIVE_PILL_HEX = "#2563eb";
+const LINK_SOLD_PILL_IMAGE_ID = "link-sold-pill-gray";
+const LINK_SOLD_PILL_HEX = "#6b7280";
+
+function ensureLinkPillStretchImage(map: mapboxgl.Map, imageId: string, fillHex: string) {
+  if (map.hasImage(imageId)) return;
+  const w = 64;
+  const h = 32;
+  const r = h / 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.fillStyle = fillHex;
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(0, 0, w, h, r);
+  } else {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.moveTo(rr, 0);
+    ctx.arcTo(w, 0, w, h, rr);
+    ctx.arcTo(w, h, 0, h, rr);
+    ctx.arcTo(0, h, 0, 0, rr);
+    ctx.arcTo(0, 0, w, 0, rr);
+    ctx.closePath();
+  }
+  ctx.fill();
+  const img = ctx.getImageData(0, 0, w, h);
+  const midY = Math.floor(h / 2);
+  map.addImage(imageId, img, {
+    pixelRatio: 1,
+    content: [r, 0, w - r, h],
+    stretchX: [[r, w - r]],
+    stretchY: [[Math.max(0, midY - 1), Math.min(h, midY + 2)]],
+  });
+}
+
 /** MLS (RE) district polygon fill — scaled down 30% from prior tuning for a lighter overlay. */
 const RE_DISTRICT_FILL_OPACITY_SCALE = 0.7;
 const RE_DISTRICT_FILL_OPACITY_INITIAL = 0.55 * RE_DISTRICT_FILL_OPACITY_SCALE;
@@ -133,11 +173,9 @@ function listingOverlayLayerIds(map: mapboxgl.Map): string[] {
     "link-active-clusters",
     "link-active-count",
     "link-active-point",
-    "link-active-point-price",
     "link-sold-clusters",
     "link-sold-count",
     "link-sold-point",
-    "link-sold-point-price",
   ];
   return ids.filter((id) => !!map.getLayer(id));
 }
@@ -650,7 +688,6 @@ export function ZoningMap({
         sourceId: string,
         clusterFill: string,
         clusterStroke: string,
-        pointFill: string,
         initialData: FeatureCollection<Point, LinkListingPinProperties>,
         priceMode: "active" | "sold",
       ) => {
@@ -688,61 +725,41 @@ export function ZoningMap({
           },
           paint: { "text-color": "#ffffff" },
         });
-        map.addLayer({
-          id: `${sourceId}-point`,
-          type: "circle",
-          source: sourceId,
-          filter: ["!", ["has", "point_count"]],
-          paint: {
-            "circle-color": pointFill,
-            "circle-radius": 7,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#ffffff",
-          },
-        });
+        const unclusteredFilter: mapboxgl.FilterSpecification = ["!", ["has", "point_count"]];
 
         const priceTextField: mapboxgl.ExpressionSpecification =
           priceMode === "active"
-            ? (["coalesce", ["get", "listPrice"], ""] as mapboxgl.ExpressionSpecification)
-            : ([
-                "case",
-                [">", ["length", ["coalesce", ["get", "closePrice"], ""]], 0],
-                ["get", "closePrice"],
-                ["coalesce", ["get", "listPrice"], ""],
-              ] as mapboxgl.ExpressionSpecification);
+            ? (["coalesce", ["get", "priceCompact"], ""] as mapboxgl.ExpressionSpecification)
+            : (["coalesce", ["get", "priceCompact"], "Sold"] as mapboxgl.ExpressionSpecification);
 
-        const priceFilter: mapboxgl.FilterSpecification =
+        const linkPillImageId = priceMode === "sold" ? LINK_SOLD_PILL_IMAGE_ID : LINK_ACTIVE_PILL_IMAGE_ID;
+        const linkPillFilter: mapboxgl.FilterSpecification =
           priceMode === "active"
-            ? (["all", ["!", ["has", "point_count"]], [">", ["length", ["coalesce", ["get", "listPrice"], ""]], 0]] as mapboxgl.FilterSpecification)
-            : ([
-                "all",
-                ["!", ["has", "point_count"]],
-                [
-                  "any",
-                  [">", ["length", ["coalesce", ["get", "closePrice"], ""]], 0],
-                  [">", ["length", ["coalesce", ["get", "listPrice"], ""]], 0],
-                ],
-              ] as mapboxgl.FilterSpecification);
+            ? (["all", unclusteredFilter, [">", ["length", ["coalesce", ["get", "priceCompact"], ""]], 0]] as mapboxgl.FilterSpecification)
+            : unclusteredFilter;
 
+        /** Active: blue capsule + `priceCompact`; sold: gray capsule + `priceCompact` / Sold. */
         map.addLayer({
-          id: `${sourceId}-point-price`,
+          id: `${sourceId}-point`,
           type: "symbol",
           source: sourceId,
-          minzoom: MIN_ZOOM_PIN_PRICE_LABEL,
-          filter: priceFilter,
+          filter: linkPillFilter,
           layout: {
+            "icon-image": linkPillImageId,
+            "icon-text-fit": "width",
+            "icon-text-fit-padding": [2, 2, 2, 2],
             "text-field": priceTextField,
             "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 10,
-            "text-offset": [0, 1.2],
-            "text-anchor": "top",
+            "text-size": 12,
+            "text-anchor": "center",
+            "icon-allow-overlap": false,
             "text-allow-overlap": false,
             "text-ignore-placement": false,
+            "icon-ignore-placement": false,
           },
           paint: {
             "text-color": "#ffffff",
-            "text-halo-color": pointFill,
-            "text-halo-width": 1.25,
+            "icon-opacity": 1,
           },
         });
 
@@ -763,17 +780,10 @@ export function ZoningMap({
           onLinkListingPinSelectRef.current?.(f as unknown as LinkListingPinFeature);
         };
         map.on("click", `${sourceId}-point`, onLinkPointClick);
-        map.on("click", `${sourceId}-point-price`, onLinkPointClick);
         map.on("mouseenter", `${sourceId}-point`, () => {
           map.getCanvas().style.cursor = "pointer";
         });
-        map.on("mouseenter", `${sourceId}-point-price`, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
         map.on("mouseleave", `${sourceId}-point`, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("mouseleave", `${sourceId}-point-price`, () => {
           map.getCanvas().style.cursor = "";
         });
         map.on("mouseenter", `${sourceId}-clusters`, () => {
@@ -785,19 +795,19 @@ export function ZoningMap({
       };
 
       if (showLinkPinsRef.current) {
+        ensureLinkPillStretchImage(map, LINK_ACTIVE_PILL_IMAGE_ID, LINK_ACTIVE_PILL_HEX);
         attachClusteredPool(
           "link-active",
           "#1d4ed8",
           "#bfdbfe",
-          "#2563eb",
           linkActiveGeoJsonRef.current ?? emptyLinkFc,
           "active",
         );
+        ensureLinkPillStretchImage(map, LINK_SOLD_PILL_IMAGE_ID, LINK_SOLD_PILL_HEX);
         attachClusteredPool(
           "link-sold",
-          "#475569",
-          "#e2e8f0",
-          "#94a3b8",
+          "#6b7280",
+          "#e5e7eb",
           linkSoldGeoJsonRef.current ?? emptyLinkFc,
           "sold",
         );
@@ -939,10 +949,8 @@ export function ZoningMap({
           "rentals-point-price",
           "rentals-clusters",
           "link-active-point",
-          "link-active-point-price",
           "link-active-clusters",
           "link-sold-point",
-          "link-sold-point-price",
           "link-sold-clusters",
         ] as const) {
           if (map.getLayer(id)) layers.push(id);
@@ -1382,30 +1390,28 @@ export function ZoningMap({
     const map = mapRef.current;
     const sel = selectedLinkListingId ?? "__none__";
     for (const base of ["link-active", "link-sold"] as const) {
-      const pointHalo = base === "link-active" ? "#2563eb" : "#94a3b8";
       const lid = `${base}-point`;
       if (!map?.getLayer(lid)) continue;
-      map.setPaintProperty(lid, "circle-stroke-color", [
+      const layer = map.getLayer(lid);
+      if (layer?.type !== "symbol") continue;
+      map.setPaintProperty(lid, "text-halo-color", [
         "case",
         ["==", ["get", "linkId"], sel],
         "#0f172a",
-        "#ffffff",
+        "rgba(255,255,255,0)",
       ]);
-      map.setPaintProperty(lid, "circle-stroke-width", [
+      map.setPaintProperty(lid, "text-halo-width", [
         "case",
         ["==", ["get", "linkId"], sel],
-        3,
-        2,
+        0.9,
+        0,
       ]);
-      const priceLid = `${base}-point-price`;
-      if (map.getLayer(priceLid)) {
-        map.setPaintProperty(priceLid, "text-halo-color", [
-          "case",
-          ["==", ["get", "linkId"], sel],
-          "#0f172a",
-          pointHalo,
-        ]);
-      }
+      map.setPaintProperty(lid, "text-halo-blur", [
+        "case",
+        ["==", ["get", "linkId"], sel],
+        0.1,
+        0,
+      ]);
     }
   }, [selectedLinkListingId]);
 

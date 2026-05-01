@@ -71,6 +71,8 @@ export type LinkListingPinProperties = {
   listPriceNum: number;
   closePrice: string;
   closePriceNum: number;
+  /** Map pin label: `$###k` below $1M, else `$#.##M`; empty when price unknown. */
+  priceCompact: string;
   closeDate: string;
   thumbUrl: string | null;
   slug: string | null;
@@ -100,6 +102,16 @@ function inBbox(lng: number, lat: number, west: number, south: number, east: num
 function formatMoney(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return "";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+}
+
+/** LINK map pin (active or sold): `$###k` below $1M, otherwise `$#.##M` (two decimals). */
+export function formatPriceCompactMapPin(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n) || n <= 0) return "";
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  const k = Math.round(n / 1000);
+  if (k <= 0) return "";
+  if (k >= 1000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  return `$${k}k`;
 }
 
 function linkMarketingBlob(row: LinkListingRow): string {
@@ -366,6 +378,16 @@ export function linkMapPointsToGeoJson(points: LinkListingMapPoint[]): FeatureCo
         listPriceNum: p.listPrice,
         closePrice: p.closePrice != null ? formatMoney(p.closePrice) : "",
         closePriceNum: p.closePrice != null && !Number.isNaN(p.closePrice) ? p.closePrice : 0,
+        priceCompact:
+          p.pool === "sold"
+            ? formatPriceCompactMapPin(
+                p.closePrice != null && !Number.isNaN(p.closePrice) && p.closePrice > 0
+                  ? p.closePrice
+                  : p.listPrice > 0
+                    ? p.listPrice
+                    : null,
+              )
+            : formatPriceCompactMapPin(p.listPrice > 0 ? p.listPrice : null),
         closeDate: p.closeDate ?? "",
         thumbUrl: p.thumbUrl,
         slug: p.slug,

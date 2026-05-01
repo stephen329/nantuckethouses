@@ -25,6 +25,7 @@ import nrRentalSlugsByParcel from "@/data/nr-rental-slugs-by-parcel.json";
 import { getZoningColor } from "@/lib/zoning-colors";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 import {
+  formatPriceCompactMapPin,
   linkListingMatchForParcelMapSelection,
   type LinkListingPinFeature,
   type LinkListingPinProperties,
@@ -159,24 +160,6 @@ function isNarrowForParcelDrawer(): boolean {
   return window.matchMedia("(max-width: 1023px)").matches;
 }
 
-function getStephensTake(selectedParcel: ParcelProperties | null): string | null {
-  if (!selectedParcel) return null;
-  const zoning = String(selectedParcel.zoning ?? "").toUpperCase();
-  if (zoning.includes("ROH")) {
-    return "Strong year-round and seasonal rental demand in many ROH pockets. Well-kept properties here often see premium weekly rents in peak season.";
-  }
-  if (zoning.includes("R-10") || zoning.includes("R10")) {
-    return "R-10 areas are often a sweet spot: broad buyer demand, good liquidity, and consistent renovation upside when zoning constraints are respected.";
-  }
-  if (zoning.includes("R-20") || zoning.includes("R20") || zoning.includes("R-40") || zoning.includes("R40")) {
-    return "Lower-density districts can hold long-term value well, especially where lot configuration supports expansion potential without heavy variance risk.";
-  }
-  if (zoning.includes("CN") || zoning.includes("RC")) {
-    return "Mixed-use and commercial-adjacent zones can move on story and location. Underwriting permitting risk early is critical for real confidence.";
-  }
-  return "Parcel-level context matters on Nantucket. I focus on zoning constraints, neighborhood demand, and resale liquidity before any final valuation call.";
-}
-
 function linkPinFromOmniboxHit(hit: OmniboxActiveListing | OmniboxSoldComp, pool: "active" | "sold"): LinkListingPinProperties {
   const isSold = pool === "sold";
   const price = typeof hit.price === "number" && !Number.isNaN(hit.price) ? hit.price : 0;
@@ -188,6 +171,7 @@ function linkPinFromOmniboxHit(hit: OmniboxActiveListing | OmniboxSoldComp, pool
     listPriceNum: isSold ? 0 : price,
     closePrice: isSold ? hit.priceLabel : "",
     closePriceNum: isSold ? price : 0,
+    priceCompact: formatPriceCompactMapPin(price > 0 ? price : null),
     closeDate: isSold && "closeDate" in hit && hit.closeDate ? hit.closeDate : "",
     thumbUrl: null,
     slug: null,
@@ -223,6 +207,13 @@ type PanelProps = {
   onViewComparableRentals?: () => void;
   /** Property map: LINK row matched to this parcel (active at centroid preferred). */
   parcelLinkListingMatch?: ParcelMapLinkListingMatch | null;
+  /**
+   * Property map: `ParcelDetailPanel` is stacked under `PropertyIntelligencePanel` — omit repeated
+   * address, listing/assessor actions, and hero thumb; add a subtle surface so the section isn’t bare.
+   */
+  stackBelowPropertyIntelligence?: boolean;
+  /** Mobile slide-up: render only parcel grid + district, or uses + footer. */
+  panelPiece?: "full" | "parcelInfo" | "usesFooter";
 };
 
 function ParcelDetailPanel({
@@ -235,135 +226,87 @@ function ParcelDetailPanel({
   onViewNearbySales,
   onViewComparableRentals,
   parcelLinkListingMatch = null,
+  stackBelowPropertyIntelligence = false,
+  panelPiece = "full",
 }: PanelProps) {
   const legend = (zoningUseChart as { metadata: { legend: Record<string, string> } }).metadata.legend;
-  const stephensTake = useMemo(() => getStephensTake(selectedParcel), [selectedParcel]);
 
   const mlsListingLinkId = parcelLinkListingMatch?.linkId ?? linkListingId;
 
-  return (
-    <div className="flex min-h-[620px] flex-col">
-      <div className="space-y-4 p-5">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-[var(--nantucket-gray)]">Parcel Detail</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h2 className="text-2xl text-[var(--atlantic-navy)]">{selectedParcel?.location ?? "Select a parcel on the map"}</h2>
-            {selectedParcel?.internal_id ? (
-              <Button asChild variant="outline" size="sm">
-                <a href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`} target="_blank" rel="noopener noreferrer">
-                  View Assessor&apos;s Record
-                </a>
-              </Button>
-            ) : null}
-            {mlsListingLinkId ? (
-              <Button asChild variant="outline" size="sm">
-                <a href={nantucketLinkListingUrl(mlsListingLinkId)} target="_blank" rel="noopener noreferrer">
-                  View LINK listing
-                </a>
-              </Button>
-            ) : null}
-            {vacationRentalSlug ? (
-              <Button asChild variant="outline" size="sm">
-                <a href={nantucketVacationRentalListingUrl(vacationRentalSlug)} target="_blank" rel="noopener noreferrer">
-                  View Vacation Rental Listing
-                </a>
-              </Button>
-            ) : null}
+  const mlsAreaLabel = parcelLinkListingMatch?.mlsArea?.trim() || "—";
+
+  const parcelMetricsOnly = (
+    <>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">MLS Area</p>
+          <p className="mt-1 font-medium text-[var(--atlantic-navy)]">{mlsAreaLabel}</p>
+        </div>
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Zoning District</p>
+          <div className="mt-1 flex items-center gap-2">
+            <span
+              className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: getZoningColor(selectedParcel?.zoning, selectedParcel?.zoning_color) }}
+            />
+            <p className="min-w-0 font-medium leading-snug">
+              {districtMatch ? (
+                <>
+                  <span className="text-[var(--atlantic-navy)]">{districtMatch.code}</span>
+                  {districtMatch.info.name ? (
+                    <span className="text-[var(--nantucket-gray)]"> — {districtMatch.info.name}</span>
+                  ) : null}
+                </>
+              ) : (
+                <span className="text-[var(--atlantic-navy)]">{zoningLabel}</span>
+              )}
+            </p>
           </div>
         </div>
-
-        {parcelLinkListingMatch?.thumbUrl ? (
-          <a
-            href={nantucketLinkListingUrl(parcelLinkListingMatch.linkId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block overflow-hidden rounded-lg border border-[var(--cedar-shingle)]/25 shadow-sm outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
-            aria-label="Open LINK MLS listing (photos)"
-          >
-            <div className="relative aspect-[16/10] w-full max-h-52">
-              <Image
-                src={parcelLinkListingMatch.thumbUrl}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 420px, 100vw"
-                unoptimized
-              />
-            </div>
-          </a>
-        ) : null}
-
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-lg border bg-white p-3">
-            <p className="text-xs text-[var(--nantucket-gray)]">Zoning</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span
-                className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: getZoningColor(selectedParcel?.zoning, selectedParcel?.zoning_color) }}
-              />
-              <p className="font-medium">{zoningLabel}</p>
-            </div>
-          </div>
-          <div className="rounded-lg border bg-white p-3">
-            <p className="text-xs text-[var(--nantucket-gray)]">Lot Size</p>
-            <p className="mt-1 font-medium">{formatTruncatedAcreage(selectedParcel?.acreage)} acres ({formatNumber(selectedParcel?.lot_area_sqft, 0)} sqft)</p>
-          </div>
-          <div className="rounded-lg border bg-white p-3">
-            <p className="text-xs text-[var(--nantucket-gray)]">Assessed Value</p>
-            <p className="mt-1 font-medium">{formatCurrency(selectedParcel?.assessed_total)}</p>
-          </div>
-          <div className="rounded-lg border bg-white p-3">
-            {parcelLinkListingMatch?.pool === "active" && parcelLinkListingMatch.listPrice ? (
-              <>
-                <p className="text-xs text-[var(--nantucket-gray)]">List price &amp; area</p>
-                <p className="mt-1 text-lg font-semibold leading-snug tabular-nums text-[var(--atlantic-navy)]">
-                  {parcelLinkListingMatch.listPrice}
-                  {parcelLinkListingMatch.mlsArea?.trim()
-                    ? ` ${parcelLinkListingMatch.mlsArea.trim()}`
-                    : ""}
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-xs text-[var(--nantucket-gray)]">Tax Map/Parcel</p>
-                <p className="mt-1 font-medium">{selectedParcel?.tax_map ?? "N/A"} / {selectedParcel?.parcel ?? "N/A"}</p>
-              </>
-            )}
-          </div>
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Min Lot Size</p>
+          <p className="mt-1 font-medium">{districtMatch?.info.minLotSize ?? "N/A"}</p>
         </div>
-
-        <div className="rounded-lg border border-[var(--cedar-shingle)]/25 bg-white p-4">
-          {districtMatch ? (
-            <div className="space-y-2 text-sm text-[var(--atlantic-navy)]">
-              <p className="font-medium">{districtMatch.code} ({districtMatch.info.name ?? "District details"})</p>
-              <p className="text-xs text-[var(--nantucket-gray)]">Minimum Lot Size: {districtMatch.info.minLotSize ?? "N/A"}</p>
-              <p className="text-xs text-[var(--nantucket-gray)]">Minimum Frontage: {districtMatch.info.frontage ?? "N/A"}</p>
-              <p className="text-xs text-[var(--nantucket-gray)]">Ground Cover Ratio: {districtMatch.info.maxGroundCover ?? "N/A"}</p>
-              <p className="text-xs text-[var(--nantucket-gray)]">Setbacks: {districtMatch.info.frontSetback ?? "N/A"} front, {districtMatch.info.sideSetback ?? "N/A"} side, {districtMatch.info.rearSetback ?? "N/A"} rear</p>
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--atlantic-navy)]">No district rule profile found for zoning code {zoningLabel}.</p>
-          )}
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Parcel Size</p>
+          <p className="mt-1 font-medium">
+            {formatTruncatedAcreage(selectedParcel?.acreage)} acres ({formatNumber(selectedParcel?.lot_area_sqft, 0)} sqft)
+          </p>
         </div>
-        {stephensTake ? (
-          <details className="rounded-lg border border-[var(--cedar-shingle)]/25 bg-white p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-[var(--atlantic-navy)]">
-              Stephen Maury&apos;s Take
-            </summary>
-            <p className="mt-2 text-sm text-[var(--nantucket-gray)]">{stephensTake}</p>
-          </details>
-        ) : null}
       </div>
 
-      <div className={cn("mt-auto border-t bg-white p-4", "sticky bottom-0 md:static")}>
-        <ParcelZoningUsesSection
-          zoningCode={selectedParcel?.zoning ?? zoningLabel}
-          districtMatch={districtMatch}
-          zoningUseRows={zoningUseRows}
-          legend={legend}
-          chartSource={(zoningUseChart as { metadata: { source: string } }).metadata.source}
-        />
+      <div className="rounded-lg border border-[var(--cedar-shingle)]/25 bg-white p-4">
+        {districtMatch ? (
+          <div className="space-y-2 text-sm text-[var(--atlantic-navy)]">
+            <p className="font-medium">{districtMatch.code} ({districtMatch.info.name ?? "District details"})</p>
+            <p className="text-xs text-[var(--nantucket-gray)]">Minimum Lot Size: {districtMatch.info.minLotSize ?? "N/A"}</p>
+            <p className="text-xs text-[var(--nantucket-gray)]">Minimum Frontage: {districtMatch.info.frontage ?? "N/A"}</p>
+            <p className="text-xs text-[var(--nantucket-gray)]">Ground Cover Ratio: {districtMatch.info.maxGroundCover ?? "N/A"}</p>
+            <p className="text-xs text-[var(--nantucket-gray)]">Setbacks: {districtMatch.info.frontSetback ?? "N/A"} front, {districtMatch.info.sideSetback ?? "N/A"} side, {districtMatch.info.rearSetback ?? "N/A"} rear</p>
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--atlantic-navy)]">No district rule profile found for zoning code {zoningLabel}.</p>
+        )}
+      </div>
+    </>
+  );
 
+  const parcelInfoInner = (
+    <>
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Parcel Data</p>
+      {parcelMetricsOnly}
+    </>
+  );
+
+  const usesFooterInner = (
+    <>
+      <ParcelZoningUsesSection
+        zoningUseRows={zoningUseRows}
+        legend={legend}
+        chartSource={(zoningUseChart as { metadata: { source: string } }).metadata.source}
+      />
+
+      <div className="space-y-2 border-t border-[var(--cedar-shingle)]/10 p-4">
         {onViewNearbySales || onViewComparableRentals ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Button
@@ -386,10 +329,88 @@ function ParcelDetailPanel({
             </Button>
           </div>
         ) : null}
-        <Button variant="outline" className="mt-2 w-full">
+        <Button variant="outline" className="w-full">
           Get Custom Valuation from Stephen Maury
         </Button>
       </div>
+    </>
+  );
+
+  if (panelPiece === "parcelInfo") {
+    return (
+      <div className="space-y-4 border-t border-[var(--cedar-shingle)]/15 bg-[var(--sandstone)]/40 p-5">{parcelInfoInner}</div>
+    );
+  }
+
+  if (panelPiece === "usesFooter") {
+    return <div className="bg-white">{usesFooterInner}</div>;
+  }
+
+  return (
+    <div className="flex min-h-[620px] flex-col">
+      <div
+        className={cn(
+          "space-y-4 p-5",
+          stackBelowPropertyIntelligence && "border-t border-[var(--cedar-shingle)]/15 bg-[var(--sandstone)]/40",
+        )}
+      >
+        {!stackBelowPropertyIntelligence ? (
+          <>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-[var(--nantucket-gray)]">Parcel Detail</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl text-[var(--atlantic-navy)]">{selectedParcel?.location ?? "Select a parcel on the map"}</h2>
+                {selectedParcel?.internal_id ? (
+                  <Button asChild variant="outline" size="sm">
+                    <a href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`} target="_blank" rel="noopener noreferrer">
+                      View Assessor&apos;s Record
+                    </a>
+                  </Button>
+                ) : null}
+                {mlsListingLinkId ? (
+                  <Button asChild variant="outline" size="sm">
+                    <a href={nantucketLinkListingUrl(mlsListingLinkId)} target="_blank" rel="noopener noreferrer">
+                      View LINK listing
+                    </a>
+                  </Button>
+                ) : null}
+                {vacationRentalSlug ? (
+                  <Button asChild variant="outline" size="sm">
+                    <a href={nantucketVacationRentalListingUrl(vacationRentalSlug)} target="_blank" rel="noopener noreferrer">
+                      View Vacation Rental Listing
+                    </a>
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+
+            {parcelLinkListingMatch?.thumbUrl ? (
+              <a
+                href={nantucketLinkListingUrl(parcelLinkListingMatch.linkId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block overflow-hidden rounded-lg border border-[var(--cedar-shingle)]/25 shadow-sm outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--atlantic-navy)]"
+                aria-label="Open LINK MLS listing (photos)"
+              >
+                <div className="relative aspect-[16/10] w-full max-h-52">
+                  <Image
+                    src={parcelLinkListingMatch.thumbUrl}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 420px, 100vw"
+                    unoptimized
+                  />
+                </div>
+              </a>
+            ) : null}
+          </>
+        ) : null}
+
+        {stackBelowPropertyIntelligence ? parcelInfoInner : parcelMetricsOnly}
+      </div>
+
+      <div className={cn("mt-auto bg-white", "sticky bottom-0 md:static")}>{usesFooterInner}</div>
     </div>
   );
 }
@@ -2013,6 +2034,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 </div>
               <div className="shrink-0 px-1 pb-1">
                 <PropertyIntelligencePanel
+                  repeatHeroTitleBelow={false}
                   selectedParcel={selectedParcel}
                   selectedRental={selectedRental}
                   selectedLink={selectedLink}
@@ -2030,6 +2052,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 <div className="min-h-0 flex-1 overflow-y-auto">
                   <ParcelDetailPanel
                     {...parcelMapCtas}
+                    stackBelowPropertyIntelligence
                     selectedParcel={selectedParcel}
                     zoningLabel={zoningLabel}
                     districtMatch={districtMatch}
@@ -2088,11 +2111,41 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
               Back to map
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto" data-property-map-drawer-scroll>
             {isPropertyMap ? (
               <div className="flex flex-col pb-4">
                 <PropertyIntelligencePanel
                   compactHero
+                  repeatHeroTitleBelow={false}
+                  propertyMapSlideUpNav
+                  parcelInfoSlot={
+                    selectedParcel ? (
+                      <ParcelDetailPanel
+                        {...parcelMapCtas}
+                        panelPiece="parcelInfo"
+                        selectedParcel={selectedParcel}
+                        zoningLabel={zoningLabel}
+                        districtMatch={districtMatch}
+                        zoningUseRows={zoningUseRows}
+                        linkListingId={linkListingIdForSelection}
+                        vacationRentalSlug={vacationRentalSlugForSelection}
+                      />
+                    ) : null
+                  }
+                  usesSlot={
+                    selectedParcel ? (
+                      <ParcelDetailPanel
+                        {...parcelMapCtas}
+                        panelPiece="usesFooter"
+                        selectedParcel={selectedParcel}
+                        zoningLabel={zoningLabel}
+                        districtMatch={districtMatch}
+                        zoningUseRows={zoningUseRows}
+                        linkListingId={linkListingIdForSelection}
+                        vacationRentalSlug={vacationRentalSlugForSelection}
+                      />
+                    ) : null
+                  }
                   selectedParcel={selectedParcel}
                   selectedRental={selectedRental}
                   selectedLink={selectedLink}
@@ -2105,19 +2158,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   onWatchChange={() => setWatchTick((t) => t + 1)}
                   onViewComparableRentals={handleViewComparableRentals}
                 />
-                {selectedParcel ? (
-                  <div className="space-y-4 px-4 pt-4">
-                    <ParcelDetailPanel
-                      {...parcelMapCtas}
-                      selectedParcel={selectedParcel}
-                      zoningLabel={zoningLabel}
-                      districtMatch={districtMatch}
-                      zoningUseRows={zoningUseRows}
-                      linkListingId={linkListingIdForSelection}
-                      vacationRentalSlug={vacationRentalSlugForSelection}
-                    />
-                  </div>
-                ) : selectedRental ? (
+                {selectedParcel ? null : selectedRental ? (
                   <p className="mx-4 mt-4 rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-center text-xs text-[var(--nantucket-gray)]">
                     This vacation rental pin did not match a loaded tax parcel. Zoom to Nantucket or tap a lot on the map
                     for full parcel and zoning detail.

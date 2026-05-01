@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 type MapLegendProps = {
   /** When true, show green dot for active vacation rentals (property map). */
   showRentalsLegend?: boolean;
-  /** When true, show LINK active (blue) and sold (gray) pins (property map). */
+  /** When true, show LINK active (blue) and sold (price pill) pins (property map). */
   showLinkPinsLegend?: boolean;
 };
 
@@ -36,11 +36,15 @@ function PinLegendRows({
       {showLinkPinsLegend ? (
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
+            <span className="inline-flex shrink-0 rounded-full bg-blue-600 px-2 py-0.5 text-[9px] font-semibold leading-none text-white shadow-sm">
+              $1.25M
+            </span>
             <span>LINK — for sale</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-slate-400" />
+            <span className="inline-flex shrink-0 rounded-full bg-gray-500 px-2 py-0.5 text-[9px] font-semibold leading-none text-white shadow-sm">
+              $425k
+            </span>
             <span>{soldLabel}</span>
           </div>
         </div>
@@ -63,7 +67,7 @@ export function MapLegend({ showRentalsLegend = false, showLinkPinsLegend = fals
         <PinLegendRows
           showRentalsLegend={showRentalsLegend}
           showLinkPinsLegend={showLinkPinsLegend}
-          soldLabel="Sold Listings (matched to lot)"
+          soldLabel="Sold — sale price on map"
         />
       </div>
 
@@ -77,7 +81,7 @@ export function MapLegend({ showRentalsLegend = false, showLinkPinsLegend = fals
             <PinLegendRows
               showRentalsLegend={showRentalsLegend}
               showLinkPinsLegend={showLinkPinsLegend}
-              soldLabel="Sold Listings"
+              soldLabel="Sold — sale price on map"
             />
           </div>
         ) : null}

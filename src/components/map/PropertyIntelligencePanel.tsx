@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Info } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -22,6 +22,11 @@ import {
 } from "@/lib/property-expansion-intelligence";
 import { parcelIsWatched, toggleWatchParcelId } from "@/lib/omnibox-local-storage";
 import { PropertyIntelligenceHero } from "@/components/map/PropertyIntelligenceHero";
+import {
+  PropertyMapSlideUpSectionNav,
+  PROPERTY_MAP_SECTION_IDS,
+  propertyMapSectionScrollClass,
+} from "@/components/map/PropertyMapSlideUpSectionNav";
 
 export type DistrictMatchLite = {
   code: string;
@@ -110,6 +115,11 @@ type Props = {
   hubTitle?: string;
   /** Mobile bottom sheet: tighter hero (4:3). */
   compactHero?: boolean;
+  /**
+   * When false, omit the large address/price line under the hero (hero already shows the headline).
+   * Use on the property map where this panel sits above `ParcelDetailPanel`.
+   */
+  repeatHeroTitleBelow?: boolean;
   selectedParcel: ParcelProperties | null;
   selectedRental: NrMapRentalResult | null;
   selectedLink: LinkListingPinProperties | null;
@@ -124,6 +134,12 @@ type Props = {
   onWatchChange?: () => void;
   /** Switch map to rentals view and frame nearby inventory (parcel selection). */
   onViewComparableRentals?: () => void;
+  /** Mobile property-map drawer: sticky section chips + reorder (Our Take → Parcel → Zoning → Uses → Timeline). */
+  propertyMapSlideUpNav?: boolean;
+  /** Injected between Our Take and Zoning when `propertyMapSlideUpNav`. */
+  parcelInfoSlot?: ReactNode;
+  /** Injected between Zoning and Timeline when `propertyMapSlideUpNav`. */
+  usesSlot?: ReactNode;
 };
 
 const ATLANTIC_NAVY = "#0c2340";
@@ -263,6 +279,10 @@ function buildDeepAnalysisMailto(opts: {
 export function PropertyIntelligencePanel({
   hubTitle = "Nantucket Market Pulse — Town Area",
   compactHero = false,
+  repeatHeroTitleBelow = true,
+  propertyMapSlideUpNav = false,
+  parcelInfoSlot = null,
+  usesSlot = null,
   selectedParcel,
   selectedRental,
   selectedLink,
@@ -439,6 +459,184 @@ export function PropertyIntelligencePanel({
     return null;
   })();
 
+  const sectionScroll = propertyMapSectionScrollClass();
+
+  const takeColumn = (
+    <>
+      {repeatHeroTitleBelow ? (
+        <div>
+          <h2 className="text-lg font-semibold leading-tight text-[var(--atlantic-navy)]">{title}</h2>
+          <p className="mt-1 text-xs text-[var(--nantucket-gray)]">{subPrice}</p>
+        </div>
+      ) : null}
+
+      {showExpansionPotential && expansion ? (
+        <ExpansionBlock exp={expansion} zoneLabel={expansionZoneLabel} />
+      ) : expansion == null ? (
+        <p className="border-t border-[var(--cedar-shingle)]/15 pt-3 text-xs text-[var(--nantucket-gray)]">
+          Expansion math needs lot size from assessor data. Pan to a parcel or open a LINK pin with lot acres.
+        </p>
+      ) : null}
+
+      {showRentalPulseBlock && pulse ? (
+        <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
+          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Rental pulse</h3>
+          <dl className="space-y-1 text-[11px]">
+            <div className="flex justify-between gap-2">
+              <dt className="text-[var(--nantucket-gray)]">Peak weekly (Jul–Aug)</dt>
+              <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.peak)}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-[var(--nantucket-gray)]">Est. annual revenue</dt>
+              <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.annualRevenue)}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-[var(--nantucket-gray)]">Est. cap rate</dt>
+              <dd className="font-medium text-[var(--atlantic-navy)]">{pulse.cap}</dd>
+            </div>
+          </dl>
+          {expansion ? (
+            <p className="mt-2 border-l-2 border-[var(--privet-green)] pl-2 text-xs italic leading-snug text-[var(--nantucket-gray)]">
+              <span className="font-semibold not-italic text-[var(--atlantic-navy)]">Maury&apos;s take: </span>
+              {expansion.mauryInsight}
+            </p>
+          ) : null}
+          {parcelId && expansion ? (
+            <a
+              href={buildDeepAnalysisMailto({
+                parcelId,
+                title,
+                expansion,
+                zoneLabel: expansionZoneLabel,
+              })}
+              className="mt-2 inline-block text-[11px] font-medium text-blue-800 underline decoration-blue-800/40 underline-offset-2 hover:text-blue-950"
+            >
+              Ask Stephen for deeper analysis on this parcel
+            </a>
+          ) : null}
+          {onViewComparableRentals ? (
+            <Button type="button" variant="outline" className="mt-3 w-full text-xs" onClick={onViewComparableRentals}>
+              View comparable rentals →
+            </Button>
+          ) : (
+            <Button asChild variant="outline" className="mt-3 w-full text-xs">
+              <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
+                View comparable rentals →
+              </a>
+            </Button>
+          )}
+        </section>
+      ) : expansion ? (
+        <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
+          <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Maury&apos;s take</h3>
+          <p className="text-xs leading-snug text-[var(--nantucket-gray)]">{expansion.mauryInsight}</p>
+          {parcelId ? (
+            <a
+              href={buildDeepAnalysisMailto({
+                parcelId,
+                title,
+                expansion,
+                zoneLabel: expansionZoneLabel,
+              })}
+              className="mt-2 inline-block text-[11px] font-medium text-blue-800 underline decoration-blue-800/40 underline-offset-2 hover:text-blue-950"
+            >
+              Ask Stephen for deeper analysis on this parcel
+            </a>
+          ) : null}
+          {onViewComparableRentals ? (
+            <Button type="button" variant="outline" className="mt-3 w-full text-xs" onClick={onViewComparableRentals}>
+              View comparable rentals →
+            </Button>
+          ) : (
+            <Button asChild variant="outline" className="mt-3 w-full text-xs">
+              <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
+                View comparable rentals →
+              </a>
+            </Button>
+          )}
+        </section>
+      ) : null}
+    </>
+  );
+
+  const zoningColumn =
+    showZoning && districtMatch ? (
+      <ZoningCheatSheet code={districtMatch.code} districtMatch={districtMatch} />
+    ) : selectedParcel ? (
+      <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
+        <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Zoning</h3>
+        <p className="text-xs text-[var(--nantucket-gray)]">District {zoningLabel} — open district profile in the full matrix below.</p>
+      </section>
+    ) : null;
+
+  const timelineColumn = (
+    <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
+      <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Historical timeline</h3>
+      <ul className="space-y-2">
+        {timeline.map((t, i) => (
+          <li key={`${t.year}-${i}`} className="flex gap-2 text-[11px]">
+            <span className="w-10 shrink-0 font-semibold text-[var(--atlantic-navy)]">{t.year}</span>
+            <span className="text-[var(--nantucket-gray)]">{t.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+
+  const ctaColumn = (
+    <div className="flex flex-col gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
+      {selectedParcel?.internal_id ? (
+        <Button asChild variant="outline" className="w-full text-sm">
+          <a
+            href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Assessor&apos;s Record
+          </a>
+        </Button>
+      ) : null}
+      {selectedLink ? (
+        <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
+          <a href={nantucketLinkListingUrl(selectedLink.linkId)} target="_blank" rel="noopener noreferrer">
+            View full LINK listing
+          </a>
+        </Button>
+      ) : null}
+      {linkListingId && !selectedLink ? (
+        <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
+          <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">
+            View full LINK listing
+          </a>
+        </Button>
+      ) : null}
+      {selectedRental?.slug?.trim() ? (
+        <Button asChild variant="outline" className="w-full text-sm">
+          <a href={nantucketVacationRentalListingUrl(selectedRental.slug)} target="_blank" rel="noopener noreferrer">
+            View rental listing
+          </a>
+        </Button>
+      ) : null}
+      {vacationRentalSlug && !selectedRental ? (
+        <Button asChild variant="outline" className="w-full text-sm">
+          <a href={nantucketVacationRentalListingUrl(vacationRentalSlug)} target="_blank" rel="noopener noreferrer">
+            Comparable rental on file
+          </a>
+        </Button>
+      ) : null}
+      <a
+        href={`mailto:stephen@maury.net?subject=${encodeURIComponent(`Property: ${title} — valuation / tour`)}`}
+        className={cn(
+          buttonVariants({ size: "default" }),
+          "w-full bg-[var(--atlantic-navy)] text-sm text-white hover:bg-[var(--atlantic-navy)]/90",
+        )}
+        title="Custom valuation or property tour — opens your email app"
+      >
+        Message Stephen
+      </a>
+    </div>
+  );
+
   return (
     <div
       className={cn(
@@ -465,170 +663,50 @@ export function PropertyIntelligencePanel({
         parcelZoning={selectedParcel?.zoning ?? null}
       />
 
-      <div className="space-y-3 p-4">
-        <div>
-          <h2 className="text-lg font-semibold leading-tight text-[var(--atlantic-navy)]">{title}</h2>
-          <p className="mt-1 text-xs text-[var(--nantucket-gray)]">{subPrice}</p>
+      {propertyMapSlideUpNav ? (
+        <>
+          <PropertyMapSlideUpSectionNav
+            visible={{
+              ourTake: true,
+              parcelInfo: Boolean(parcelInfoSlot),
+              zoning: Boolean(selectedParcel),
+              uses: Boolean(usesSlot),
+              timeline: true,
+            }}
+          />
+          <div className="space-y-5 px-4 pb-4 pt-1">
+            <section id={PROPERTY_MAP_SECTION_IDS.ourTake} className={cn(sectionScroll, "space-y-3")}>
+              {takeColumn}
+            </section>
+            {parcelInfoSlot ? (
+              <div id={PROPERTY_MAP_SECTION_IDS.parcelInfo} className={sectionScroll}>
+                {parcelInfoSlot}
+              </div>
+            ) : null}
+            {zoningColumn ? (
+              <div id={PROPERTY_MAP_SECTION_IDS.zoning} className={sectionScroll}>
+                {zoningColumn}
+              </div>
+            ) : null}
+            {usesSlot ? (
+              <div id={PROPERTY_MAP_SECTION_IDS.uses} className={sectionScroll}>
+                {usesSlot}
+              </div>
+            ) : null}
+            <div id={PROPERTY_MAP_SECTION_IDS.timeline} className={sectionScroll}>
+              {timelineColumn}
+            </div>
+            {ctaColumn}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-3 p-4">
+          {takeColumn}
+          {zoningColumn}
+          {timelineColumn}
+          {ctaColumn}
         </div>
-
-        {showExpansionPotential && expansion ? (
-          <ExpansionBlock exp={expansion} zoneLabel={expansionZoneLabel} />
-        ) : expansion == null ? (
-          <p className="border-t border-[var(--cedar-shingle)]/15 pt-3 text-xs text-[var(--nantucket-gray)]">
-            Expansion math needs lot size from assessor data. Pan to a parcel or open a LINK pin with lot acres.
-          </p>
-        ) : null}
-
-        {showRentalPulseBlock && pulse ? (
-          <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
-            <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Rental pulse</h3>
-            <dl className="space-y-1 text-[11px]">
-              <div className="flex justify-between gap-2">
-                <dt className="text-[var(--nantucket-gray)]">Peak weekly (Jul–Aug)</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.peak)}</dd>
-              </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-[var(--nantucket-gray)]">Est. annual revenue</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{formatMoney(pulse.annualRevenue)}</dd>
-              </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-[var(--nantucket-gray)]">Est. cap rate</dt>
-                <dd className="font-medium text-[var(--atlantic-navy)]">{pulse.cap}</dd>
-              </div>
-            </dl>
-            {expansion ? (
-              <p className="mt-2 border-l-2 border-[var(--privet-green)] pl-2 text-xs italic leading-snug text-[var(--nantucket-gray)]">
-                <span className="font-semibold not-italic text-[var(--atlantic-navy)]">Maury&apos;s take: </span>
-                {expansion.mauryInsight}
-              </p>
-            ) : null}
-            {parcelId && expansion ? (
-              <a
-                href={buildDeepAnalysisMailto({
-                  parcelId,
-                  title,
-                  expansion,
-                  zoneLabel: expansionZoneLabel,
-                })}
-                className="mt-2 inline-block text-[11px] font-medium text-blue-800 underline decoration-blue-800/40 underline-offset-2 hover:text-blue-950"
-              >
-                Ask Stephen for deeper analysis on this parcel
-              </a>
-            ) : null}
-            {onViewComparableRentals ? (
-              <Button type="button" variant="outline" className="mt-3 w-full text-xs" onClick={onViewComparableRentals}>
-                View comparable rentals →
-              </Button>
-            ) : (
-              <Button asChild variant="outline" className="mt-3 w-full text-xs">
-                <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
-                  View comparable rentals →
-                </a>
-              </Button>
-            )}
-          </section>
-        ) : expansion ? (
-          <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
-            <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Maury&apos;s take</h3>
-            <p className="text-xs leading-snug text-[var(--nantucket-gray)]">{expansion.mauryInsight}</p>
-            {parcelId ? (
-              <a
-                href={buildDeepAnalysisMailto({
-                  parcelId,
-                  title,
-                  expansion,
-                  zoneLabel: expansionZoneLabel,
-                })}
-                className="mt-2 inline-block text-[11px] font-medium text-blue-800 underline decoration-blue-800/40 underline-offset-2 hover:text-blue-950"
-              >
-                Ask Stephen for deeper analysis on this parcel
-              </a>
-            ) : null}
-            {onViewComparableRentals ? (
-              <Button type="button" variant="outline" className="mt-3 w-full text-xs" onClick={onViewComparableRentals}>
-                View comparable rentals →
-              </Button>
-            ) : (
-              <Button asChild variant="outline" className="mt-3 w-full text-xs">
-                <a href={comparableRentalsHref} target="_blank" rel="noopener noreferrer">
-                  View comparable rentals →
-                </a>
-              </Button>
-            )}
-          </section>
-        ) : null}
-
-        {showZoning && districtMatch ? <ZoningCheatSheet code={districtMatch.code} districtMatch={districtMatch} /> : selectedParcel ? (
-          <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
-            <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Zoning</h3>
-            <p className="text-xs text-[var(--nantucket-gray)]">District {zoningLabel} — open district profile in the full matrix below.</p>
-          </section>
-        ) : null}
-
-        <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
-          <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Historical timeline</h3>
-          <ul className="space-y-2">
-            {timeline.map((t, i) => (
-              <li key={`${t.year}-${i}`} className="flex gap-2 text-[11px]">
-                <span className="w-10 shrink-0 font-semibold text-[var(--atlantic-navy)]">{t.year}</span>
-                <span className="text-[var(--nantucket-gray)]">{t.label}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div className="flex flex-col gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
-          {selectedParcel?.internal_id ? (
-            <Button asChild variant="outline" className="w-full text-sm">
-              <a
-                href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Assessor&apos;s Record
-              </a>
-            </Button>
-          ) : null}
-          {selectedLink ? (
-            <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
-              <a href={nantucketLinkListingUrl(selectedLink.linkId)} target="_blank" rel="noopener noreferrer">
-                View full LINK listing
-              </a>
-            </Button>
-          ) : null}
-          {linkListingId && !selectedLink ? (
-            <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
-              <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">
-                View full LINK listing
-              </a>
-            </Button>
-          ) : null}
-          {selectedRental?.slug?.trim() ? (
-            <Button asChild variant="outline" className="w-full text-sm">
-              <a href={nantucketVacationRentalListingUrl(selectedRental.slug)} target="_blank" rel="noopener noreferrer">
-                View rental listing
-              </a>
-            </Button>
-          ) : null}
-          {vacationRentalSlug && !selectedRental ? (
-            <Button asChild variant="outline" className="w-full text-sm">
-              <a href={nantucketVacationRentalListingUrl(vacationRentalSlug)} target="_blank" rel="noopener noreferrer">
-                Comparable rental on file
-              </a>
-            </Button>
-          ) : null}
-          <a
-            href={`mailto:stephen@maury.net?subject=${encodeURIComponent(`Property: ${title} — valuation / tour`)}`}
-            className={cn(
-              buttonVariants({ size: "default" }),
-              "w-full bg-[var(--atlantic-navy)] text-sm text-white hover:bg-[var(--atlantic-navy)]/90",
-            )}
-            title="Custom valuation or property tour — opens your email app"
-          >
-            Message Stephen
-          </a>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -9,14 +9,6 @@ export type ZoningUseRow = { category: string; useName: string; value: string; a
 
 type UseFilterChip = "all" | "residential" | "accessory" | "special";
 
-type DistrictMatchLite = {
-  code: string;
-  info: {
-    name?: string;
-    maxGroundCover?: string;
-  };
-} | null;
-
 function filterUseRows(rows: ZoningUseRow[], filterText: string, chip: UseFilterChip) {
   const q = filterText.trim().toLowerCase();
   return rows.filter((row) => {
@@ -44,17 +36,20 @@ const CHIP_LABELS: Record<UseFilterChip, string> = {
 };
 
 type Props = {
-  zoningCode: string;
-  districtMatch: DistrictMatchLite;
   zoningUseRows: ZoningUseRow[];
   legend: Record<string, string>;
   chartSource: string;
 };
 
-function StatusTag({ status }: { status: RowStatus }) {
+function StatusTag({ status, className }: { status: RowStatus; className?: string }) {
   if (status === "allowed") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200/80 sm:py-1">
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200/80 sm:py-1",
+          className,
+        )}
+      >
         <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
         Allowed
       </span>
@@ -62,21 +57,31 @@ function StatusTag({ status }: { status: RowStatus }) {
   }
   if (status === "limited") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200/90 sm:py-1">
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200/90 sm:py-1",
+          className,
+        )}
+      >
         <AlertTriangle className="h-3.5 w-3.5 text-amber-600" aria-hidden />
         Limited
       </span>
     );
   }
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 ring-1 ring-rose-200/80 sm:py-1">
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 ring-1 ring-rose-200/80 sm:py-1",
+        className,
+      )}
+    >
       <X className="h-3.5 w-3.5 text-rose-600" aria-hidden />
       Not allowed
     </span>
   );
 }
 
-export function ParcelZoningUsesSection({ zoningCode, districtMatch, zoningUseRows, legend, chartSource }: Props) {
+export function ParcelZoningUsesSection({ zoningUseRows, legend, chartSource }: Props) {
   const [filter, setFilter] = useState("");
   const [chip, setChip] = useState<UseFilterChip>("all");
 
@@ -91,28 +96,31 @@ export function ParcelZoningUsesSection({ zoningCode, districtMatch, zoningUseRo
     });
   }, [filteredRows]);
 
-  const code = districtMatch?.code ?? zoningCode;
-  const districtName = districtMatch?.info.name;
-  const maxGc = districtMatch?.info.maxGroundCover;
+  const totalUses = zoningUseRows.length;
 
   return (
-    <div className="mb-3 w-full">
-      <div className="overflow-hidden rounded-2xl border border-[var(--cedar-shingle)]/12 bg-[var(--sandstone)]/20 shadow-sm">
+    <details className="group/pu w-full max-w-none overflow-hidden rounded-none border-0 border-t border-[var(--cedar-shingle)]/12 bg-[var(--sandstone)]/20 shadow-none">
+      <summary
+        className="cursor-pointer list-none marker:content-none [&::-webkit-details-marker]:hidden"
+        aria-label="Permitted uses: open filters and use chart list"
+      >
         <div className="border-b border-[var(--cedar-shingle)]/10 bg-white/90 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Permitted uses</p>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="text-sm text-[var(--atlantic-navy)]">
-              <span className="font-semibold tabular-nums">{code}</span>
-              {districtName ? <span className="text-[var(--nantucket-gray)]"> — {districtName}</span> : null}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Permitted uses</p>
+              <p className="mt-1 text-xs text-[var(--nantucket-gray)]">
+                {totalUses ? `${totalUses} rows from the town use chart` : "Use chart"}
+              </p>
             </div>
-            {maxGc ? (
-              <div className="text-left text-xs text-[var(--nantucket-gray)] sm:text-right sm:text-sm">
-                Max ground cover <span className="font-semibold text-[var(--atlantic-navy)]">{maxGc}</span>
-              </div>
-            ) : null}
+            <ChevronDown
+              className="h-5 w-5 shrink-0 text-[var(--nantucket-gray)] transition-transform group-open/pu:rotate-180"
+              aria-hidden
+            />
           </div>
         </div>
+      </summary>
 
+      <div>
         <div className="space-y-3 border-b border-[var(--cedar-shingle)]/10 bg-white/80 px-4 py-3">
           <Input
             placeholder="Filter uses…"
@@ -152,14 +160,14 @@ export function ParcelZoningUsesSection({ zoningCode, districtMatch, zoningUseRo
                     key={`${row.category}-${row.useName}-${row.value}`}
                     className="rounded-2xl border border-[var(--cedar-shingle)]/10 bg-white p-4 shadow-sm ring-1 ring-black/[0.02] transition-shadow hover:shadow-md"
                   >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                      <div className="min-w-0 flex-1">
+                    <div className="flex w-full flex-col gap-3">
+                      <div className="min-w-0 w-full">
                         <p className="text-sm font-semibold leading-snug text-[var(--atlantic-navy)]">{row.useName}</p>
                         <p className="mt-0.5 text-[11px] uppercase tracking-wide text-[var(--nantucket-gray)]">{row.category}</p>
                         {longNote ? (
-                          <details className="group mt-2 sm:mt-2">
+                          <details className="group/note mt-2 sm:mt-2">
                             <summary className="flex min-h-[44px] cursor-pointer list-none items-center gap-2 text-xs text-[var(--nantucket-gray)] marker:content-none sm:min-h-0 [&::-webkit-details-marker]:hidden">
-                              <ChevronDown className="h-4 w-4 shrink-0 text-[var(--privet-green)] transition-transform group-open:rotate-180" />
+                              <ChevronDown className="h-4 w-4 shrink-0 text-[var(--privet-green)] transition-transform group-open/note:rotate-180" />
                               <span className="font-medium text-[var(--atlantic-navy)]">Notes</span>
                               <span className="text-[var(--nantucket-gray)]">(tap to expand)</span>
                             </summary>
@@ -171,8 +179,8 @@ export function ParcelZoningUsesSection({ zoningCode, districtMatch, zoningUseRo
                           <p className="mt-2 text-xs leading-relaxed text-[var(--nantucket-gray)]">{note}</p>
                         )}
                       </div>
-                      <div className="flex shrink-0 items-center sm:pt-0.5">
-                        <StatusTag status={status} />
+                      <div className="w-full">
+                        <StatusTag status={status} className="w-full justify-center" />
                       </div>
                     </div>
                   </div>
@@ -188,6 +196,6 @@ export function ParcelZoningUsesSection({ zoningCode, districtMatch, zoningUseRo
           Source: {chartSource}
         </p>
       </div>
-    </div>
+    </details>
   );
 }
