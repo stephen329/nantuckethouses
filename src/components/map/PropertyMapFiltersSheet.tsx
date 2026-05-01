@@ -18,7 +18,9 @@ import {
   countActiveRentalFilters,
   DEFAULT_LINK_FILTERS,
   DEFAULT_RENTAL_FILTERS,
+  LINK_FILTERS_SOLD_IN_LAST_OPTIONS,
   LINK_PROPERTY_TYPE_LABELS,
+  type LinkFiltersSoldInLast,
   type LinkFiltersState,
   type LinkPropertyTypeKey,
   type PropertyMapMode,
@@ -130,11 +132,12 @@ export function PropertyMapFiltersSheet({
   const showLink = showSale || showSold;
   const showSoldTools = showSold;
 
+  /** Tabs left → right: For sale, Sold, then Vacation Rentals (rent). */
   const tabIds = useMemo((): FilterSheetTab[] => {
     const ids: FilterSheetTab[] = [];
-    if (showRent) ids.push("rent");
     if (showSale) ids.push("sale");
     if (showSold) ids.push("sold");
+    if (showRent) ids.push("rent");
     return ids;
   }, [showRent, showSale, showSold]);
 
@@ -144,6 +147,10 @@ export function PropertyMapFiltersSheet({
     if (tabIds.length === 0) return;
     if (!tabIds.includes(activeTab)) setActiveTab(tabIds[0]!);
   }, [tabIds, activeTab]);
+
+  /** Sold date UI only on Sold tab (or single-mode sold). */
+  const showSoldDateControls = showSoldTools && (tabIds.length === 1 || activeTab === "sold");
+  const showDomControls = activeTab !== "sold";
 
   const rentBadge = showRent ? countActiveRentalFilters(rentalFilters) : 0;
   const linkBadge = showLink ? countActiveLinkFilters(linkFilters) : 0;
@@ -156,7 +163,7 @@ export function PropertyMapFiltersSheet({
 
   const headline = useMemo(() => {
     if (!showRent && !showSale && !showSold) {
-      return "No listing types selected — turn on For rent, For sale, and/or Sold above";
+      return "No listing types selected — turn on For sale, Sold, and/or Vacation Rentals above";
     }
     const parts: string[] = [];
     if (showRent && !showLink) {
@@ -209,15 +216,15 @@ export function PropertyMapFiltersSheet({
         <SheetContent
           side={side}
           className={cn(
-            "flex max-h-[90dvh] flex-col gap-0 overflow-hidden bg-white p-0 shadow-2xl",
+            "flex max-h-[90dvh] w-full max-w-[100vw] flex-col gap-0 overflow-x-hidden overflow-y-hidden bg-white p-0 shadow-2xl",
             side === "top"
               ? "rounded-b-2xl border-b-2 border-blue-700/35"
               : "rounded-t-2xl border-t-2 border-blue-700/35",
           )}
         >
           <SheetHeader className="shrink-0 space-y-2 border-b border-[var(--cedar-shingle)]/15 px-4 pb-3 pt-4 text-left">
-            <div className="flex items-start justify-between gap-3 pr-10">
-              <div>
+            <div className="flex min-w-0 items-start justify-between gap-3 pr-10">
+              <div className="min-w-0 flex-1">
                 <SheetTitle className="text-lg text-[var(--atlantic-navy)]">Map filters</SheetTitle>
                 <p className="mt-1 text-xs leading-snug text-[var(--nantucket-gray)]">
                   <span className="font-semibold text-blue-800">{headline}</span>
@@ -239,7 +246,7 @@ export function PropertyMapFiltersSheet({
             <div
               role="tablist"
               aria-label="Listing type filters"
-              className="flex shrink-0 gap-0 border-b border-[var(--cedar-shingle)]/15 px-2"
+              className="flex min-w-0 shrink-0 gap-0 border-b border-[var(--cedar-shingle)]/15 px-2"
             >
               {tabIds.map((id) => {
                 const selectedTab = activeTab === id;
@@ -254,14 +261,14 @@ export function PropertyMapFiltersSheet({
                     aria-selected={selectedTab}
                     onClick={() => setActiveTab(id)}
                     className={cn(
-                      "relative min-h-11 flex-1 px-2 py-2.5 text-center text-xs font-semibold transition-colors",
+                      "relative min-h-11 min-w-0 flex-1 px-1.5 py-2.5 text-center text-[11px] font-semibold leading-tight transition-colors sm:px-2 sm:text-xs",
                       selectedTab
                         ? "text-blue-800 after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-blue-700"
                         : "text-[var(--nantucket-gray)] hover:text-[var(--atlantic-navy)]",
                     )}
                   >
-                    <span className="inline-flex flex-col items-center gap-0.5">
-                      <span>{label}</span>
+                    <span className="inline-flex max-w-full flex-col items-center gap-0.5">
+                      <span className="line-clamp-2 break-words">{label}</span>
                       {tabBadge > 0 ? (
                         <span className="rounded-full bg-blue-700 px-1.5 py-px text-[10px] font-bold leading-none text-white">
                           {tabBadge > 99 ? "99+" : tabBadge}
@@ -274,7 +281,7 @@ export function PropertyMapFiltersSheet({
             </div>
           ) : null}
 
-          <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 min-w-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-4 py-4">
             {tabIds.length === 0 ? (
               <p className="rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
                 Select at least one listing type using the chips on the map toolbar to filter pins here.
@@ -374,20 +381,9 @@ export function PropertyMapFiltersSheet({
 
             {viewingLink ? (
               <section className="space-y-4">
-                {tabIds.length > 1 && (activeTab === "sale" || activeTab === "sold") ? (
-                  <p className="rounded-md border border-blue-700/10 bg-blue-50/60 px-2.5 py-1.5 text-[11px] leading-snug text-blue-950">
-                    {activeTab === "sale"
-                      ? showSold
-                        ? "Active MLS pins: criteria below also shape sold pins where the same field applies (e.g. price, beds). Sold close dates can be filtered below when sold pins are on."
-                        : "Criteria below apply to active MLS pins in the current map view."
-                      : showSale
-                        ? "Sold MLS pins: criteria below also shape active pins where the same field applies. Sold close dates are below."
-                        : "Criteria below apply to sold MLS pins in the current map view."}
-                  </p>
-                ) : null}
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center justify-between gap-2">
                   <SectionLabel>MLS Listings</SectionLabel>
-                  <span className="text-right text-[11px] font-medium leading-tight text-blue-900">
+                  <span className="min-w-0 shrink text-right text-[11px] font-medium leading-tight text-blue-900">
                     {showSale ? (
                       <span>
                         {pinSummary.linkActiveFiltered}/{pinSummary.linkActiveTotal} active
@@ -401,6 +397,32 @@ export function PropertyMapFiltersSheet({
                     ) : null}
                   </span>
                 </div>
+
+                {showSoldDateControls ? (
+                  <label className="block min-w-0">
+                    <span className="mb-1 block text-[11px] font-medium text-[var(--atlantic-navy)]">Sold in last:</span>
+                    <select
+                      value={linkFilters.soldInLast}
+                      onChange={(e) =>
+                        onLinkFiltersChange({
+                          ...linkFilters,
+                          soldInLast: e.target.value as LinkFiltersSoldInLast,
+                        })
+                      }
+                      className="h-10 w-full min-w-0 max-w-full rounded-lg border border-[var(--cedar-shingle)]/25 bg-white px-3 text-sm text-[var(--atlantic-navy)] shadow-sm"
+                    >
+                      <option value="" hidden>
+                        &#8203;
+                      </option>
+                      {LINK_FILTERS_SOLD_IN_LAST_OPTIONS.map(({ value, label }) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+
                 <div>
                   <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Property type</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -512,10 +534,10 @@ export function PropertyMapFiltersSheet({
                   </label>
                   <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-xs font-medium text-[var(--atlantic-navy)] has-[:checked]:border-blue-700/30 has-[:checked]:bg-white">
                     <Checkbox
-                      checked={linkFilters.walkToTown}
-                      onCheckedChange={(v) => onLinkFiltersChange({ ...linkFilters, walkToTown: v === true })}
+                      checked={linkFilters.pool}
+                      onCheckedChange={(v) => onLinkFiltersChange({ ...linkFilters, pool: v === true })}
                     />
-                    Walk to Town
+                    Pool
                   </label>
                   <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-xs font-medium text-[var(--atlantic-navy)] has-[:checked]:border-blue-700/30 has-[:checked]:bg-white">
                     <Checkbox
@@ -524,60 +546,32 @@ export function PropertyMapFiltersSheet({
                     />
                     New construction
                   </label>
-                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-xs font-medium text-[var(--atlantic-navy)] has-[:checked]:border-blue-700/30 has-[:checked]:bg-white">
-                    <Checkbox
-                      checked={linkFilters.renoRecent}
-                      onCheckedChange={(v) => onLinkFiltersChange({ ...linkFilters, renoRecent: v === true })}
-                    />
-                    Recently renovated
-                  </label>
                 </div>
 
-                {showSoldTools ? (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed after</p>
+                {showDomControls ? (
+                  <div className="grid min-w-0 max-w-full grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (min)</p>
                       <Input
-                        type="date"
-                        value={linkFilters.soldCloseAfter}
-                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseAfter: e.target.value })}
-                        className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
+                        inputMode="numeric"
+                        placeholder="Any"
+                        value={linkFilters.minDom}
+                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, minDom: e.target.value })}
+                        className="h-10 w-full min-w-0 max-w-full rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
                       />
                     </div>
-                    <div>
-                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed before</p>
+                    <div className="min-w-0">
+                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (max)</p>
                       <Input
-                        type="date"
-                        value={linkFilters.soldCloseBefore}
-                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseBefore: e.target.value })}
-                        className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
+                        inputMode="numeric"
+                        placeholder="Any"
+                        value={linkFilters.maxDom}
+                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxDom: e.target.value })}
+                        className="h-10 w-full min-w-0 max-w-full rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
                       />
                     </div>
                   </div>
                 ) : null}
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (min)</p>
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Any"
-                      value={linkFilters.minDom}
-                      onChange={(e) => onLinkFiltersChange({ ...linkFilters, minDom: e.target.value })}
-                      className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (max)</p>
-                    <Input
-                      inputMode="numeric"
-                      placeholder="Any"
-                      value={linkFilters.maxDom}
-                      onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxDom: e.target.value })}
-                      className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                    />
-                  </div>
-                </div>
               </section>
             ) : null}
           </div>

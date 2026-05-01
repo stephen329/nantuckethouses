@@ -88,6 +88,8 @@ type LayerPillsProps = {
   onParcelBaseLayer: (v: ParcelBaseMapLayer) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  /** When false, hide the Filters control (e.g. no listing-type chip selected). */
+  showFiltersButton?: boolean;
 };
 
 const OVERLAY_OPTIONS = [
@@ -187,30 +189,38 @@ export function PropertyMapLayerPillsRow({
   onParcelBaseLayer,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: LayerPillsProps) {
   const filtersActive = filterBadgeCount > 0;
   const filtersIconClass = filtersActive ? "text-white" : "text-[var(--cedar-shingle)]";
 
   return (
-    <div className={cn("flex gap-1.5", layout === "stack" ? "flex-col items-stretch" : "flex-row flex-wrap items-center")}>
+    <div
+      className={cn(
+        "flex min-w-0 gap-1.5",
+        layout === "stack" ? "flex-col items-stretch" : "flex-row flex-wrap items-center",
+      )}
+    >
       <PropertyMapOverlayChip parcelBaseLayer={parcelBaseLayer} onParcelBaseLayer={onParcelBaseLayer} layout={layout} />
-      <button
-        type="button"
-        onClick={onOpenFilters}
-        className={cn(
-          filtersActive ? layerPillActiveSolid() : layerPillInactive(),
-          "gap-1",
-          layout === "stack" && "justify-center",
-        )}
-      >
-        <SlidersHorizontal className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", filtersIconClass)} aria-hidden />
-        Filters
-        {filterBadgeCount > 0 ? (
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-white/25 px-1 text-[9px] font-bold text-white">
-            {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
-          </span>
-        ) : null}
-      </button>
+      {showFiltersButton ? (
+        <button
+          type="button"
+          onClick={onOpenFilters}
+          className={cn(
+            filtersActive ? layerPillActiveSolid() : layerPillInactive(),
+            "gap-1",
+            layout === "stack" && "justify-center",
+          )}
+        >
+          <SlidersHorizontal className={cn("h-3.5 w-3.5 shrink-0 stroke-[2]", filtersIconClass)} aria-hidden />
+          Filters
+          {filterBadgeCount > 0 ? (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-white/25 px-1 text-[9px] font-bold text-white">
+              {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -252,6 +262,7 @@ type DesktopBarProps = {
   onRequestFlyToReDistrict: (abbrv: string) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  showFiltersButton?: boolean;
 };
 
 export function PropertyMapDesktopLayerBar({
@@ -264,6 +275,7 @@ export function PropertyMapDesktopLayerBar({
   onRequestFlyToReDistrict,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: DesktopBarProps) {
   const showFocus = parcelBaseLayer === "re_market_areas";
 
@@ -277,6 +289,7 @@ export function PropertyMapDesktopLayerBar({
           onParcelBaseLayer={onParcelBaseLayer}
           onOpenFilters={onOpenFilters}
           filterBadgeCount={filterBadgeCount}
+          showFiltersButton={showFiltersButton}
         />
         <PropertyMapLayerHelpTrigger />
       </div>
@@ -301,6 +314,7 @@ type SheetBodyProps = {
   onRequestFlyToReDistrict: (abbrv: string) => void;
   onOpenFilters: () => void;
   filterBadgeCount: number;
+  showFiltersButton?: boolean;
 };
 
 export function PropertyMapLayersSheetBody({
@@ -313,6 +327,7 @@ export function PropertyMapLayersSheetBody({
   onRequestFlyToReDistrict,
   onOpenFilters,
   filterBadgeCount,
+  showFiltersButton = true,
 }: SheetBodyProps) {
   const showFocus = parcelBaseLayer === "re_market_areas";
 
@@ -331,6 +346,7 @@ export function PropertyMapLayersSheetBody({
           onParcelBaseLayer={onParcelBaseLayer}
           onOpenFilters={onOpenFilters}
           filterBadgeCount={filterBadgeCount}
+          showFiltersButton={showFiltersButton}
         />
       </div>
       {showFocus ? (

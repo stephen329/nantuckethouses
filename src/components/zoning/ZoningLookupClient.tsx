@@ -199,6 +199,7 @@ function linkPinFromOmniboxHit(hit: OmniboxActiveListing | OmniboxSoldComp, pool
     livingAreaSqft: null,
     renoHint: false,
     townWalkHint: false,
+    hasPool: false,
     longitude: hit.lng ?? null,
     latitude: hit.lat ?? null,
   };
@@ -461,7 +462,12 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
   const hasRentMode = mapModes.includes("rent");
   const hasSaleMode = mapModes.includes("sale");
   const hasSoldMode = mapModes.includes("sold");
+  const hasListingTypeSelected = mapModes.length > 0;
   const mapModeForOmnibox = effectiveModeForOmnibox(mapModes);
+
+  useEffect(() => {
+    if (mapModes.length === 0) setFiltersOpen(false);
+  }, [mapModes.length]);
 
   const mapResearchHubPrimaryCta = useMemo(() => {
     if (!selectedRental) return null;
@@ -1309,8 +1315,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   {(
                     [
                       { mode: "sale" as const, label: "For sale" },
-                      { mode: "rent" as const, label: "For rent" },
                       { mode: "sold" as const, label: "Sold" },
+                      { mode: "rent" as const, label: "Vacation Rentals" },
                     ] as const
                   ).map(({ mode, label }) => (
                     <button
@@ -1353,20 +1359,22 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   parcelBaseLayer={parcelBaseLayer}
                   onParcelBaseLayer={applyParcelBaseLayer}
                 />
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen(true)}
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--atlantic-navy)] transition-colors hover:bg-[var(--sandstone)] lg:hidden"
-                  aria-label="Open filters"
-                >
-                  Filters
-                  <ChevronDown className="h-3.5 w-3.5 text-[var(--nantucket-gray)]" aria-hidden />
-                  {filterBadgeCount > 0 ? (
-                    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-700 px-1 text-[9px] font-semibold text-white">
-                      {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
-                    </span>
-                  ) : null}
-                </button>
+                {hasListingTypeSelected ? (
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen(true)}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--cedar-shingle)]/30 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--atlantic-navy)] transition-colors hover:bg-[var(--sandstone)] lg:hidden"
+                    aria-label="Open filters"
+                  >
+                    Filters
+                    <ChevronDown className="h-3.5 w-3.5 text-[var(--nantucket-gray)]" aria-hidden />
+                    {filterBadgeCount > 0 ? (
+                      <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-700 px-1 text-[9px] font-semibold text-white">
+                        {filterBadgeCount > 99 ? "99+" : filterBadgeCount}
+                      </span>
+                    ) : null}
+                  </button>
+                ) : null}
               </div>
               <div className="hidden min-w-0 lg:block">
                 <PropertyMapDesktopLayerBar
@@ -1383,6 +1391,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   }}
                   onOpenFilters={() => setFiltersOpen(true)}
                   filterBadgeCount={filterBadgeCount}
+                  showFiltersButton={hasListingTypeSelected}
                 />
               </div>
             </div>
@@ -1559,7 +1568,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   <div className={cn(mapUiHidden && "pointer-events-none opacity-0")}>
                     <PropertyMapFiltersSheet
                       trigger="none"
-                      open={filtersOpen}
+                      open={filtersOpen && hasListingTypeSelected}
                       onOpenChange={setFiltersOpen}
                       side={isPropertyMap && layoutNarrow ? "top" : "bottom"}
                       mapMode={mapModeForOmnibox}

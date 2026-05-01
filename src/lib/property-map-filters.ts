@@ -24,6 +24,20 @@ export type RentalFiltersState = {
 
 export type LinkPropertyTypeKey = "houses" | "land" | "commercial";
 
+/** Sold-pool “closed in the last …” window; empty = no date filter. */
+export type LinkFiltersSoldInLast = "" | "7d" | "30d" | "90d" | "6m" | "12m" | "24m" | "36m";
+
+/** Preset rows for the “Sold in last” control (no “any time” row — empty state uses a hidden `option`). */
+export const LINK_FILTERS_SOLD_IN_LAST_OPTIONS: { value: Exclude<LinkFiltersSoldInLast, "">; label: string }[] = [
+  { value: "7d", label: "7 days" },
+  { value: "30d", label: "30 days" },
+  { value: "90d", label: "90 days" },
+  { value: "6m", label: "6 months" },
+  { value: "12m", label: "12 months" },
+  { value: "24m", label: "24 months" },
+  { value: "36m", label: "36 months" },
+];
+
 export type LinkFiltersState = {
   pricePreset: "" | "1-3" | "3-6" | "6+";
   minPrice: string;
@@ -33,15 +47,11 @@ export type LinkFiltersState = {
   minLotAcres: string;
   newConstruction: boolean;
   waterfront: boolean;
-  /** Keyword “walk to town” style (remarks / marketing). */
-  walkToTown: boolean;
-  /** Recently renovated / like-new (remarks heuristic). */
-  renoRecent: boolean;
+  /** Pool / swimming pool (remarks heuristic on LINK pins). */
+  pool: boolean;
   propertyTypes: LinkPropertyTypeKey[];
-  /** yyyy-mm-dd inclusive lower bound on sold close date (sold pool). */
-  soldCloseAfter: string;
-  /** yyyy-mm-dd inclusive upper bound on sold close date (sold pool). */
-  soldCloseBefore: string;
+  /** Sold listings only: require close date within this lookback from “now”. */
+  soldInLast: LinkFiltersSoldInLast;
   minDom: string;
   maxDom: string;
   /** Max $/sqft when living area is present on the pin (LINK feed). */
@@ -72,11 +82,9 @@ export const DEFAULT_LINK_FILTERS: LinkFiltersState = {
   minLotAcres: "",
   newConstruction: false,
   waterfront: false,
-  walkToTown: false,
-  renoRecent: false,
+  pool: false,
   propertyTypes: [],
-  soldCloseAfter: "",
-  soldCloseBefore: "",
+  soldInLast: "",
   minDom: "",
   maxDom: "",
   maxPricePerSqft: "",
@@ -196,10 +204,9 @@ export function countActiveLinkFilters(f: LinkFiltersState): number {
   if (f.minLotAcres.trim()) n += 1;
   if (f.newConstruction) n += 1;
   if (f.waterfront) n += 1;
-  if (f.walkToTown) n += 1;
-  if (f.renoRecent) n += 1;
+  if (f.pool) n += 1;
   if (f.propertyTypes.length) n += 1;
-  if (f.soldCloseAfter.trim() || f.soldCloseBefore.trim()) n += 1;
+  if (f.soldInLast) n += 1;
   if (f.minDom.trim() || f.maxDom.trim()) n += 1;
   if (f.maxPricePerSqft.trim()) n += 1;
   return n;
@@ -246,6 +253,22 @@ function linkTransactionPrice(p: LinkListingPinProperties, pool: "active" | "sol
   return typeof p.listPriceNum === "number" && !Number.isNaN(p.listPriceNum) ? p.listPriceNum : 0;
 }
 
+/** Start of “sold in last …” window (inclusive), in ms since epoch. */
+export function soldInLastStartMs(preset: LinkFiltersSoldInLast, now: Date): number | null {
+  if (!preset) return null;
+  const DAY = 86_400_000;
+  const t = now.getTime();
+  if (preset === "7d") return t - 7 * DAY;
+  if (preset === "30d") return t - 30 * DAY;
+  if (preset === "90d") return t - 90 * DAY;
+  const months =
+    preset === "6m" ? 6 : preset === "12m" ? 12 : preset === "24m" ? 24 : preset === "36m" ? 36 : 0;
+  if (!months) return null;
+  const d = new Date(t);
+  d.setMonth(d.getMonth() - months);
+  return d.getTime();
+}
+
 export function filterLinkFeatureCollection(
   fc: FeatureCollection<Point, LinkListingPinProperties>,
   f: LinkFiltersState,
@@ -270,9 +293,9 @@ export function filterLinkFeatureCollection(
   const minDom = parsePositiveInt(f.minDom);
   const maxDom = parsePositiveInt(f.maxDom);
   const maxPpsf = parsePositiveFloat(f.maxPricePerSqft);
-  const afterMs = f.soldCloseAfter.trim() ? parseListingDateMs(f.soldCloseAfter) : null;
-  const beforeMs = f.soldCloseBefore.trim() ? parseListingDateMs(f.soldCloseBefore) : null;
   const now = new Date();
+  const soldWindowStartMs = pool === "sold" ? soldInLastStartMs(f.soldInLast, now) : null;
+  const soldWindowEndMs = now.getTime();
 
   const feats = fc.features.filter((feat) => {
     const p = feat.properties;
@@ -297,8 +320,7 @@ export function filterLinkFeatureCollection(
     }
     if (f.newConstruction && !nc) return false;
     if (f.waterfront && !wf) return false;
-    if (f.walkToTown && !p.townWalkHint) return false;
-    if (f.renoRecent && !p.renoHint) return false;
+    if (f.pool && !p.hasPool) return false;
     if (!linkMatchesPropertyTypes(p.propertyType, f.propertyTypes)) return false;
 
     if (maxPpsf != null) {
@@ -307,11 +329,11 @@ export function filterLinkFeatureCollection(
       if (price / sq > maxPpsf) return false;
     }
 
-    if (pool === "sold" && (afterMs != null || beforeMs != null)) {
+    if (pool === "sold" && soldWindowStartMs != null) {
       const closeMs = parseListingDateMs(p.closeDate);
       if (closeMs == null) return false;
-      if (afterMs != null && closeMs < afterMs) return false;
-      if (beforeMs != null && closeMs >= beforeMs + 86_400_000) return false;
+      if (closeMs < soldWindowStartMs) return false;
+      if (closeMs > soldWindowEndMs) return false;
     }
 
     if (minDom != null || maxDom != null) {

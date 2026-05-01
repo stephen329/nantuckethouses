@@ -59,6 +59,8 @@ export type LinkListingMapPoint = {
   livingAreaSqft: number | null;
   renoHint: boolean;
   townWalkHint: boolean;
+  /** Heuristic from remarks / marketing (not a dedicated MLS pool field). */
+  hasPool: boolean;
 };
 
 export type LinkListingPinProperties = {
@@ -83,6 +85,7 @@ export type LinkListingPinProperties = {
   livingAreaSqft: number | null;
   renoHint: boolean;
   townWalkHint: boolean;
+  hasPool: boolean;
   /** Parcel centroid pin — used for satellite hero when listing has no photo. */
   longitude?: number | null;
   latitude?: number | null;
@@ -123,6 +126,12 @@ function linkRenovatedRecent(row: LinkListingRow): boolean {
 
 function linkTownWalkHint(row: LinkListingRow): boolean {
   return /\b(downtown|in town|in-town|town center|center of town|historic district|main street|steps to town|walk to town)\b/i.test(
+    linkMarketingBlob(row),
+  );
+}
+
+function linkPoolHint(row: LinkListingRow): boolean {
+  return /\b(pool|heated pool|in-?ground pool|swimming pool|gunite pool|pool & spa|pool and spa)\b/i.test(
     linkMarketingBlob(row),
   );
 }
@@ -204,6 +213,7 @@ export function matchLinkListingToPoint(
     livingAreaSqft: pickLivingAreaSqft(row),
     renoHint: linkRenovatedRecent(row),
     townWalkHint: linkTownWalkHint(row),
+    hasPool: linkPoolHint(row),
   };
 }
 
@@ -370,6 +380,7 @@ export function linkMapPointsToGeoJson(points: LinkListingMapPoint[]): FeatureCo
         livingAreaSqft: p.livingAreaSqft,
         renoHint: p.renoHint,
         townWalkHint: p.townWalkHint,
+        hasPool: p.hasPool,
         longitude: p.longitude,
         latitude: p.latitude,
       },
