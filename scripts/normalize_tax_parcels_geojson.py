@@ -18,6 +18,11 @@ from pathlib import Path
 SQM_TO_ACRES = 0.00024710538146717
 SQM_TO_SQFT = 10.76391041671
 
+# Nantucket assessor parcel GeoJSON uses Esri `Shape_Area` in **US square feet**
+# (foot-based CRS), not square meters. Treating it as m² inflates `lot_area_sqft`
+# by ~10.76× (e.g. ~14.4k shown as ~144k).
+SHAPE_AREA_SOURCE_UNIT = "sqft"
+
 # Colors from Use Chart - September 2024 - Sheet2.csv (Zones, Color).
 ZONING_COLORS = {
     "AH": "#FFFF73",
@@ -69,6 +74,33 @@ ZONING_COLORS = {
 }
 DEFAULT_ZONING_COLOR = "#DDDDDD"
 
+
+def apply_parcel_zoning_overrides(features: list, output_dir: Path) -> None:
+    """Apply hand-maintained zoning fixes keyed by `parcel_id` (and optional `location` guard)."""
+    path = output_dir / "parcel-zoning-overrides.json"
+    if not path.is_file():
+        return
+    data = json.loads(path.read_text(encoding="utf-8"))
+    entries = data.get("overrides") or []
+    for entry in entries:
+        parcel_id = str(entry.get("parcel_id", "")).strip()
+        want = entry.get("zoning")
+        guard_loc = (entry.get("location") or "").strip().upper()
+        if not parcel_id or not isinstance(want, str) or not want.strip():
+            continue
+        z = want.strip().upper()
+        for feature in features:
+            props = feature.get("properties") or {}
+            if str(props.get("parcel_id", "")).strip() != parcel_id:
+                continue
+            if guard_loc and str(props.get("location", "")).strip().upper() != guard_loc:
+                continue
+            props["zoning"] = z
+            props["zoning_color"] = ZONING_COLORS.get(z, DEFAULT_ZONING_COLOR)
+            break
+
+
+# Raw `Shape_Area` is read into internal key `shape_area_sq_m` before unit conversion below.
 FIELD_PRIORITY = {
     "parcel_id": ["MAP_PAR_ID", "Parcel_Id", "MA_MAP_PAR_ID"],
     "alt_parcel_id": ["Alt_Parcel_ID"],
@@ -171,13 +203,25 @@ def normalize_feature(feature: dict) -> tuple[dict, list[str]]:
     normalized["tax_map"] = tax_map
     normalized["parcel"] = parcel
 
-    shape_area_sqm = to_number(normalized.get("shape_area_sq_m"))
-    acreage = shape_area_sqm * SQM_TO_ACRES if shape_area_sqm is not None else None
-    sqft = shape_area_sqm * SQM_TO_SQFT if shape_area_sqm is not None else None
-
-    normalized["shape_area_sq_m"] = round(shape_area_sqm, 2) if shape_area_sqm else None
-    normalized["acreage"] = round(acreage, 4) if acreage else None
-    normalized["lot_area_sqft"] = round(sqft, 2) if sqft else None
+    shape_raw = to_number(normalized.get("shape_area_sq_m"))
+    if shape_raw is None:
+        normalized["shape_area_sq_m"] = None
+        normalized["acreage"] = None
+        normalized["lot_area_sqft"] = None
+    elif SHAPE_AREA_SOURCE_UNIT == "sqft":
+        sqft = shape_raw
+        acreage = sqft / 43560.0
+        sq_m = sqft / SQM_TO_SQFT
+        normalized["lot_area_sqft"] = round(sqft, 2)
+        normalized["acreage"] = round(acreage, 4)
+        normalized["shape_area_sq_m"] = round(sq_m, 2)
+    else:
+        shape_area_sqm = shape_raw
+        acreage = shape_area_sqm * SQM_TO_ACRES
+        sqft = shape_area_sqm * SQM_TO_SQFT
+        normalized["shape_area_sq_m"] = round(shape_area_sqm, 2) if shape_area_sqm else None
+        normalized["acreage"] = round(acreage, 4) if acreage else None
+        normalized["lot_area_sqft"] = round(sqft, 2) if sqft else None
 
     assessed_total = to_number(normalized.get("assessed_total"))
     normalized["assessed_total"] = round(assessed_total, 2) if assessed_total else None
@@ -233,6 +277,8 @@ def main() -> None:
             stats["count"] += 1
             stats["types"].add(type(raw_properties.get(key)).__name__)
 
+    apply_parcel_zoning_overrides(normalized_features, output_dir)
+
     clean = {
         "type": source.get("type", "FeatureCollection"),
         "name": "nantucket_tax_parcels_clean_v1",
@@ -281,9 +327,9 @@ def main() -> None:
         "- `co_owner_name` (string): Optional secondary owner.",
         "- `land_class` (string): Land class designation.",
         "- `utilities` (string): Utility availability/description field.",
-        "- `shape_area_sq_m` (number): Lot size in square meters (geometry area field).",
-        "- `lot_area_sqft` (number): Derived lot size in square feet.",
-        "- `acreage` (number): Derived lot size in acres.",
+        "- `shape_area_sq_m` (number): Lot area in **true** square meters (from assessor `Shape_Area` in sq ft ÷ sqft/m²).",
+        "- `lot_area_sqft` (number): Lot size in square feet (same as assessor `Shape_Area` in this export).",
+        "- `acreage` (number): Lot size in acres (`lot_area_sqft` ÷ 43,560).",
         "- `assessed_total` (number): Total assessed value.",
         "- `assessed_building` (number): Building-only assessed amount.",
         "- `assessed_outbuilding` (number): Outbuilding assessed amount.",

@@ -21,6 +21,7 @@ import {
   type ExpansionIntelligence,
 } from "@/lib/property-expansion-intelligence";
 import { parcelIsWatched, toggleWatchParcelId } from "@/lib/omnibox-local-storage";
+import { getZoningColor } from "@/lib/zoning-colors";
 import { PropertyIntelligenceHero } from "@/components/map/PropertyIntelligenceHero";
 import {
   PropertyMapSlideUpSectionNav,
@@ -123,7 +124,6 @@ type Props = {
   selectedParcel: ParcelProperties | null;
   selectedRental: NrMapRentalResult | null;
   selectedLink: LinkListingPinProperties | null;
-  linkListingId: string | null;
   /** LINK row for this parcel (viewport pins or `?parcel_id=` server match). */
   parcelLinkListingMatch?: ParcelMapLinkListingMatch | null;
   vacationRentalSlug: string | null;
@@ -134,12 +134,14 @@ type Props = {
   onWatchChange?: () => void;
   /** Switch map to rentals view and frame nearby inventory (parcel selection). */
   onViewComparableRentals?: () => void;
-  /** Mobile property-map drawer: sticky section chips + reorder (Our Take → Parcel → Zoning → Uses → Timeline). */
+  /** Mobile property-map drawer: sticky section chips + reorder (Our Take → … → Comps). */
   propertyMapSlideUpNav?: boolean;
   /** Injected between Our Take and Zoning when `propertyMapSlideUpNav`. */
   parcelInfoSlot?: ReactNode;
   /** Injected between Zoning and Timeline when `propertyMapSlideUpNav`. */
   usesSlot?: ReactNode;
+  /** Injected after Timeline (nearby sales + comparable rentals) when `propertyMapSlideUpNav`. */
+  compsSlot?: ReactNode;
 };
 
 const ATLANTIC_NAVY = "#0c2340";
@@ -221,35 +223,48 @@ function ExpansionBlock({ exp, zoneLabel }: { exp: ExpansionIntelligence; zoneLa
   );
 }
 
-function ZoningCheatSheet({ code, districtMatch }: { code: string; districtMatch: DistrictMatchLite }) {
+function ZoningCheatSheet({
+  code,
+  districtMatch,
+  parcelZoning,
+  parcelZoningColor,
+}: {
+  code: string;
+  districtMatch: DistrictMatchLite;
+  parcelZoning?: string | null;
+  parcelZoningColor?: string | null;
+}) {
   const info = districtMatch?.info;
+  const setbacks = `${info?.frontSetback ?? "—"} front · ${info?.sideSetback ?? "—"} side · ${info?.rearSetback ?? "—"} rear`;
+  const zoneDot = getZoningColor(parcelZoning ?? code, parcelZoningColor ?? null);
   return (
     <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
-      <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Zoning cheat sheet — {code}</h3>
-      <ul className="grid gap-1 text-[11px] leading-snug text-[var(--atlantic-navy)]">
-        <li className="flex justify-between gap-2 border-b border-[var(--cedar-shingle)]/10 py-0.5">
-          <span className="text-[var(--nantucket-gray)]">Max ground cover</span>
-          <span className="font-medium">{info?.maxGroundCover ?? "—"}</span>
-        </li>
-        <li className="flex justify-between gap-2 border-b border-[var(--cedar-shingle)]/10 py-0.5">
-          <span className="text-[var(--nantucket-gray)]">Min lot size</span>
-          <span className="font-medium">{info?.minLotSize ?? "—"}</span>
-        </li>
-        <li className="flex justify-between gap-2 border-b border-[var(--cedar-shingle)]/10 py-0.5">
-          <span className="text-[var(--nantucket-gray)]">Frontage</span>
-          <span className="font-medium">{info?.frontage ?? "—"}</span>
-        </li>
-        <li className="flex justify-between gap-2 border-b border-[var(--cedar-shingle)]/10 py-0.5">
-          <span className="text-[var(--nantucket-gray)]">Setbacks</span>
-          <span className="text-right font-medium">
-            {info?.frontSetback ?? "—"} front · {info?.sideSetback ?? "—"} side · {info?.rearSetback ?? "—"} rear
-          </span>
-        </li>
-        <li className="flex justify-between gap-2 py-0.5">
-          <span className="text-[var(--nantucket-gray)]">Secondary dwelling</span>
-          <span className="max-w-[55%] text-right font-medium">Accessory / guest — verify use table + lot coverage</span>
-        </li>
-      </ul>
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--nantucket-gray)]">Zoning cheat sheet</p>
+      <div className="mt-1 flex min-w-0 items-center gap-2">
+        <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: zoneDot }} />
+        <p className="min-w-0 text-sm font-medium leading-snug text-[var(--atlantic-navy)]">
+          {code}
+          {info?.name ? <span className="text-[var(--nantucket-gray)]"> — {info.name}</span> : null}
+        </p>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Min Lot Size</p>
+          <p className="mt-1 font-medium text-[var(--atlantic-navy)]">{info?.minLotSize ?? "—"}</p>
+        </div>
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Max Ground Cover</p>
+          <p className="mt-1 font-medium text-[var(--atlantic-navy)]">{info?.maxGroundCover ?? "—"}</p>
+        </div>
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Min Frontage</p>
+          <p className="mt-1 font-medium text-[var(--atlantic-navy)]">{info?.frontage ?? "—"}</p>
+        </div>
+        <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-[var(--nantucket-gray)]">Setbacks</p>
+          <p className="mt-1 font-medium leading-snug text-[var(--atlantic-navy)]">{setbacks}</p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -283,10 +298,10 @@ export function PropertyIntelligencePanel({
   propertyMapSlideUpNav = false,
   parcelInfoSlot = null,
   usesSlot = null,
+  compsSlot = null,
   selectedParcel,
   selectedRental,
   selectedLink,
-  linkListingId,
   parcelLinkListingMatch = null,
   vacationRentalSlug,
   districtMatch,
@@ -315,10 +330,19 @@ export function PropertyIntelligencePanel({
   }, [compactHero, parcelId, onWatchChange]);
 
   const lotSqft = useMemo(() => {
-    if (selectedParcel?.lot_area_sqft != null && selectedParcel.lot_area_sqft > 0) return selectedParcel.lot_area_sqft;
+    const mls = parcelLinkListingMatch?.lotSizeSqft;
+    if (mls != null && mls > 0) return mls;
+    const linkSq = selectedLink?.lotSizeSqft;
+    if (linkSq != null && linkSq > 0) return linkSq;
     if (selectedLink?.lotAcres != null && selectedLink.lotAcres > 0) return Math.round(selectedLink.lotAcres * 43_560);
+    if (selectedParcel?.lot_area_sqft != null && selectedParcel.lot_area_sqft > 0) return selectedParcel.lot_area_sqft;
     return null;
-  }, [selectedParcel?.lot_area_sqft, selectedLink?.lotAcres]);
+  }, [
+    parcelLinkListingMatch?.lotSizeSqft,
+    selectedLink?.lotSizeSqft,
+    selectedLink?.lotAcres,
+    selectedParcel?.lot_area_sqft,
+  ]);
 
   const zoneForExpansion = selectedParcel?.zoning ?? districtMatch?.code ?? null;
 
@@ -561,7 +585,12 @@ export function PropertyIntelligencePanel({
 
   const zoningColumn =
     showZoning && districtMatch ? (
-      <ZoningCheatSheet code={districtMatch.code} districtMatch={districtMatch} />
+      <ZoningCheatSheet
+        code={districtMatch.code}
+        districtMatch={districtMatch}
+        parcelZoning={selectedParcel?.zoning ?? null}
+        parcelZoningColor={selectedParcel?.zoning_color ?? null}
+      />
     ) : selectedParcel ? (
       <section className="border-t border-[var(--cedar-shingle)]/15 pt-3">
         <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Zoning</h3>
@@ -585,31 +614,6 @@ export function PropertyIntelligencePanel({
 
   const ctaColumn = (
     <div className="flex flex-col gap-2 border-t border-[var(--cedar-shingle)]/15 pt-3">
-      {selectedParcel?.internal_id ? (
-        <Button asChild variant="outline" className="w-full text-sm">
-          <a
-            href={`https://gis.vgsi.com/nantucketma/Parcel.aspx?Pid=${encodeURIComponent(String(selectedParcel.internal_id))}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Assessor&apos;s Record
-          </a>
-        </Button>
-      ) : null}
-      {selectedLink ? (
-        <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
-          <a href={nantucketLinkListingUrl(selectedLink.linkId)} target="_blank" rel="noopener noreferrer">
-            View full LINK listing
-          </a>
-        </Button>
-      ) : null}
-      {linkListingId && !selectedLink ? (
-        <Button asChild className="w-full bg-blue-700 text-sm text-white hover:bg-blue-800">
-          <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">
-            View full LINK listing
-          </a>
-        </Button>
-      ) : null}
       {selectedRental?.slug?.trim() ? (
         <Button asChild variant="outline" className="w-full text-sm">
           <a href={nantucketVacationRentalListingUrl(selectedRental.slug)} target="_blank" rel="noopener noreferrer">
@@ -666,12 +670,14 @@ export function PropertyIntelligencePanel({
       {propertyMapSlideUpNav ? (
         <>
           <PropertyMapSlideUpSectionNav
+            addressLine={title}
             visible={{
               ourTake: true,
               parcelInfo: Boolean(parcelInfoSlot),
               zoning: Boolean(selectedParcel),
               uses: Boolean(usesSlot),
               timeline: true,
+              comps: Boolean(compsSlot),
             }}
           />
           <div className="space-y-5 px-4 pb-4 pt-1">
@@ -696,6 +702,12 @@ export function PropertyIntelligencePanel({
             <div id={PROPERTY_MAP_SECTION_IDS.timeline} className={sectionScroll}>
               {timelineColumn}
             </div>
+            {compsSlot ? (
+              <section id={PROPERTY_MAP_SECTION_IDS.comps} className={cn(sectionScroll, "border-t border-[var(--cedar-shingle)]/15 pt-3")}>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-[var(--atlantic-navy)]">Comps</h3>
+                {compsSlot}
+              </section>
+            ) : null}
             {ctaColumn}
           </div>
         </>
