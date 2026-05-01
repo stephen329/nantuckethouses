@@ -228,8 +228,16 @@ export type ParcelMapLinkListingMatch = {
   listPriceNum: number;
   /** Formatted close price when sold. */
   closePrice: string;
+  /** ISO-ish MLS on-market date when present (DOM). */
+  onMarketDate: string | null;
+  /** Close date when sold (DOM through close). */
+  closeDate: string | null;
   /** MLS area / neighborhood (e.g. Tom Nevers). */
   mlsArea: string | null;
+  /** LINK MLS property type (e.g. Single Family, Land, Commercial). */
+  propertyType: string | null;
+  /** MLS bedrooms when present (for deep links to NR search). */
+  bedrooms: number | null;
   /** Pin / parcel centroid (for map hero framing). */
   longitude?: number | null;
   latitude?: number | null;
@@ -244,7 +252,11 @@ export function parcelMapListingMatchFromMapPoint(p: LinkListingMapPoint): Parce
     listPrice: formatMoney(p.listPrice),
     listPriceNum: p.listPrice,
     closePrice: p.closePrice != null ? formatMoney(p.closePrice) : "",
+    onMarketDate: p.onMarketDate,
+    closeDate: p.closeDate?.trim() ? p.closeDate : null,
     mlsArea: p.mlsArea,
+    propertyType: p.propertyType ?? null,
+    bedrooms: p.bedrooms ?? null,
     longitude: p.longitude,
     latitude: p.latitude,
   };
@@ -260,7 +272,11 @@ function featureToParcelMatch(f: Feature<Point, LinkListingPinProperties>): Parc
     listPrice: p.listPrice,
     listPriceNum: p.listPriceNum,
     closePrice: p.closePrice,
+    onMarketDate: p.onMarketDate,
+    closeDate: p.closeDate?.trim() ? p.closeDate : null,
     mlsArea: p.mlsArea,
+    propertyType: p.propertyType ?? null,
+    bedrooms: p.bedrooms ?? null,
     longitude: p.longitude ?? lng,
     latitude: p.latitude ?? lat,
   };

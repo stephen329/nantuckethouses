@@ -136,14 +136,21 @@ export function PropertyIntelligenceHero({
   const satelliteUrl = useMemo(() => {
     if (!center || satFailed) return null;
     const w = 400;
-    const h = compactHero ? 220 : 250;
+    const h = compactHero ? 320 : 250;
     return mapboxSatelliteStaticUrl({ lng: center.lng, lat: center.lat, zoom: 18, width: w, height: h, retina: true });
   }, [center, compactHero, satFailed]);
 
   const zoneBadge = zoneHeadline(districtMatch, parcelZoning, zoningLabel);
 
   return (
-    <div className={cn("relative w-full overflow-hidden rounded-t-lg bg-slate-200", compactHero ? "aspect-[4/3]" : "aspect-video")}>
+    <div
+      className={cn(
+        "relative w-full overflow-hidden bg-slate-200",
+        compactHero
+          ? "min-h-[220px] h-[40vh] max-h-[min(360px,52dvh)] rounded-t-none"
+          : "aspect-video rounded-t-lg",
+      )}
+    >
       {heroUrl ? (
         heroListingHref ? (
           <a
@@ -198,7 +205,7 @@ export function PropertyIntelligenceHero({
         >
           {statusLabel}
         </span>
-        {parcelId ? (
+        {!compactHero && parcelId ? (
           <button
             type="button"
             onClick={onToggleWatch}

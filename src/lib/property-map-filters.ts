@@ -22,7 +22,7 @@ export type RentalFiltersState = {
   townWalk: boolean;
 };
 
-export type LinkPropertyTypeKey = "sf" | "condo" | "land" | "guest" | "multi";
+export type LinkPropertyTypeKey = "houses" | "land" | "commercial";
 
 export type LinkFiltersState = {
   pricePreset: "" | "1-3" | "3-6" | "6+";
@@ -37,8 +37,6 @@ export type LinkFiltersState = {
   walkToTown: boolean;
   /** Recently renovated / like-new (remarks heuristic). */
   renoRecent: boolean;
-  /** Curated MLS areas (Surfside, Town, Brant Point, …). */
-  highYieldZones: boolean;
   propertyTypes: LinkPropertyTypeKey[];
   /** yyyy-mm-dd inclusive lower bound on sold close date (sold pool). */
   soldCloseAfter: string;
@@ -76,7 +74,6 @@ export const DEFAULT_LINK_FILTERS: LinkFiltersState = {
   waterfront: false,
   walkToTown: false,
   renoRecent: false,
-  highYieldZones: false,
   propertyTypes: [],
   soldCloseAfter: "",
   soldCloseBefore: "",
@@ -85,52 +82,50 @@ export const DEFAULT_LINK_FILTERS: LinkFiltersState = {
   maxPricePerSqft: "",
 };
 
+/** MLS-facing labels for the map LINK property-type chips (sale/sold pools). */
 export const LINK_PROPERTY_TYPE_LABELS: { key: LinkPropertyTypeKey; label: string }[] = [
-  { key: "sf", label: "Single Family" },
-  { key: "condo", label: "Condo / Townhouse" },
+  { key: "houses", label: "Houses" },
   { key: "land", label: "Land" },
-  { key: "guest", label: "Guest / Carriage" },
-  { key: "multi", label: "Multi-Family" },
+  { key: "commercial", label: "Commercial" },
 ];
 
-export function isHighYieldMlsArea(area: string | null | undefined): boolean {
-  if (!area?.trim()) return false;
-  const a = area.toLowerCase();
-  const needles = [
-    "town",
-    "brant",
-    "cliff",
-    "surfside",
-    "sconset",
-    "siasconset",
-    "wauwinet",
-    "quent",
-    "dionis",
-    "polpis",
-    "quidnet",
-    "pocomo",
-    "madaket",
-    "shimmo",
-  ];
-  return needles.some((n) => a.includes(n));
+function linkPropertyTypeIsLand(low: string): boolean {
+  return /\b(land|lot|lots|acre|unimproved|vacant land|lots\s*[\/&]\s*land|agricultural|farm)\b/i.test(low);
+}
+
+function linkPropertyTypeIsCommercial(low: string): boolean {
+  return /\b(commercial|industrial|retail|office|warehouse|hospitality|hotel|motel|mixed.?use|business|medical|restaurant)\b/i.test(
+    low,
+  );
+}
+
+/** Dwelling / residential inventory that is not land-only or commercial. */
+function linkPropertyTypeIsHouses(low: string): boolean {
+  if (!low.trim()) return false;
+  if (linkPropertyTypeIsLand(low) || linkPropertyTypeIsCommercial(low)) return false;
+  return (
+    /\b(single.?family|1.?family|one.?family|sfr|detached|attached)\b/i.test(low) ||
+    /\b(condo|townhouse|town house|co-?op|cooperative)\b/i.test(low) ||
+    /\baffordable\b/i.test(low) ||
+    /\b(guest|carriage|in-?law|accessory)\b/i.test(low) ||
+    /\b(multi|duplex|triplex|2-?4 units|investment)\b/i.test(low) ||
+    (/\bresidential\b/i.test(low) && !/\bland\b/i.test(low))
+  );
 }
 
 export function linkMatchesPropertyTypes(propertyType: string | null, keys: LinkPropertyTypeKey[]): boolean {
   if (!keys.length) return true;
-  const s = (propertyType ?? "").toLowerCase();
-  if (!s.trim()) return false;
+  const raw = propertyType ?? "";
+  if (!raw.trim()) return false;
+  const low = raw.toLowerCase();
   return keys.some((k) => {
     switch (k) {
-      case "sf":
-        return /\b(single.?family|sfr|detached)\b/i.test(s) || (s.includes("residential") && !s.includes("condo"));
-      case "condo":
-        return /\b(condo|townhouse|town house|attached)\b/i.test(s);
       case "land":
-        return /\b(land|lot|lots|acre|unimproved|vacant land)\b/i.test(s);
-      case "guest":
-        return /\b(guest|carriage|in-?law|accessory)\b/i.test(s);
-      case "multi":
-        return /\b(multi|duplex|triplex|2.?4 units|investment)\b/i.test(s);
+        return linkPropertyTypeIsLand(low);
+      case "commercial":
+        return linkPropertyTypeIsCommercial(low);
+      case "houses":
+        return linkPropertyTypeIsHouses(low);
       default:
         return false;
     }
@@ -203,7 +198,6 @@ export function countActiveLinkFilters(f: LinkFiltersState): number {
   if (f.waterfront) n += 1;
   if (f.walkToTown) n += 1;
   if (f.renoRecent) n += 1;
-  if (f.highYieldZones) n += 1;
   if (f.propertyTypes.length) n += 1;
   if (f.soldCloseAfter.trim() || f.soldCloseBefore.trim()) n += 1;
   if (f.minDom.trim() || f.maxDom.trim()) n += 1;
@@ -305,7 +299,6 @@ export function filterLinkFeatureCollection(
     if (f.waterfront && !wf) return false;
     if (f.walkToTown && !p.townWalkHint) return false;
     if (f.renoRecent && !p.renoHint) return false;
-    if (f.highYieldZones && !isHighYieldMlsArea(p.mlsArea)) return false;
     if (!linkMatchesPropertyTypes(p.propertyType, f.propertyTypes)) return false;
 
     if (maxPpsf != null) {

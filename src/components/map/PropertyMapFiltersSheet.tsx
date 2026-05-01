@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -36,6 +34,8 @@ export type MapFilterPinSummary = {
   linkSoldTotal: number;
 };
 
+type FilterSheetTab = "rent" | "sale" | "sold";
+
 type Props = {
   mapMode: PropertyMapMode;
   selectedModes?: Array<Exclude<PropertyMapMode, "all">>;
@@ -61,15 +61,18 @@ function Chip({
   onClick,
   children,
   className,
+  title,
 }: {
   selected: boolean;
   onClick: () => void;
   children: ReactNode;
   className?: string;
+  title?: string;
 }) {
   return (
     <button
       type="button"
+      title={title}
       onClick={onClick}
       className={cn(
         "rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors",
@@ -105,7 +108,6 @@ export function PropertyMapFiltersSheet({
   side = "bottom",
 }: Props) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
   const isControlled = openControlled !== undefined && onOpenChange !== undefined;
   const open = isControlled ? openControlled : internalOpen;
   const setOpen = (next: boolean) => {
@@ -114,11 +116,13 @@ export function PropertyMapFiltersSheet({
   };
 
   const selected = new Set<Exclude<PropertyMapMode, "all">>(
-    selectedModes?.length
-      ? selectedModes
-      : mapMode === "all"
-        ? ["rent", "sale", "sold"]
-        : [mapMode as Exclude<PropertyMapMode, "all">],
+    Array.isArray(selectedModes) && selectedModes.length === 0
+      ? []
+      : selectedModes?.length
+        ? selectedModes
+        : mapMode === "all"
+          ? ["rent", "sale", "sold"]
+          : [mapMode as Exclude<PropertyMapMode, "all">],
   );
   const showRent = selected.has("rent");
   const showSale = selected.has("sale");
@@ -126,10 +130,34 @@ export function PropertyMapFiltersSheet({
   const showLink = showSale || showSold;
   const showSoldTools = showSold;
 
-  const badge =
-    (showRent ? countActiveRentalFilters(rentalFilters) : 0) + (showLink ? countActiveLinkFilters(linkFilters) : 0);
+  const tabIds = useMemo((): FilterSheetTab[] => {
+    const ids: FilterSheetTab[] = [];
+    if (showRent) ids.push("rent");
+    if (showSale) ids.push("sale");
+    if (showSold) ids.push("sold");
+    return ids;
+  }, [showRent, showSale, showSold]);
+
+  const [activeTab, setActiveTab] = useState<FilterSheetTab>("rent");
+
+  useEffect(() => {
+    if (tabIds.length === 0) return;
+    if (!tabIds.includes(activeTab)) setActiveTab(tabIds[0]!);
+  }, [tabIds, activeTab]);
+
+  const rentBadge = showRent ? countActiveRentalFilters(rentalFilters) : 0;
+  const linkBadge = showLink ? countActiveLinkFilters(linkFilters) : 0;
+
+  const viewingRent = showRent && (tabIds.length === 1 ? tabIds[0] === "rent" : activeTab === "rent");
+  const viewingLink =
+    showLink && (tabIds.length === 1 ? tabIds[0] === "sale" || tabIds[0] === "sold" : activeTab === "sale" || activeTab === "sold");
+
+  const badge = rentBadge + linkBadge;
 
   const headline = useMemo(() => {
+    if (!showRent && !showSale && !showSold) {
+      return "No listing types selected — turn on For rent, For sale, and/or Sold above";
+    }
     const parts: string[] = [];
     if (showRent && !showLink) {
       parts.push(`${pinSummary.rentalsFiltered} rental${pinSummary.rentalsFiltered === 1 ? "" : "s"}`);
@@ -207,8 +235,52 @@ export function PropertyMapFiltersSheet({
             ) : null}
           </SheetHeader>
 
+          {tabIds.length > 1 ? (
+            <div
+              role="tablist"
+              aria-label="Listing type filters"
+              className="flex shrink-0 gap-0 border-b border-[var(--cedar-shingle)]/15 px-2"
+            >
+              {tabIds.map((id) => {
+                const selectedTab = activeTab === id;
+                const label = id === "rent" ? "Vacation Rentals" : id === "sale" ? "For sale" : "Sold";
+                const tabBadge =
+                  id === "rent" && rentBadge > 0 ? rentBadge : (id === "sale" || id === "sold") && linkBadge > 0 ? linkBadge : 0;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedTab}
+                    onClick={() => setActiveTab(id)}
+                    className={cn(
+                      "relative min-h-11 flex-1 px-2 py-2.5 text-center text-xs font-semibold transition-colors",
+                      selectedTab
+                        ? "text-blue-800 after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-blue-700"
+                        : "text-[var(--nantucket-gray)] hover:text-[var(--atlantic-navy)]",
+                    )}
+                  >
+                    <span className="inline-flex flex-col items-center gap-0.5">
+                      <span>{label}</span>
+                      {tabBadge > 0 ? (
+                        <span className="rounded-full bg-blue-700 px-1.5 py-px text-[10px] font-bold leading-none text-white">
+                          {tabBadge > 99 ? "99+" : tabBadge}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 py-4">
-            {showRent ? (
+            {tabIds.length === 0 ? (
+              <p className="rounded-md border border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/40 px-3 py-2 text-xs leading-snug text-[var(--atlantic-navy)]">
+                Select at least one listing type using the chips on the map toolbar to filter pins here.
+              </p>
+            ) : null}
+            {viewingRent ? (
               <section className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <SectionLabel>Vacation rentals</SectionLabel>
@@ -300,10 +372,21 @@ export function PropertyMapFiltersSheet({
               </section>
             ) : null}
 
-            {showLink ? (
-              <section className={cn("space-y-4", showRent && "border-t border-[var(--cedar-shingle)]/15 pt-5")}>
+            {viewingLink ? (
+              <section className="space-y-4">
+                {tabIds.length > 1 && (activeTab === "sale" || activeTab === "sold") ? (
+                  <p className="rounded-md border border-blue-700/10 bg-blue-50/60 px-2.5 py-1.5 text-[11px] leading-snug text-blue-950">
+                    {activeTab === "sale"
+                      ? showSold
+                        ? "Active MLS pins: criteria below also shape sold pins where the same field applies (e.g. price, beds). Sold close dates can be filtered below when sold pins are on."
+                        : "Criteria below apply to active MLS pins in the current map view."
+                      : showSale
+                        ? "Sold MLS pins: criteria below also shape active pins where the same field applies. Sold close dates are below."
+                        : "Criteria below apply to sold MLS pins in the current map view."}
+                  </p>
+                ) : null}
                 <div className="flex items-center justify-between gap-2">
-                  <SectionLabel>LINK listings</SectionLabel>
+                  <SectionLabel>MLS Listings</SectionLabel>
                   <span className="text-right text-[11px] font-medium leading-tight text-blue-900">
                     {showSale ? (
                       <span>
@@ -317,6 +400,28 @@ export function PropertyMapFiltersSheet({
                       </span>
                     ) : null}
                   </span>
+                </div>
+                <div>
+                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Property type</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {LINK_PROPERTY_TYPE_LABELS.map(({ key, label }) => {
+                      const on = linkFilters.propertyTypes.includes(key);
+                      return (
+                        <Chip
+                          key={key}
+                          selected={on}
+                          onClick={() =>
+                            onLinkFiltersChange({
+                              ...linkFilters,
+                              propertyTypes: toggleTypeKey(linkFilters.propertyTypes, key),
+                            })
+                          }
+                        >
+                          {label}
+                        </Chip>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div>
                   <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Price</p>
@@ -344,55 +449,6 @@ export function PropertyMapFiltersSheet({
                         {label}
                       </Chip>
                     ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Custom price</p>
-                  <div className="flex items-stretch overflow-hidden rounded-xl border border-[var(--cedar-shingle)]/25 bg-[var(--sandstone)]/30 shadow-inner">
-                    <div className="flex min-w-0 flex-1 flex-col border-r border-[var(--cedar-shingle)]/20 px-3 py-2">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--nantucket-gray)]">Min</span>
-                      <Input
-                        inputMode="numeric"
-                        placeholder="$0"
-                        value={linkFilters.minPrice}
-                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, minPrice: e.target.value, pricePreset: "" })}
-                        className="h-8 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--atlantic-navy)] focus-visible:ring-0"
-                      />
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col px-3 py-2">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--nantucket-gray)]">Max</span>
-                      <Input
-                        inputMode="numeric"
-                        placeholder="No max"
-                        value={linkFilters.maxPrice}
-                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxPrice: e.target.value, pricePreset: "" })}
-                        className="h-8 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--atlantic-navy)] focus-visible:ring-0"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Value — max $/sqft</p>
-                  <p className="mb-1.5 text-[10px] text-[var(--nantucket-gray)]">Uses living area from LINK when present; other listings are hidden while this filter is on.</p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Chip
-                      selected={linkFilters.maxPricePerSqft === "1500"}
-                      onClick={() =>
-                        onLinkFiltersChange({
-                          ...linkFilters,
-                          maxPricePerSqft: linkFilters.maxPricePerSqft === "1500" ? "" : "1500",
-                        })
-                      }
-                    >
-                      Under $1,500/sqft
-                    </Chip>
-                    <Input
-                      inputMode="decimal"
-                      placeholder="Custom max $/sqft"
-                      value={linkFilters.maxPricePerSqft}
-                      onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxPricePerSqft: e.target.value })}
-                      className="h-9 max-w-[10rem] rounded-lg border-[var(--cedar-shingle)]/25 text-sm font-medium"
-                    />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -446,28 +502,6 @@ export function PropertyMapFiltersSheet({
                     ))}
                   </div>
                 </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium text-[var(--atlantic-navy)]">Property type</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {LINK_PROPERTY_TYPE_LABELS.map(({ key, label }) => {
-                      const on = linkFilters.propertyTypes.includes(key);
-                      return (
-                        <Chip
-                          key={key}
-                          selected={on}
-                          onClick={() =>
-                            onLinkFiltersChange({
-                              ...linkFilters,
-                              propertyTypes: toggleTypeKey(linkFilters.propertyTypes, key),
-                            })
-                          }
-                        >
-                          {label}
-                        </Chip>
-                      );
-                    })}
-                  </div>
-                </div>
                 <div className="flex flex-wrap gap-2 rounded-xl border border-[var(--cedar-shingle)]/15 bg-blue-50/40 p-2.5">
                   <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-2 py-1 text-xs font-medium text-[var(--atlantic-navy)] has-[:checked]:border-blue-700/30 has-[:checked]:bg-white">
                     <Checkbox
@@ -499,81 +533,51 @@ export function PropertyMapFiltersSheet({
                   </label>
                 </div>
 
-                <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                  <CollapsibleTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between rounded-lg border border-[var(--cedar-shingle)]/25 bg-white px-3 py-2 text-left text-xs font-semibold text-[var(--atlantic-navy)] shadow-sm"
-                    >
-                      Advanced
-                      <span className="text-[var(--nantucket-gray)]">{advancedOpen ? "▾" : "▸"}</span>
-                    </button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 border-b border-t border-[var(--cedar-shingle)]/10 py-3 data-[state=closed]:animate-out">
-                    <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-blue-700/15 bg-blue-50/50 p-2.5">
-                      <Checkbox
-                        checked={linkFilters.highYieldZones}
-                        onCheckedChange={(v) => onLinkFiltersChange({ ...linkFilters, highYieldZones: v === true })}
-                        className="mt-0.5"
+                {showSoldTools ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed after</p>
+                      <Input
+                        type="date"
+                        value={linkFilters.soldCloseAfter}
+                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseAfter: e.target.value })}
+                        className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
                       />
-                      <span>
-                        <span className="text-xs font-semibold text-[var(--atlantic-navy)]">Stephen Maury&apos;s high-yield zones</span>
-                        <span className="mt-0.5 block text-[10px] leading-snug text-[var(--nantucket-gray)]">
-                          Town, Brant Point, Cliff, Surfside, Sconset, Wauwinet, Dionis, Polpis, Madaket, and similar MLS
-                          area tags when present on the listing.
-                        </span>
-                      </span>
-                    </label>
-                    {showSoldTools ? (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed after</p>
-                          <Input
-                            type="date"
-                            value={linkFilters.soldCloseAfter}
-                            onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseAfter: e.target.value })}
-                            className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed before</p>
-                          <Input
-                            type="date"
-                            value={linkFilters.soldCloseBefore}
-                            onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseBefore: e.target.value })}
-                            className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (min)</p>
-                        <Input
-                          inputMode="numeric"
-                          placeholder="Any"
-                          value={linkFilters.minDom}
-                          onChange={(e) => onLinkFiltersChange({ ...linkFilters, minDom: e.target.value })}
-                          className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (max)</p>
-                        <Input
-                          inputMode="numeric"
-                          placeholder="Any"
-                          value={linkFilters.maxDom}
-                          onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxDom: e.target.value })}
-                          className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
-                        />
-                      </div>
                     </div>
-                    <p className="text-[10px] leading-snug text-[var(--nantucket-gray)]">
-                      DOM uses LINK on-market date when the feed provides it; sold comps use close date as the end of the
-                      window.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
+                    <div>
+                      <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Sold — closed before</p>
+                      <Input
+                        type="date"
+                        value={linkFilters.soldCloseBefore}
+                        onChange={(e) => onLinkFiltersChange({ ...linkFilters, soldCloseBefore: e.target.value })}
+                        className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (min)</p>
+                    <Input
+                      inputMode="numeric"
+                      placeholder="Any"
+                      value={linkFilters.minDom}
+                      onChange={(e) => onLinkFiltersChange({ ...linkFilters, minDom: e.target.value })}
+                      className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[11px] font-medium text-[var(--atlantic-navy)]">Days on market (max)</p>
+                    <Input
+                      inputMode="numeric"
+                      placeholder="Any"
+                      value={linkFilters.maxDom}
+                      onChange={(e) => onLinkFiltersChange({ ...linkFilters, maxDom: e.target.value })}
+                      className="h-10 rounded-lg border-[var(--cedar-shingle)]/25 text-sm"
+                    />
+                  </div>
+                </div>
               </section>
             ) : null}
           </div>
@@ -581,9 +585,6 @@ export function PropertyMapFiltersSheet({
           <SheetFooter className="shrink-0 flex-col gap-2 border-t border-[var(--cedar-shingle)]/20 bg-[var(--sandstone)]/90 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
             <Button type="button" className="h-11 w-full bg-blue-700 text-[15px] font-semibold text-white hover:bg-blue-800" onClick={() => setOpen(false)}>
               Apply filters
-            </Button>
-            <Button type="button" variant="outline" className="h-10 w-full border-[var(--cedar-shingle)]/35 text-sm font-semibold" asChild>
-              <Link href="/buy">Save search &amp; get alerts</Link>
             </Button>
             <Button type="button" variant="ghost" className="h-9 w-full text-xs font-medium text-[var(--nantucket-gray)]" onClick={clearAll}>
               Clear all filters

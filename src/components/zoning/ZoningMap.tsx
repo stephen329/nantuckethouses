@@ -17,7 +17,8 @@ import {
 import { mapboxZoningFillColorExpression } from "@/lib/zoning-colors";
 import { reDistrictFillColorExpression, reDistrictPolygonsToBoundaryLines } from "@/lib/re-districts-map";
 
-export type ParcelBaseMapLayer = "tax_zoning" | "re_market_areas";
+/** Parcel fill + optional RE (MLS-style) market polygons under parcels. */
+export type ParcelBaseMapLayer = "tax_zoning" | "re_market_areas" | "none";
 
 export type ParcelProperties = {
   parcel_id?: string | null;
@@ -71,7 +72,7 @@ type ZoningMapProps = {
     | { id: number; lng: number; lat: number; zoom: number }
     | { id: number; bounds: { west: number; south: number; east: number; north: number } }
     | null;
-  /** LINK-style market polygons (RE_Districts). Shown when `parcelBaseLayer` is `re_market_areas`. */
+  /** MLS-style market polygons (RE_Districts). Shown when `parcelBaseLayer` is `re_market_areas`. */
   reDistrictsGeoJson?: FeatureCollection<Geometry, { Abbrv?: string; District?: string }> | null;
   parcelBaseLayer?: ParcelBaseMapLayer;
   /** Dim other market areas when set (Abbrv, e.g. SURF). */
@@ -207,10 +208,11 @@ function syncParcelAndReOverlay(
     map.setPaintProperty("parcels-fill", "fill-color", PARCEL_FILL_NEUTRAL);
     map.setPaintProperty("parcels-fill", "fill-opacity", 0);
   } else {
+    const zoningTint = opts.parcelBaseLayer === "tax_zoning" && opts.showZoningColors;
     map.setPaintProperty(
       "parcels-fill",
       "fill-color",
-      opts.showZoningColors ? mapboxZoningFillColorExpression() : PARCEL_FILL_NEUTRAL,
+      zoningTint ? mapboxZoningFillColorExpression() : PARCEL_FILL_NEUTRAL,
     );
     map.setPaintProperty("parcels-fill", "fill-opacity", PARCEL_FILL_OPACITY_HOVER);
   }

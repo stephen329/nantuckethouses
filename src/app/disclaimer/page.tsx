@@ -20,11 +20,6 @@ export default function DisclaimerPage() {
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg border border-[var(--cedar-shingle)]/20 p-6 sm:p-8 space-y-6 text-sm text-[var(--atlantic-navy)]/85 leading-relaxed">
-            <p>
-              This disclaimer is boilerplate content intended as a placeholder and should be reviewed with legal
-              counsel before final publication.
-            </p>
-
             <div>
               <h2 className="text-base text-[var(--atlantic-navy)] font-semibold mb-2">Market Information</h2>
               <p>
