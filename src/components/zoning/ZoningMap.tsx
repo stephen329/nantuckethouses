@@ -102,6 +102,13 @@ const PARCEL_OUTLINE_MIN_ZOOM = 15;
 /** Parcel fill when zoning colors are hidden (single tone over basemap). */
 const PARCEL_FILL_NEUTRAL = "#cbd5e1";
 
+/** MLS (RE) district polygon fill — scaled down 30% from prior tuning for a lighter overlay. */
+const RE_DISTRICT_FILL_OPACITY_SCALE = 0.7;
+const RE_DISTRICT_FILL_OPACITY_INITIAL = 0.55 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_DEFAULT = 0.62 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_HIGHLIGHT = 0.78 * RE_DISTRICT_FILL_OPACITY_SCALE;
+const RE_DISTRICT_FILL_OPACITY_DIM = 0.42 * RE_DISTRICT_FILL_OPACITY_SCALE;
+
 function listingOverlayLayerIds(map: mapboxgl.Map): string[] {
   const ids = [
     "rentals-clusters",
@@ -249,11 +256,11 @@ function syncParcelAndReOverlay(
       map.setPaintProperty("re-districts-fill", "fill-opacity", [
         "case",
         ["==", ["get", "Abbrv"], hi],
-        0.78,
-        0.42,
+        RE_DISTRICT_FILL_OPACITY_HIGHLIGHT,
+        RE_DISTRICT_FILL_OPACITY_DIM,
       ]);
     } else {
-      map.setPaintProperty("re-districts-fill", "fill-opacity", 0.62);
+      map.setPaintProperty("re-districts-fill", "fill-opacity", RE_DISTRICT_FILL_OPACITY_DEFAULT);
     }
   }
 }
@@ -1149,7 +1156,7 @@ export function ZoningMap({
             layout: { visibility: "none" },
             paint: {
               "fill-color": reDistrictFillColorExpression() as mapboxgl.ExpressionSpecification,
-              "fill-opacity": 0.55,
+              "fill-opacity": RE_DISTRICT_FILL_OPACITY_INITIAL,
             },
           },
           "parcels-fill",
