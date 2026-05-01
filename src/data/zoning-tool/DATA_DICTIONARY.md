@@ -1,0 +1,110 @@
+# Nantucket Tax Parcels - Data Dictionary (v1)
+
+- **Lot size:** Assessor `Shape_Area` is **US square feet** in this export. Older clean builds treated it as square meters and inflated `lot_area_sqft` by ~10.76×; the bundled `nantucket-tax-parcels.clean.geojson` was corrected in-repo from that legacy derivation (`lot_area_sqft ÷ 10.76391041671` → true sq ft, then acres and true m² recomputed).
+- Source: `/Users/stephenmaury/Downloads/GeojsonNantucketParcels.geojson`
+- Features: **14890**
+- Output: `/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/nantucket-tax-parcels.clean.geojson`
+
+## Normalized Fields
+
+- `parcel_id` (string): Parcel identifier used for lookup and joins.
+- `alt_parcel_id` (string): Alternate parcel identifier from assessor export.
+- `internal_id` (number|string): Assessor internal account identifier (`Internal_ID`).
+- `tax_map` (string): Parsed map component from `MAP_PAR_ID` (example: `42.3.4`).
+- `parcel` (string): Parsed parcel component from `MAP_PAR_ID` (example: `152`).
+- `zoning` (string): Normalized zoning district code (uppercased), sourced from `Land_Class` first then `Zoning`.
+- `zoning_color` (string): Hex color token for zoning map/tool UI.
+- `use` (string): Parcel use category.
+- `primary_use` (number|string): Primary use code from assessor data.
+- `land_use_code` (number|string): Land use classification code.
+- `street_number` (string): Street number of subject parcel.
+- `street_name` (string): Street name of subject parcel.
+- `location` (string): Display address; derived from street parts when missing.
+- `owner_name` (string): Owner/trust label from assessor export.
+- `co_owner_name` (string): Optional secondary owner.
+- `land_class` (string): Land class designation.
+- `utilities` (string): Utility availability/description field.
+- `shape_area_sq_m` (number): Lot area in **true** square meters (assessor `Shape_Area` is in US sq ft in this export, then converted).
+- `lot_area_sqft` (number): Lot size in square feet (from assessor `Shape_Area`).
+- `acreage` (number): Lot size in acres (`lot_area_sqft` ÷ 43,560).
+- `assessed_total` (number): Total assessed value.
+- `assessed_building` (number): Building-only assessed amount.
+- `assessed_outbuilding` (number): Outbuilding assessed amount.
+- `assessed_extra_features` (number): Extra-features assessed amount.
+- `assessed_improvements` (number): Combined improvements assessed amount.
+- `assessed_price_per_acre` (number): Derived valuation density for comps.
+- `source_fields` (string[]): Raw source columns used for this normalized record.
+
+## Raw Source Field Coverage
+
+- `Address_Line_1`: present in 14890 features; observed types: NoneType, str
+- `Address_Line_2`: present in 14890 features; observed types: NoneType, str
+- `Address_Line_3`: present in 14890 features; observed types: NoneType, str
+- `Alt_Parcel_ID`: present in 14890 features; observed types: NoneType, str
+- `Assessed`: present in 14890 features; observed types: NoneType, int
+- `BND_CHK`: present in 14890 features; observed types: NoneType, str
+- `City`: present in 14890 features; observed types: NoneType, str
+- `CoOwner_Full_Name`: present in 14890 features; observed types: NoneType, str
+- `Country`: present in 14890 features; observed types: NoneType, str
+- `Deed_Book`: present in 14890 features; observed types: NoneType, str
+- `Deed_Page`: present in 14890 features; observed types: NoneType, str
+- `Gis_ID`: present in 14890 features; observed types: NoneType, str
+- `Internal_ID`: present in 14890 features; observed types: NoneType, int
+- `Internet_Suppression`: present in 14890 features; observed types: NoneType, str
+- `LAST_EDIT`: present in 14890 features; observed types: int
+- `LND_USE_CODE`: present in 14890 features; observed types: NoneType, int
+- `LOC_ID`: present in 14890 features; observed types: str
+- `LOC_ID_ISL`: present in 14890 features; observed types: NoneType, str
+- `Land_Class`: present in 14890 features; observed types: NoneType, str
+- `Legal_Area`: present in 14890 features; observed types: NoneType, int
+- `Location`: present in 14890 features; observed types: NoneType, str
+- `Lot`: present in 14890 features; observed types: NoneType, int
+- `Lot_Cut`: present in 14890 features; observed types: NoneType, int
+- `MAP_NO`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID_1`: present in 14890 features; observed types: NoneType, str
+- `MAP_PAR_ID_X`: present in 14890 features; observed types: NoneType, float, int
+- `MAP_PAR_ID_Y`: present in 14890 features; observed types: NoneType, float, int
+- `MA_MAP_PAR_ID`: present in 14890 features; observed types: NoneType, str
+- `MBLU`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct_2`: present in 14890 features; observed types: NoneType, int
+- `Mixed_Use_Pct_3`: present in 14890 features; observed types: NoneType, int
+- `NO_MATCH`: present in 14890 features; observed types: str
+- `Nbhd`: present in 14890 features; observed types: NoneType, int
+- `NonDisclosure`: present in 14890 features; observed types: NoneType, str
+- `OBJECTID`: present in 14890 features; observed types: int
+- `OLD_GIS`: present in 14890 features; observed types: NoneType, int
+- `ORIG_FID`: present in 14890 features; observed types: NoneType, int
+- `Owner_Full_Name`: present in 14890 features; observed types: NoneType, str
+- `Owners_Name`: present in 14890 features; observed types: NoneType, str
+- `PLAN_ID`: present in 14890 features; observed types: NoneType, str
+- `POLY_TYPE`: present in 14890 features; observed types: str
+- `Parcel_City`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Id`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Name`: present in 14890 features; observed types: NoneType, int
+- `Parcel_State`: present in 14890 features; observed types: NoneType, str
+- `Parcel_Status`: present in 14890 features; observed types: NoneType, float, int
+- `Parcel_Total_Exemptions`: present in 14890 features; observed types: NoneType, int
+- `Parcel_Zip`: present in 14890 features; observed types: NoneType, int
+- `Primary_Use`: present in 14890 features; observed types: NoneType, int
+- `Rem_Cmplx_Num`: present in 14890 features; observed types: NoneType, int
+- `SOURCE`: present in 14890 features; observed types: str
+- `Sale_Price`: present in 14890 features; observed types: NoneType, int
+- `Shape_Area`: present in 14890 features; observed types: float
+- `Shape_Length`: present in 14890 features; observed types: float
+- `State`: present in 14890 features; observed types: NoneType, str
+- `Street_Name`: present in 14890 features; observed types: NoneType, str
+- `Street_Number`: present in 14890 features; observed types: NoneType, str
+- `TOWN_ID`: present in 14890 features; observed types: int
+- `Total_Assessed_Bldg`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Extra_Features`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Improvements`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Outbldg`: present in 14890 features; observed types: NoneType, int
+- `Total_Assessed_Parcel_Value`: present in 14890 features; observed types: NoneType, str
+- `Use`: present in 14890 features; observed types: NoneType, str
+- `Utilities`: present in 14890 features; observed types: NoneType, str
+- `Utilities_Desc`: present in 14890 features; observed types: NoneType, str
+- `Year_Built`: present in 14890 features; observed types: NoneType
+- `Zip`: present in 14890 features; observed types: NoneType, int
+- `Zoning`: present in 14890 features; observed types: NoneType, str

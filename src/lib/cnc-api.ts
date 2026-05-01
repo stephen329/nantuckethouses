@@ -14,6 +14,24 @@ export type CncListing = {
   PropertyType?: string;
   Slug?: string;
   link_id?: number;
+  /** Full mailing-style line from LINK (used for parcel / map matching). */
+  Address?: string;
+  link_images?: { url?: string; small_url?: string }[];
+  /** Lot area in square feet when LINK exposes it (preferred over interpreting `LotSizeAcres`). */
+  LotSizeSquareFeet?: number;
+  lot_size_square_feet?: number;
+  Lot_Size_Square_Feet?: number;
+  LotSizeAcres?: number;
+  YearBuilt?: number;
+  LivingArea?: number;
+  BuildingAreaTotal?: number;
+  PublicRemarks?: string;
+  LINK_descr?: string;
+  TitleTag?: string;
+  View?: string[];
+  /** Listing brokerage / office (RESO-style when CNC exposes it). */
+  ListOfficeName?: string;
+  ListOfficeFullName?: string;
 };
 
 type CncListingsResponse = {

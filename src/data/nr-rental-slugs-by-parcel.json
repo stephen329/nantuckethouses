@@ -1,0 +1,13 @@
+{
+  "source": "https://api.nantucketrentals.com/api/property/nrproperty-listing/ (active) × nantucket-tax-parcels.clean.geojson — regenerate with scripts/build_nr_rental_slugs_by_parcel.py; includes verified NR nrPropertyId 118 (6 Weymouth St → 55.4.1 22).",
+  "listingCount": 6,
+  "matchedParcelCount": 6,
+  "slugByParcelId": {
+    "40 114": "stunning-custom-built-nantucket-home",
+    "41 850": "13a-gingy-lane",
+    "55.4.1 22": "lovely-nantucket-home-located-near-town-2",
+    "68 661": "prime-location-home-just-one-mile-from",
+    "73.4.2 103": "25-king-street",
+    "80 10": "3-bedroom-home-on-3-acres-2"
+  }
+}

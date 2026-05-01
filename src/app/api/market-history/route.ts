@@ -9,6 +9,7 @@ type MonthlyData = {
   avgPrice: number;
   soldCount: number;
   medianDaysOnMarket: number;
+  saleToListRatio: number | null;
 };
 
 const monthNames = [
@@ -24,6 +25,8 @@ const monthNames = [
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const years = parseInt(searchParams.get("years") ?? "3");
+  const propertyType = searchParams.get("propertyType");
+  const neighborhood = searchParams.get("neighborhood");
 
   try {
     const daysBack = years * 365;
@@ -33,13 +36,25 @@ export async function GET(request: Request) {
       close_date: daysBack,
     });
 
+    const filteredSoldListings = soldListings.filter((listing) => {
+      const propertyOk =
+        !propertyType ||
+        propertyType === "all" ||
+        (listing.PropertyType ?? "").toLowerCase().includes(propertyType.toLowerCase());
+      const neighborhoodOk =
+        !neighborhood ||
+        neighborhood === "all" ||
+        (listing.MLSAreaMajor ?? "").toLowerCase() === neighborhood.toLowerCase();
+      return propertyOk && neighborhoodOk;
+    });
+
     // Group by month using CloseDate
     const monthBuckets: Record<
       string,
-      { prices: number[]; domValues: number[] }
+      { prices: number[]; domValues: number[]; saleToListRatios: number[] }
     > = {};
 
-    for (const listing of soldListings) {
+    for (const listing of filteredSoldListings) {
       if (!listing.CloseDate || !listing.ClosePrice) continue;
 
       const closeDate = new Date(listing.CloseDate);
@@ -48,9 +63,14 @@ export async function GET(request: Request) {
       const monthKey = `${y}-${String(m + 1).padStart(2, "0")}`;
 
       if (!monthBuckets[monthKey]) {
-        monthBuckets[monthKey] = { prices: [], domValues: [] };
+        monthBuckets[monthKey] = { prices: [], domValues: [], saleToListRatios: [] };
       }
       monthBuckets[monthKey].prices.push(listing.ClosePrice);
+      if (listing.ListPrice && listing.ListPrice > 0) {
+        monthBuckets[monthKey].saleToListRatios.push(
+          (listing.ClosePrice / listing.ListPrice) * 100,
+        );
+      }
 
       if (listing.OnMarketDate) {
         const dom = daysBetween(listing.OnMarketDate, listing.CloseDate);
@@ -73,6 +93,7 @@ export async function GET(request: Request) {
           avgPrice: average(bucket.prices) ?? 0,
           soldCount: bucket.prices.length,
           medianDaysOnMarket: median(bucket.domValues) ?? 0,
+          saleToListRatio: average(bucket.saleToListRatios),
         };
       })
       .sort((a, b) => a.monthKey.localeCompare(b.monthKey));
@@ -81,9 +102,9 @@ export async function GET(request: Request) {
       return NextResponse.json({
         data: history,
         isFallback: false,
-        totalSold: soldListings.length,
+        totalSold: filteredSoldListings.length,
         overallMedianPrice: median(
-          soldListings
+          filteredSoldListings
             .map((l) => l.ClosePrice)
             .filter((p): p is number => typeof p === "number" && p > 0)
         ),
@@ -151,6 +172,7 @@ function generateFallbackHistory(years: number): MonthlyData[] {
         medianDaysOnMarket: Math.round(
           90 + (1 - seasonalMultipliers[m]) * 60 + Math.random() * 30
         ),
+        saleToListRatio: Math.round((89 + (Math.random() - 0.5) * 8) * 10) / 10,
       });
     }
   }
