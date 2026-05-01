@@ -39,11 +39,13 @@ import {
 } from "@/lib/nr-vacation-rental-url";
 import {
   applyRentalFilters,
+  buildMapAppliedFilterChips,
   countActiveLinkFilters,
   countActiveRentalFilters,
   DEFAULT_LINK_FILTERS,
   DEFAULT_RENTAL_FILTERS,
   filterLinkFeatureCollection,
+  removeMapAppliedFilterChip,
   type LinkFiltersState,
   type PropertyMapMode,
   type RentalFiltersState,
@@ -486,7 +488,8 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     setSelectedRental(null);
     setSelectedLink(null);
     setRentalFilters({ ...DEFAULT_RENTAL_FILTERS });
-    setLinkFilters({ ...DEFAULT_LINK_FILTERS });
+    const soldInLastDefault = mapModes.includes("sold") ? ("30d" as const) : ("" as const);
+    setLinkFilters({ ...DEFAULT_LINK_FILTERS, soldInLast: soldInLastDefault });
   }, [mapModes]);
 
   const setMapModesAndUrl = useCallback(
@@ -666,6 +669,18 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
     const showLink = hasSaleMode || hasSoldMode;
     return (showRent ? countActiveRentalFilters(rentalFilters) : 0) + (showLink ? countActiveLinkFilters(linkFilters) : 0);
   }, [hasRentMode, hasSaleMode, hasSoldMode, rentalFilters, linkFilters]);
+
+  const appliedFilterChips = useMemo(
+    () =>
+      buildMapAppliedFilterChips({
+        rental: rentalFilters,
+        link: linkFilters,
+        showRent: hasRentMode,
+        showLink: hasSaleMode || hasSoldMode,
+        showSold: hasSoldMode,
+      }),
+    [rentalFilters, linkFilters, hasRentMode, hasSaleMode, hasSoldMode],
+  );
 
   useEffect(() => {
     if (!selectedRental) return;
@@ -1376,6 +1391,52 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                   </button>
                 ) : null}
               </div>
+
+              {hasListingTypeSelected && appliedFilterChips.length > 0 ? (
+                <div
+                  className="flex min-w-0 flex-wrap items-center gap-1.5 border-t border-[var(--cedar-shingle)]/10 pt-1.5 sm:pt-2"
+                  role="list"
+                  aria-label="Active map filters"
+                >
+                  {appliedFilterChips.map((chip) => (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      role="listitem"
+                      aria-label={`Remove filter: ${chip.label}`}
+                      className={cn(
+                        "inline-flex max-w-full items-center gap-1 rounded-full border py-0.5 pl-2.5 pr-1 text-[11px] font-medium leading-tight shadow-sm transition-colors",
+                        chip.source === "rental"
+                          ? "border-emerald-700/25 bg-emerald-50/95 text-emerald-950 hover:border-emerald-700/40 hover:bg-emerald-50"
+                          : "border-blue-700/25 bg-blue-50/95 text-blue-950 hover:border-blue-700/40 hover:bg-blue-50",
+                      )}
+                      onClick={() => {
+                        const { rental: nextR, link: nextL } = removeMapAppliedFilterChip(
+                          chip.id,
+                          rentalFilters,
+                          linkFilters,
+                        );
+                        setRentalFilters(nextR);
+                        setLinkFilters(nextL);
+                      }}
+                    >
+                      <span className="min-w-0 truncate">{chip.label}</span>
+                      <span
+                        className={cn(
+                          "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                          chip.source === "rental"
+                            ? "bg-emerald-700/15 text-emerald-900 hover:bg-emerald-700/25"
+                            : "bg-blue-700/15 text-blue-900 hover:bg-blue-700/25",
+                        )}
+                        aria-hidden
+                      >
+                        <X className="h-3 w-3" strokeWidth={2.5} />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
               <div className="hidden min-w-0 lg:block">
                 <PropertyMapDesktopLayerBar
                   showZoningColors={showZoningColors}

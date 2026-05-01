@@ -212,6 +212,147 @@ export function countActiveLinkFilters(f: LinkFiltersState): number {
   return n;
 }
 
+export type MapAppliedFilterChip = {
+  id: string;
+  source: "rental" | "link";
+  label: string;
+};
+
+function soldInLastPresetLabel(preset: LinkFiltersSoldInLast): string {
+  if (!preset) return "";
+  return LINK_FILTERS_SOLD_IN_LAST_OPTIONS.find((o) => o.value === preset)?.label ?? preset;
+}
+
+function removeLinkPropertyTypeKey(keys: LinkPropertyTypeKey[], k: LinkPropertyTypeKey): LinkPropertyTypeKey[] {
+  return keys.filter((x) => x !== k);
+}
+
+/** Toolbar chips for active vacation-rental / MLS filters (IDs consumed by `removeMapAppliedFilterChip`). */
+export function buildMapAppliedFilterChips(params: {
+  rental: RentalFiltersState;
+  link: LinkFiltersState;
+  showRent: boolean;
+  showLink: boolean;
+  showSold: boolean;
+}): MapAppliedFilterChip[] {
+  const { rental: r, link: l, showRent, showLink, showSold } = params;
+  const chips: MapAppliedFilterChip[] = [];
+
+  if (showRent) {
+    if (r.minRate.trim() || r.maxRate.trim()) {
+      const a = r.minRate.trim() ? `$${r.minRate.trim()}` : "Any";
+      const b = r.maxRate.trim() ? `$${r.maxRate.trim()}` : "Any";
+      chips.push({ id: "rent:rate", source: "rental", label: `Rate (${r.ratePeriod}): ${a} – ${b}` });
+    }
+    if (r.beachDistance === "walk") chips.push({ id: "rent:beach", source: "rental", label: "Walk to beach" });
+    if (r.beachDistance === "not_walk") chips.push({ id: "rent:beach", source: "rental", label: "Not walk-to-beach" });
+    if (r.minBedrooms.trim()) chips.push({ id: "rent:beds", source: "rental", label: `Beds ≥ ${r.minBedrooms}` });
+    if (r.minBaths.trim()) chips.push({ id: "rent:baths", source: "rental", label: `Baths ≥ ${r.minBaths}` });
+    if (r.minOccupancy.trim()) chips.push({ id: "rent:occ", source: "rental", label: `Sleeps ≥ ${r.minOccupancy}` });
+    if (r.pool) chips.push({ id: "rent:pool", source: "rental", label: "Pool" });
+    if (r.waterfront) chips.push({ id: "rent:water", source: "rental", label: "Waterfront / water view" });
+    if (r.petFriendly) chips.push({ id: "rent:pets", source: "rental", label: "Pet-friendly" });
+    if (r.renovated) chips.push({ id: "rent:reno", source: "rental", label: "Renovated / like-new" });
+    if (r.townWalk) chips.push({ id: "rent:town", source: "rental", label: "Walk to Town" });
+  }
+
+  if (showLink) {
+    if (l.pricePreset === "1-3") chips.push({ id: "link:price:preset", source: "link", label: "Price: $1M – $3M" });
+    else if (l.pricePreset === "3-6") chips.push({ id: "link:price:preset", source: "link", label: "Price: $3M – $6M" });
+    else if (l.pricePreset === "6+") chips.push({ id: "link:price:preset", source: "link", label: "Price: $6M+" });
+    else if (l.minPrice.trim() || l.maxPrice.trim()) {
+      const a = l.minPrice.trim() ? l.minPrice.trim() : "Any";
+      const b = l.maxPrice.trim() ? l.maxPrice.trim() : "Any";
+      chips.push({ id: "link:price:custom", source: "link", label: `List price: ${a} – ${b}` });
+    }
+    if (l.minBeds.trim()) chips.push({ id: "link:beds", source: "link", label: `Beds ≥ ${l.minBeds}` });
+    if (l.minBaths.trim()) chips.push({ id: "link:baths", source: "link", label: `Baths ≥ ${l.minBaths}` });
+    if (l.minLotAcres.trim()) chips.push({ id: "link:lot", source: "link", label: `Lot ≥ ${l.minLotAcres} ac` });
+    if (l.newConstruction) chips.push({ id: "link:new", source: "link", label: "New construction" });
+    if (l.waterfront) chips.push({ id: "link:water", source: "link", label: "Waterfront" });
+    if (l.pool) chips.push({ id: "link:pool", source: "link", label: "Pool" });
+    for (const k of l.propertyTypes) {
+      const lab = LINK_PROPERTY_TYPE_LABELS.find((x) => x.key === k)?.label ?? k;
+      chips.push({ id: `link:ptype:${k}`, source: "link", label: lab });
+    }
+    if (showSold && l.soldInLast) {
+      chips.push({
+        id: "link:soldInLast",
+        source: "link",
+        label: `Sold: last ${soldInLastPresetLabel(l.soldInLast)}`,
+      });
+    }
+    if (l.minDom.trim()) chips.push({ id: "link:domMin", source: "link", label: `DOM ≥ ${l.minDom}` });
+    if (l.maxDom.trim()) chips.push({ id: "link:domMax", source: "link", label: `DOM ≤ ${l.maxDom}` });
+    if (l.maxPricePerSqft.trim()) chips.push({ id: "link:ppsf", source: "link", label: `≤ $${l.maxPricePerSqft.trim()}/sq ft` });
+  }
+
+  return chips;
+}
+
+/** Apply a single chip removal (toolbar dismiss). */
+export function removeMapAppliedFilterChip(
+  chipId: string,
+  rental: RentalFiltersState,
+  link: LinkFiltersState,
+): { rental: RentalFiltersState; link: LinkFiltersState } {
+  let r = { ...rental };
+  let l = { ...link };
+
+  if (chipId === "rent:rate") {
+    r = { ...r, minRate: "", maxRate: "" };
+  } else if (chipId === "rent:beach") {
+    r = { ...r, beachDistance: "any" };
+  } else if (chipId === "rent:beds") {
+    r = { ...r, minBedrooms: "" };
+  } else if (chipId === "rent:baths") {
+    r = { ...r, minBaths: "" };
+  } else if (chipId === "rent:occ") {
+    r = { ...r, minOccupancy: "" };
+  } else if (chipId === "rent:pool") {
+    r = { ...r, pool: false };
+  } else if (chipId === "rent:water") {
+    r = { ...r, waterfront: false };
+  } else if (chipId === "rent:pets") {
+    r = { ...r, petFriendly: false };
+  } else if (chipId === "rent:reno") {
+    r = { ...r, renovated: false };
+  } else if (chipId === "rent:town") {
+    r = { ...r, townWalk: false };
+  } else if (chipId === "link:price:preset") {
+    l = { ...l, pricePreset: "", minPrice: "", maxPrice: "" };
+  } else if (chipId === "link:price:custom") {
+    l = { ...l, minPrice: "", maxPrice: "" };
+  } else if (chipId === "link:beds") {
+    l = { ...l, minBeds: "" };
+  } else if (chipId === "link:baths") {
+    l = { ...l, minBaths: "" };
+  } else if (chipId === "link:lot") {
+    l = { ...l, minLotAcres: "" };
+  } else if (chipId === "link:new") {
+    l = { ...l, newConstruction: false };
+  } else if (chipId === "link:water") {
+    l = { ...l, waterfront: false };
+  } else if (chipId === "link:pool") {
+    l = { ...l, pool: false };
+  } else if (chipId === "link:soldInLast") {
+    l = { ...l, soldInLast: "" };
+  } else if (chipId === "link:domMin") {
+    l = { ...l, minDom: "" };
+  } else if (chipId === "link:domMax") {
+    l = { ...l, maxDom: "" };
+  } else if (chipId === "link:ppsf") {
+    l = { ...l, maxPricePerSqft: "" };
+  } else if (chipId.startsWith("link:ptype:")) {
+    const k = chipId.slice("link:ptype:".length) as LinkPropertyTypeKey;
+    if (k === "houses" || k === "land" || k === "commercial") {
+      l = { ...l, propertyTypes: removeLinkPropertyTypeKey(l.propertyTypes, k) };
+    }
+  }
+
+  return { rental: r, link: l };
+}
+
 export function applyRentalFilters(results: NrMapRentalResult[], f: RentalFiltersState): NrMapRentalResult[] {
   const minR = parseMoney(f.minRate);
   const maxR = parseMoney(f.maxRate);
