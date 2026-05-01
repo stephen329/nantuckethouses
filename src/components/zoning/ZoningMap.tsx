@@ -15,7 +15,11 @@ import {
   parseMapViewFromSearchParams,
 } from "@/lib/map-view-url";
 import { mapboxZoningFillColorExpression } from "@/lib/zoning-colors";
-import { reDistrictFillColorExpression, reDistrictPolygonsToBoundaryLines } from "@/lib/re-districts-map";
+import {
+  reDistrictFillColorExpression,
+  reDistrictPolygonsToBoundaryLines,
+  reDistrictPolygonsToLabelPoints,
+} from "@/lib/re-districts-map";
 
 /** Parcel fill + optional RE (MLS-style) market polygons under parcels. */
 export type ParcelBaseMapLayer = "tax_zoning" | "re_market_areas" | "none";
@@ -228,6 +232,9 @@ function syncParcelAndReOverlay(
   }
   if (map.getLayer("re-districts-outline")) {
     map.setLayoutProperty("re-districts-outline", "visibility", "none");
+  }
+  if (map.getLayer("re-districts-label")) {
+    map.setLayoutProperty("re-districts-label", "visibility", showReOverlay ? "visible" : "none");
   }
   if (showReOverlay) {
     const hi = (opts.highlightedReDistrictAbbrv ?? "").trim();
@@ -1041,6 +1048,73 @@ export function ZoningMap({
       const boundaryLines = reDistrictPolygonsToBoundaryLines(
         data as FeatureCollection<Geometry, Record<string, unknown>>,
       );
+      const labelPoints = reDistrictPolygonsToLabelPoints(
+        data as FeatureCollection<Geometry, Record<string, unknown>>,
+      );
+
+      const upsertReDistrictLabelLayer = () => {
+        const textField: mapboxgl.ExpressionSpecification = [
+          "case",
+          [">", ["length", ["coalesce", ["get", "District"], ""]], 0],
+          ["get", "District"],
+          ["coalesce", ["get", "Abbrv"], ""],
+        ];
+        if (!map.getSource("re-districts-labels")) {
+          map.addSource("re-districts-labels", { type: "geojson", data: labelPoints });
+          map.addLayer(
+            {
+              id: "re-districts-label",
+              type: "symbol",
+              source: "re-districts-labels",
+              minzoom: 10,
+              layout: {
+                visibility: "none",
+                "text-field": textField,
+                "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 12, 11, 14, 12.5, 16, 13.5],
+                "text-allow-overlap": true,
+                "text-padding": 4,
+              },
+              paint: {
+                "text-color": "#0f172a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 3,
+                "text-halo-blur": 0.35,
+                "text-opacity": ["interpolate", ["linear"], ["zoom"], 9.5, 0, 10, 1],
+              },
+            },
+            "parcels-fill",
+          );
+        } else {
+          (map.getSource("re-districts-labels") as mapboxgl.GeoJSONSource).setData(labelPoints);
+          if (!map.getLayer("re-districts-label")) {
+            map.addLayer(
+              {
+                id: "re-districts-label",
+                type: "symbol",
+                source: "re-districts-labels",
+                minzoom: 10,
+                layout: {
+                  visibility: "none",
+                  "text-field": textField,
+                  "text-font": ["DIN Offc Pro Bold", "Arial Unicode MS Bold"],
+                  "text-size": ["interpolate", ["linear"], ["zoom"], 10, 10, 12, 11, 14, 12.5, 16, 13.5],
+                  "text-allow-overlap": true,
+                  "text-padding": 4,
+                },
+                paint: {
+                  "text-color": "#0f172a",
+                  "text-halo-color": "#ffffff",
+                  "text-halo-width": 3,
+                  "text-halo-blur": 0.35,
+                  "text-opacity": ["interpolate", ["linear"], ["zoom"], 9.5, 0, 10, 1],
+                },
+              },
+              "parcels-fill",
+            );
+          }
+        }
+      };
 
       if (!map.getSource("re-districts")) {
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
@@ -1077,6 +1151,7 @@ export function ZoningMap({
           },
           "parcels-sold-outline",
         );
+        upsertReDistrictLabelLayer();
       } else {
         (map.getSource("re-districts") as mapboxgl.GeoJSONSource).setData(data);
         let lineSrc = map.getSource("re-districts-boundaries") as mapboxgl.GeoJSONSource | undefined;
@@ -1111,6 +1186,7 @@ export function ZoningMap({
           );
         }
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
+        upsertReDistrictLabelLayer();
       }
       syncParcelAndReOverlay(map, {
         showZoningColors: showZoningColorsRef.current,

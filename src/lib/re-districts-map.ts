@@ -1,4 +1,4 @@
-import type { Feature, FeatureCollection, Geometry, LineString, MultiPolygon, Polygon } from "geojson";
+import type { Feature, FeatureCollection, Geometry, LineString, MultiPolygon, Point, Polygon } from "geojson";
 
 /**
  * Mapbox `line` layers only render LineString / MultiLineString — not Polygon rings.
@@ -31,6 +31,83 @@ export function reDistrictPolygonsToBoundaryLines<P extends Record<string, unkno
             geometry: { type: "LineString", coordinates: ring },
           });
         }
+      }
+    }
+  }
+  return { type: "FeatureCollection", features };
+}
+
+/** Shoelace centroid of one ring (lng/lat); falls back to vertex average for degenerate rings. */
+function centroidOfRingLngLat(ring: number[][]): [number, number] {
+  const n = ring.length;
+  if (n < 3) return [(ring[0]?.[0] ?? 0) as number, (ring[0]?.[1] ?? 0) as number];
+  let twice = 0;
+  let cx = 0;
+  let cy = 0;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const p = ring[i]!;
+    const q = ring[j]!;
+    const cr = q[0] * p[1] - p[0] * q[1];
+    twice += cr;
+    cx += (p[0] + q[0]) * cr;
+    cy += (p[1] + q[1]) * cr;
+  }
+  if (Math.abs(twice) < 1e-18) {
+    let sx = 0;
+    let sy = 0;
+    let c = 0;
+    for (const pt of ring) {
+      if (pt.length >= 2) {
+        sx += pt[0];
+        sy += pt[1];
+        c += 1;
+      }
+    }
+    return c ? [sx / c, sy / c] : [0, 0];
+  }
+  const a = twice / 2;
+  return [cx / (6 * a), cy / (6 * a)];
+}
+
+function ringBBoxAreaLngLat(ring: number[][]): number {
+  const b = ringBounds(ring);
+  if (!b) return 0;
+  return (b[2] - b[0]) * (b[3] - b[1]);
+}
+
+/**
+ * One Point feature per district (polygon centroid) for symbol labels.
+ * MultiPolygon: uses the exterior ring of the largest bbox sub-polygon.
+ */
+export function reDistrictPolygonsToLabelPoints<P extends Record<string, unknown>>(
+  fc: FeatureCollection<Geometry, P>,
+): FeatureCollection<Point, P> {
+  const features: Feature<Point, P>[] = [];
+  for (const f of fc.features) {
+    const props = (f.properties ?? {}) as P;
+    const g = f.geometry;
+    if (!g) continue;
+    if (g.type === "Polygon") {
+      const ring = g.coordinates[0];
+      if (ring?.length) {
+        const c = centroidOfRingLngLat(ring);
+        features.push({ type: "Feature", properties: props, geometry: { type: "Point", coordinates: c } });
+      }
+    } else if (g.type === "MultiPolygon") {
+      let bestRing: number[][] | null = null;
+      let bestA = -1;
+      for (const poly of g.coordinates) {
+        const ring = poly[0];
+        if (!ring?.length) continue;
+        const ar = ringBBoxAreaLngLat(ring);
+        if (ar > bestA) {
+          bestA = ar;
+          bestRing = ring;
+        }
+      }
+      if (bestRing) {
+        const c = centroidOfRingLngLat(bestRing);
+        features.push({ type: "Feature", properties: props, geometry: { type: "Point", coordinates: c } });
       }
     }
   }
