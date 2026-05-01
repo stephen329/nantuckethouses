@@ -223,6 +223,13 @@ const PARCEL_FILL_OPACITY_HOVER: mapboxgl.ExpressionSpecification = [
   0.62,
 ];
 
+/** `re-districts-boundary` must insert below parcel line work; prefer sold-outline slot when present. */
+function reDistrictBoundaryInsertBefore(map: mapboxgl.Map): string {
+  if (map.getLayer("parcels-sold-outline")) return "parcels-sold-outline";
+  if (map.getLayer("parcels-line")) return "parcels-line";
+  return "parcels-fill";
+}
+
 function syncParcelAndReOverlay(
   map: mapboxgl.Map,
   opts: {
@@ -976,6 +983,19 @@ export function ZoningMap({
       applySoldParcelHighlight(map);
 
       window.setTimeout(flushViewportSideEffects, 600);
+
+      /** First idle after base layers — MLS RE effect may attach on same tick; re-sync overlay visibility. */
+      map.once("idle", () => {
+        try {
+          syncParcelAndReOverlay(map, {
+            showZoningColors: showZoningColorsRef.current,
+            parcelBaseLayer: parcelBaseLayerRef.current,
+            highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+          });
+        } catch {
+          /* ignore */
+        }
+      });
     });
 
     mapRef.current = map;
@@ -1082,9 +1102,10 @@ export function ZoningMap({
     const ensureLayers = (): boolean => {
       if (cancelled) return false;
       if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return false;
-      const data = reDistrictsGeoJson;
-      if (!data) return true;
+      const data = reDistrictsGeoJsonRef.current;
+      if (!data?.features?.length) return false;
 
+      const boundaryBefore = reDistrictBoundaryInsertBefore(map);
       const boundaryLines = reDistrictPolygonsToBoundaryLines(
         data as FeatureCollection<Geometry, Record<string, unknown>>,
       );
@@ -1189,7 +1210,7 @@ export function ZoningMap({
               "line-opacity": 0.95,
             },
           },
-          "parcels-sold-outline",
+          boundaryBefore,
         );
         upsertReDistrictLabelLayer();
       } else {
@@ -1209,7 +1230,7 @@ export function ZoningMap({
         if (wrongSource) {
           map.removeLayer("re-districts-boundary");
         }
-        if (!map.getLayer("re-districts-boundary") && map.getLayer("parcels-sold-outline")) {
+        if (!map.getLayer("re-districts-boundary")) {
           map.addLayer(
             {
               id: "re-districts-boundary",
@@ -1222,7 +1243,7 @@ export function ZoningMap({
                 "line-opacity": 0.95,
               },
             },
-            "parcels-sold-outline",
+            boundaryBefore,
           );
         }
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
@@ -1237,30 +1258,49 @@ export function ZoningMap({
     };
 
     /**
-     * RE GeoJSON often finishes loading before the map `load` handler adds `parcels-fill`.
-     * Previously `ensureLayers` no-op'd with no retry, so MLS Areas stayed blank until another
-     * prop tick (e.g. toggling the overlay). Retry on `load` and `idle` until base layers exist.
+     * RE GeoJSON can resolve before `parcels-fill` exists, or `idle` can be scarce during motion.
+     * Use a short polling interval plus one-shot `load`/`idle` hooks until attach succeeds (bounded).
      */
-    let attachAttempts = 0;
-    const maxAttachAttempts = 48;
-    const scheduleAttachWhenReady = () => {
-      if (cancelled) return;
-      if (ensureLayers()) return;
-      attachAttempts += 1;
-      if (attachAttempts > maxAttachAttempts) return;
-      if (!map.isStyleLoaded()) {
-        map.once("load", scheduleAttachWhenReady);
-      } else {
-        map.once("idle", scheduleAttachWhenReady);
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let attempts = 0;
+    const maxAttempts = 80;
+
+    const tryAttach = (): boolean => {
+      if (cancelled) return true;
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = undefined;
+        return true;
       }
+      if (ensureLayers()) {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = undefined;
+        return true;
+      }
+      return false;
     };
 
-    scheduleAttachWhenReady();
+    const onStyleReady = () => {
+      tryAttach();
+    };
+
+    if (!tryAttach()) {
+      map.once("idle", onStyleReady);
+      map.once("load", onStyleReady);
+      intervalId = setInterval(() => {
+        if (tryAttach()) {
+          if (intervalId) clearInterval(intervalId);
+          intervalId = undefined;
+        }
+      }, 120);
+    }
 
     return () => {
       cancelled = true;
-      map.off("load", scheduleAttachWhenReady);
-      map.off("idle", scheduleAttachWhenReady);
+      map.off("idle", onStyleReady);
+      map.off("load", onStyleReady);
+      if (intervalId) clearInterval(intervalId);
     };
   }, [reDistrictsGeoJson, showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
