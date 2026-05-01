@@ -1,3 +1,24 @@
+/**
+ * Flatten Next.js App Router `searchParams` (page props) to a query string for map URL sync.
+ * Matches `useSearchParams().toString()` when the same keys are present.
+ */
+export function searchParamsRecordToQueryString(
+  sp: Record<string, string | string[] | undefined>,
+): string {
+  const u = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const v of value) {
+        if (v != null && v !== "") u.append(key, v);
+      }
+    } else if (value !== "") {
+      u.set(key, value);
+    }
+  }
+  return u.toString();
+}
+
 /** Default view when no `zoom` / `lat` / `lng` query params are present. */
 export const DEFAULT_MAP_CENTER: [number, number] = [-70.1, 41.28];
 export const DEFAULT_MAP_ZOOM = 13.5;

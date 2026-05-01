@@ -15,6 +15,7 @@ import {
 } from "@/lib/parcel-data";
 import recentSoldParcels from "@/data/recent-sold-parcels.json";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
+import { searchParamsRecordToQueryString } from "@/lib/map-view-url";
 
 type Params = {
   taxMap: string;
@@ -52,10 +53,13 @@ export async function generateMetadata({
 
 export default async function ParcelDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<Params>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { taxMap, parcel } = await params;
+  const mapViewUrlQuery = searchParamsRecordToQueryString(searchParams != null ? await searchParams : {});
   const record = await getParcelByMapAndParcel(taxMap, parcel);
   if (!record) notFound();
 
@@ -225,6 +229,7 @@ export default async function ParcelDetailPage({
             <div className="rounded-xl bg-white p-3">
               <p className="mb-2 text-sm font-medium text-[var(--atlantic-navy)]">Interactive Parcel Map</p>
               <ZoningMap
+                mapViewUrlQuery={mapViewUrlQuery}
                 geojson={mapData}
                 selectedParcelId={record.parcelId}
                 className="h-[260px] w-full rounded-xl"

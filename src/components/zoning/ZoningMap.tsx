@@ -5,7 +5,7 @@ import mapboxgl from "mapbox-gl";
 import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import type { LinkListingPinFeature, LinkListingPinProperties } from "@/lib/link-listings-parcel-match";
 import type { RentalPinFeature, RentalPinProperties } from "@/lib/nr-map-rentals";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "mapbox-gl/dist/mapbox-gl.css";
 import {
   applyMapViewToSearchParams,
@@ -87,6 +87,12 @@ type ZoningMapProps = {
   omniboxPreviewPoint?: { lng: number; lat: number } | null;
   /** Tap on map canvas with no parcel / pin / cluster hit (e.g. water, roads). */
   onMapNonFeatureInteraction?: () => void;
+  /**
+   * Current URL query string for `zoom`/`lat`/`lng` sync (e.g. `searchParams.toString()` from the parent).
+   * Passed from the parent so this component does not call `useSearchParams()` (avoids Next.js CSR bailout
+   * when the map is rendered outside a Suspense boundary, e.g. parcel detail tool page).
+   */
+  mapViewUrlQuery: string;
 };
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
@@ -394,10 +400,10 @@ export function ZoningMap({
   omniboxPreviewParcelId = null,
   omniboxPreviewPoint = null,
   onMapNonFeatureInteraction,
+  mapViewUrlQuery,
 }: ZoningMapProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const routerRef = useRef(router);
   const pathnameRef = useRef(pathname);
 
@@ -1415,7 +1421,7 @@ export function ZoningMap({
     }
   }, [selectedLinkListingId]);
 
-  const mapViewQueryKey = searchParams.toString();
+  const mapViewQueryKey = mapViewUrlQuery;
 
   useEffect(() => {
     const map = mapRef.current;

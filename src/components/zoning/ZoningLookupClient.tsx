@@ -1840,6 +1840,7 @@ export function ZoningLookupClient({ variant = "tool" }: { variant?: ZoningLooku
                 ) : null}
                 <div className="min-h-0 flex-1">
                   <ZoningMap
+                    mapViewUrlQuery={searchParams.toString()}
                     geojson={geojson}
                     selectedParcelId={selectedParcel?.parcel_id ?? null}
                     showZoningColors={showZoningColors}
