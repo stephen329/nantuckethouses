@@ -102,6 +102,46 @@ const PARCEL_OUTLINE_MIN_ZOOM = 15;
 /** Parcel fill when zoning colors are hidden (single tone over basemap). */
 const PARCEL_FILL_NEUTRAL = "#cbd5e1";
 
+/** Stretchable capsule for LINK price labels (`icon-text-fit: width`). */
+const LINK_ACTIVE_PILL_IMAGE_ID = "link-active-pill-blue";
+const LINK_ACTIVE_PILL_HEX = "#2563eb";
+const LINK_SOLD_PILL_IMAGE_ID = "link-sold-pill-gray";
+const LINK_SOLD_PILL_HEX = "#6b7280";
+
+function ensureLinkPillStretchImage(map: mapboxgl.Map, imageId: string, fillHex: string) {
+  if (map.hasImage(imageId)) return;
+  const w = 64;
+  const h = 32;
+  const r = h / 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.fillStyle = fillHex;
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(0, 0, w, h, r);
+  } else {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.moveTo(rr, 0);
+    ctx.arcTo(w, 0, w, h, rr);
+    ctx.arcTo(w, h, 0, h, rr);
+    ctx.arcTo(0, h, 0, 0, rr);
+    ctx.arcTo(0, 0, w, 0, rr);
+    ctx.closePath();
+  }
+  ctx.fill();
+  const img = ctx.getImageData(0, 0, w, h);
+  const midY = Math.floor(h / 2);
+  map.addImage(imageId, img, {
+    pixelRatio: 1,
+    content: [r, 0, w - r, h],
+    stretchX: [[r, w - r]],
+    stretchY: [[Math.max(0, midY - 1), Math.min(h, midY + 2)]],
+  });
+}
+
 /** MLS (RE) district polygon fill — scaled down 30% from prior tuning for a lighter overlay. */
 const RE_DISTRICT_FILL_OPACITY_SCALE = 0.7;
 const RE_DISTRICT_FILL_OPACITY_INITIAL = 0.55 * RE_DISTRICT_FILL_OPACITY_SCALE;
@@ -133,11 +173,9 @@ function listingOverlayLayerIds(map: mapboxgl.Map): string[] {
     "link-active-clusters",
     "link-active-count",
     "link-active-point",
-    "link-active-point-price",
     "link-sold-clusters",
     "link-sold-count",
     "link-sold-point",
-    "link-sold-point-price",
   ];
   return ids.filter((id) => !!map.getLayer(id));
 }
@@ -222,6 +260,13 @@ const PARCEL_FILL_OPACITY_HOVER: mapboxgl.ExpressionSpecification = [
   0.82,
   0.62,
 ];
+
+/** `re-districts-boundary` must insert below parcel line work; prefer sold-outline slot when present. */
+function reDistrictBoundaryInsertBefore(map: mapboxgl.Map): string {
+  if (map.getLayer("parcels-sold-outline")) return "parcels-sold-outline";
+  if (map.getLayer("parcels-line")) return "parcels-line";
+  return "parcels-fill";
+}
 
 function syncParcelAndReOverlay(
   map: mapboxgl.Map,
@@ -379,6 +424,16 @@ export function ZoningMap({
   const onLinkListingPinSelectRef = useRef(onLinkListingPinSelect);
   const showLinkPinsRef = useRef(showLinkPins);
   const reDistrictsGeoJsonRef = useRef(reDistrictsGeoJson);
+  const geojsonRef = useRef(geojson);
+  const onParcelSelectRef = useRef(onParcelSelect);
+
+  useEffect(() => {
+    geojsonRef.current = geojson ?? null;
+  }, [geojson]);
+
+  useEffect(() => {
+    onParcelSelectRef.current = onParcelSelect;
+  }, [onParcelSelect]);
 
   useEffect(() => {
     rentalGeoJsonRef.current = rentalGeoJson ?? null;
@@ -464,7 +519,7 @@ export function ZoningMap({
     map.on("load", () => {
       map.addSource("parcels", {
         type: "geojson",
-        data: geojson ?? { type: "FeatureCollection", features: [] },
+        data: geojsonRef.current ?? { type: "FeatureCollection", features: [] },
         promoteId: "parcel_id",
       });
 
@@ -633,7 +688,6 @@ export function ZoningMap({
         sourceId: string,
         clusterFill: string,
         clusterStroke: string,
-        pointFill: string,
         initialData: FeatureCollection<Point, LinkListingPinProperties>,
         priceMode: "active" | "sold",
       ) => {
@@ -671,61 +725,41 @@ export function ZoningMap({
           },
           paint: { "text-color": "#ffffff" },
         });
-        map.addLayer({
-          id: `${sourceId}-point`,
-          type: "circle",
-          source: sourceId,
-          filter: ["!", ["has", "point_count"]],
-          paint: {
-            "circle-color": pointFill,
-            "circle-radius": 7,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#ffffff",
-          },
-        });
+        const unclusteredFilter: mapboxgl.FilterSpecification = ["!", ["has", "point_count"]];
 
         const priceTextField: mapboxgl.ExpressionSpecification =
           priceMode === "active"
-            ? (["coalesce", ["get", "listPrice"], ""] as mapboxgl.ExpressionSpecification)
-            : ([
-                "case",
-                [">", ["length", ["coalesce", ["get", "closePrice"], ""]], 0],
-                ["get", "closePrice"],
-                ["coalesce", ["get", "listPrice"], ""],
-              ] as mapboxgl.ExpressionSpecification);
+            ? (["coalesce", ["get", "priceCompact"], ""] as mapboxgl.ExpressionSpecification)
+            : (["coalesce", ["get", "priceCompact"], "Sold"] as mapboxgl.ExpressionSpecification);
 
-        const priceFilter: mapboxgl.FilterSpecification =
+        const linkPillImageId = priceMode === "sold" ? LINK_SOLD_PILL_IMAGE_ID : LINK_ACTIVE_PILL_IMAGE_ID;
+        const linkPillFilter: mapboxgl.FilterSpecification =
           priceMode === "active"
-            ? (["all", ["!", ["has", "point_count"]], [">", ["length", ["coalesce", ["get", "listPrice"], ""]], 0]] as mapboxgl.FilterSpecification)
-            : ([
-                "all",
-                ["!", ["has", "point_count"]],
-                [
-                  "any",
-                  [">", ["length", ["coalesce", ["get", "closePrice"], ""]], 0],
-                  [">", ["length", ["coalesce", ["get", "listPrice"], ""]], 0],
-                ],
-              ] as mapboxgl.FilterSpecification);
+            ? (["all", unclusteredFilter, [">", ["length", ["coalesce", ["get", "priceCompact"], ""]], 0]] as mapboxgl.FilterSpecification)
+            : unclusteredFilter;
 
+        /** Active: blue capsule + `priceCompact`; sold: gray capsule + `priceCompact` / Sold. */
         map.addLayer({
-          id: `${sourceId}-point-price`,
+          id: `${sourceId}-point`,
           type: "symbol",
           source: sourceId,
-          minzoom: MIN_ZOOM_PIN_PRICE_LABEL,
-          filter: priceFilter,
+          filter: linkPillFilter,
           layout: {
+            "icon-image": linkPillImageId,
+            "icon-text-fit": "width",
+            "icon-text-fit-padding": [2, 2, 2, 2],
             "text-field": priceTextField,
             "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 10,
-            "text-offset": [0, 1.2],
-            "text-anchor": "top",
+            "text-size": 12,
+            "text-anchor": "center",
+            "icon-allow-overlap": false,
             "text-allow-overlap": false,
             "text-ignore-placement": false,
+            "icon-ignore-placement": false,
           },
           paint: {
             "text-color": "#ffffff",
-            "text-halo-color": pointFill,
-            "text-halo-width": 1.25,
+            "icon-opacity": 1,
           },
         });
 
@@ -746,17 +780,10 @@ export function ZoningMap({
           onLinkListingPinSelectRef.current?.(f as unknown as LinkListingPinFeature);
         };
         map.on("click", `${sourceId}-point`, onLinkPointClick);
-        map.on("click", `${sourceId}-point-price`, onLinkPointClick);
         map.on("mouseenter", `${sourceId}-point`, () => {
           map.getCanvas().style.cursor = "pointer";
         });
-        map.on("mouseenter", `${sourceId}-point-price`, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
         map.on("mouseleave", `${sourceId}-point`, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("mouseleave", `${sourceId}-point-price`, () => {
           map.getCanvas().style.cursor = "";
         });
         map.on("mouseenter", `${sourceId}-clusters`, () => {
@@ -768,19 +795,19 @@ export function ZoningMap({
       };
 
       if (showLinkPinsRef.current) {
+        ensureLinkPillStretchImage(map, LINK_ACTIVE_PILL_IMAGE_ID, LINK_ACTIVE_PILL_HEX);
         attachClusteredPool(
           "link-active",
           "#1d4ed8",
           "#bfdbfe",
-          "#2563eb",
           linkActiveGeoJsonRef.current ?? emptyLinkFc,
           "active",
         );
+        ensureLinkPillStretchImage(map, LINK_SOLD_PILL_IMAGE_ID, LINK_SOLD_PILL_HEX);
         attachClusteredPool(
           "link-sold",
-          "#475569",
-          "#e2e8f0",
-          "#94a3b8",
+          "#6b7280",
+          "#e5e7eb",
           linkSoldGeoJsonRef.current ?? emptyLinkFc,
           "sold",
         );
@@ -910,7 +937,7 @@ export function ZoningMap({
           });
         }
 
-        onParcelSelect(feature);
+        onParcelSelectRef.current(feature);
       });
 
       map.on("click", (e) => {
@@ -922,10 +949,8 @@ export function ZoningMap({
           "rentals-point-price",
           "rentals-clusters",
           "link-active-point",
-          "link-active-point-price",
           "link-active-clusters",
           "link-sold-point",
-          "link-sold-point-price",
           "link-sold-clusters",
         ] as const) {
           if (map.getLayer(id)) layers.push(id);
@@ -976,22 +1001,50 @@ export function ZoningMap({
       applySoldParcelHighlight(map);
 
       window.setTimeout(flushViewportSideEffects, 600);
+
+      /** First idle after base layers — MLS RE effect may attach on same tick; re-sync overlay visibility. */
+      map.once("idle", () => {
+        try {
+          syncParcelAndReOverlay(map, {
+            showZoningColors: showZoningColorsRef.current,
+            parcelBaseLayer: parcelBaseLayerRef.current,
+            highlightedReDistrictAbbrv: highlightedReDistrictAbbrvRef.current,
+          });
+        } catch {
+          /* ignore */
+        }
+      });
     });
 
     mapRef.current = map;
+    // Mount-once map: do not depend on `geojson` (parcel fetch) or the parcel click handler — that was
+    // destroying the Mapbox instance when parcels loaded, which dropped MLS RE layers without re-running attach.
     return () => {
       moveEndUrlCleanupRef.current?.();
       popupRef.current?.remove();
       map.remove();
       mapRef.current = null;
     };
-  }, [geojson, onParcelSelect]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getSource("parcels")) return;
-    const source = map.getSource("parcels") as mapboxgl.GeoJSONSource;
-    source.setData(geojson ?? { type: "FeatureCollection", features: [] });
+    if (!map) return;
+    const data = geojson ?? { type: "FeatureCollection", features: [] };
+    const apply = () => {
+      const source = map.getSource("parcels") as mapboxgl.GeoJSONSource | undefined;
+      if (!source) return false;
+      source.setData(data);
+      return true;
+    };
+    if (apply()) return;
+    const onMapLoad = () => {
+      apply();
+    };
+    map.once("load", onMapLoad);
+    return () => {
+      map.off("load", onMapLoad);
+    };
   }, [geojson]);
 
   useEffect(() => {
@@ -1082,9 +1135,10 @@ export function ZoningMap({
     const ensureLayers = (): boolean => {
       if (cancelled) return false;
       if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return false;
-      const data = reDistrictsGeoJson;
-      if (!data) return true;
+      const data = reDistrictsGeoJsonRef.current;
+      if (!data?.features?.length) return false;
 
+      const boundaryBefore = reDistrictBoundaryInsertBefore(map);
       const boundaryLines = reDistrictPolygonsToBoundaryLines(
         data as FeatureCollection<Geometry, Record<string, unknown>>,
       );
@@ -1189,7 +1243,7 @@ export function ZoningMap({
               "line-opacity": 0.95,
             },
           },
-          "parcels-sold-outline",
+          boundaryBefore,
         );
         upsertReDistrictLabelLayer();
       } else {
@@ -1209,7 +1263,7 @@ export function ZoningMap({
         if (wrongSource) {
           map.removeLayer("re-districts-boundary");
         }
-        if (!map.getLayer("re-districts-boundary") && map.getLayer("parcels-sold-outline")) {
+        if (!map.getLayer("re-districts-boundary")) {
           map.addLayer(
             {
               id: "re-districts-boundary",
@@ -1222,7 +1276,7 @@ export function ZoningMap({
                 "line-opacity": 0.95,
               },
             },
-            "parcels-sold-outline",
+            boundaryBefore,
           );
         }
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
@@ -1237,30 +1291,49 @@ export function ZoningMap({
     };
 
     /**
-     * RE GeoJSON often finishes loading before the map `load` handler adds `parcels-fill`.
-     * Previously `ensureLayers` no-op'd with no retry, so MLS Areas stayed blank until another
-     * prop tick (e.g. toggling the overlay). Retry on `load` and `idle` until base layers exist.
+     * RE GeoJSON can resolve before `parcels-fill` exists, or `idle` can be scarce during motion.
+     * Use a short polling interval plus one-shot `load`/`idle` hooks until attach succeeds (bounded).
      */
-    let attachAttempts = 0;
-    const maxAttachAttempts = 48;
-    const scheduleAttachWhenReady = () => {
-      if (cancelled) return;
-      if (ensureLayers()) return;
-      attachAttempts += 1;
-      if (attachAttempts > maxAttachAttempts) return;
-      if (!map.isStyleLoaded()) {
-        map.once("load", scheduleAttachWhenReady);
-      } else {
-        map.once("idle", scheduleAttachWhenReady);
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let attempts = 0;
+    const maxAttempts = 80;
+
+    const tryAttach = (): boolean => {
+      if (cancelled) return true;
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = undefined;
+        return true;
       }
+      if (ensureLayers()) {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = undefined;
+        return true;
+      }
+      return false;
     };
 
-    scheduleAttachWhenReady();
+    const onStyleReady = () => {
+      tryAttach();
+    };
+
+    if (!tryAttach()) {
+      map.once("idle", onStyleReady);
+      map.once("load", onStyleReady);
+      intervalId = setInterval(() => {
+        if (tryAttach()) {
+          if (intervalId) clearInterval(intervalId);
+          intervalId = undefined;
+        }
+      }, 120);
+    }
 
     return () => {
       cancelled = true;
-      map.off("load", scheduleAttachWhenReady);
-      map.off("idle", scheduleAttachWhenReady);
+      map.off("idle", onStyleReady);
+      map.off("load", onStyleReady);
+      if (intervalId) clearInterval(intervalId);
     };
   }, [reDistrictsGeoJson, showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
@@ -1317,30 +1390,28 @@ export function ZoningMap({
     const map = mapRef.current;
     const sel = selectedLinkListingId ?? "__none__";
     for (const base of ["link-active", "link-sold"] as const) {
-      const pointHalo = base === "link-active" ? "#2563eb" : "#94a3b8";
       const lid = `${base}-point`;
       if (!map?.getLayer(lid)) continue;
-      map.setPaintProperty(lid, "circle-stroke-color", [
+      const layer = map.getLayer(lid);
+      if (layer?.type !== "symbol") continue;
+      map.setPaintProperty(lid, "text-halo-color", [
         "case",
         ["==", ["get", "linkId"], sel],
         "#0f172a",
-        "#ffffff",
+        "rgba(255,255,255,0)",
       ]);
-      map.setPaintProperty(lid, "circle-stroke-width", [
+      map.setPaintProperty(lid, "text-halo-width", [
         "case",
         ["==", ["get", "linkId"], sel],
-        3,
-        2,
+        0.9,
+        0,
       ]);
-      const priceLid = `${base}-point-price`;
-      if (map.getLayer(priceLid)) {
-        map.setPaintProperty(priceLid, "text-halo-color", [
-          "case",
-          ["==", ["get", "linkId"], sel],
-          "#0f172a",
-          pointHalo,
-        ]);
-      }
+      map.setPaintProperty(lid, "text-halo-blur", [
+        "case",
+        ["==", ["get", "linkId"], sel],
+        0.1,
+        0,
+      ]);
     }
   }, [selectedLinkListingId]);
 

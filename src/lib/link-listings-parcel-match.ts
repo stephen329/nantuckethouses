@@ -20,6 +20,11 @@ export type LinkListingRow = {
   MlsStatus?: string;
   Slug?: string;
   link_images?: { url?: string; small_url?: string }[];
+  /** Lot area in square feet when LINK exposes it (preferred). */
+  LotSizeSquareFeet?: number;
+  /** Alternate keys seen on CNC / LINK payloads. */
+  lot_size_square_feet?: number;
+  Lot_Size_Square_Feet?: number;
   LotSizeAcres?: number;
   YearBuilt?: number;
   BedroomsTotal?: number;
@@ -33,6 +38,8 @@ export type LinkListingRow = {
   OnMarketDate?: string;
   LivingArea?: number;
   BuildingAreaTotal?: number;
+  ListOfficeName?: string;
+  ListOfficeFullName?: string;
 };
 
 export type LinkListingMapPoint = {
@@ -51,6 +58,8 @@ export type LinkListingMapPoint = {
   bedrooms: number | null;
   baths: number | null;
   lotAcres: number | null;
+  /** LINK-reported lot size in sq ft when present or inferred from feed fields. */
+  lotSizeSqft: number | null;
   waterfront: boolean;
   newConstruction: boolean;
   propertyType: string | null;
@@ -61,6 +70,12 @@ export type LinkListingMapPoint = {
   townWalkHint: boolean;
   /** Heuristic from remarks / marketing (not a dedicated MLS pool field). */
   hasPool: boolean;
+  /** MLS year built when present on the listing row. */
+  yearBuilt: number | null;
+  /** Public remarks / marketing copy (trimmed, length-capped for map payloads). */
+  listingDescription: string | null;
+  /** Listing office / firm name when present on the feed row. */
+  listOfficeName: string | null;
 };
 
 export type LinkListingPinProperties = {
@@ -71,12 +86,16 @@ export type LinkListingPinProperties = {
   listPriceNum: number;
   closePrice: string;
   closePriceNum: number;
+  /** Map pin label: `$###k` below $1M, else `$#.##M`; empty when price unknown. */
+  priceCompact: string;
   closeDate: string;
   thumbUrl: string | null;
   slug: string | null;
   bedrooms: number | null;
   baths: number | null;
   lotAcres: number | null;
+  /** LINK-reported lot size in sq ft (preferred over assessor for Parcel Size). */
+  lotSizeSqft: number | null;
   waterfront: boolean;
   newConstruction: boolean;
   propertyType: string | null;
@@ -86,6 +105,9 @@ export type LinkListingPinProperties = {
   renoHint: boolean;
   townWalkHint: boolean;
   hasPool: boolean;
+  yearBuilt: number | null;
+  listingDescription: string | null;
+  listOfficeName: string | null;
   /** Parcel centroid pin — used for satellite hero when listing has no photo. */
   longitude?: number | null;
   latitude?: number | null;
@@ -100,6 +122,39 @@ function inBbox(lng: number, lat: number, west: number, south: number, east: num
 function formatMoney(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return "";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+}
+
+/** LINK map pin (active or sold): `$###k` below $1M, otherwise `$#.##M` (two decimals). */
+export function formatPriceCompactMapPin(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n) || n <= 0) return "";
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  const k = Math.round(n / 1000);
+  if (k <= 0) return "";
+  if (k >= 1000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  return `$${k}k`;
+}
+
+/**
+ * Lot size in square feet from LINK / CNC listing row.
+ * Prefer explicit `LotSizeSquareFeet`; otherwise interpret `LotSizeAcres` as acres when small,
+ * or as square feet when the value is large (feed sometimes stores sq ft in that field).
+ */
+/** MLS year built when present and plausible. */
+export function pickLinkYearBuiltFromRow(row: LinkListingRow): number | null {
+  const y = row.YearBuilt;
+  const maxY = new Date().getFullYear() + 2;
+  if (typeof y !== "number" || Number.isNaN(y) || y < 1600 || y > maxY) return null;
+  return Math.round(y);
+}
+
+export function pickLinkLotSqftFromRow(row: LinkListingRow): number | null {
+  const explicit =
+    row.LotSizeSquareFeet ?? row.lot_size_square_feet ?? row.Lot_Size_Square_Feet;
+  if (typeof explicit === "number" && !Number.isNaN(explicit) && explicit > 0) return Math.round(explicit);
+  const lot = row.LotSizeAcres;
+  if (lot == null || Number.isNaN(lot) || lot <= 0) return null;
+  if (lot > 300 && lot < 600_000) return Math.round(lot);
+  return Math.round(lot * 43_560);
 }
 
 function linkMarketingBlob(row: LinkListingRow): string {
@@ -142,6 +197,39 @@ function pickLivingAreaSqft(row: LinkListingRow): number | null {
   const bt = row.BuildingAreaTotal;
   if (typeof bt === "number" && !Number.isNaN(bt) && bt > 0) return bt;
   return null;
+}
+
+/** Cap remarks length for GeoJSON / in-memory map payloads. */
+const LINK_LISTING_DESCRIPTION_MAX = 800;
+
+function truncateListingText(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return `${s.slice(0, max - 1).trimEnd()}…`;
+}
+
+export function pickLinkDescriptionFromRow(row: LinkListingRow): string | null {
+  const raw = (row.PublicRemarks ?? row.LINK_descr ?? "").toString().replace(/\s+/g, " ").trim();
+  if (!raw) return null;
+  return truncateListingText(raw, LINK_LISTING_DESCRIPTION_MAX);
+}
+
+function strField(row: Record<string, unknown>, key: string): string | null {
+  const v = row[key];
+  if (typeof v !== "string") return null;
+  const t = v.trim();
+  return t.length ? t : null;
+}
+
+function pickListOfficeNameFromRow(row: LinkListingRow): string | null {
+  const r = row as Record<string, unknown>;
+  return (
+    row.ListOfficeName?.trim() ||
+    row.ListOfficeFullName?.trim() ||
+    strField(r, "OfficeName") ||
+    strField(r, "list_office_name") ||
+    strField(r, "CoListOfficeName") ||
+    null
+  );
 }
 
 /** Build first-match street key → centroid from parcel GeoJSON features. */
@@ -187,9 +275,17 @@ export function matchLinkListingToPoint(
   const thumb = img?.small_url ?? img?.url ?? null;
   const beds = row.BedroomsTotal;
   const bathsRaw = row.BathroomsTotalDecimal;
-  const lot = row.LotSizeAcres;
+  const lotSizeSqft = pickLinkLotSqftFromRow(row);
+  const lotRaw = row.LotSizeAcres;
+  const lotAcresOut =
+    lotSizeSqft != null && lotSizeSqft > 0
+      ? Math.round((lotSizeSqft / 43_560) * 10_000) / 10_000
+      : typeof lotRaw === "number" && !Number.isNaN(lotRaw) && lotRaw > 0
+        ? lotRaw
+        : null;
   const pt = String(row.PropertyType ?? "").trim();
   const area = String(row.MLSAreaMajor ?? "").trim();
+  const yearBuilt = pickLinkYearBuiltFromRow(row);
   return {
     linkId: id,
     parcel_id: String(hit.parcel_id).trim(),
@@ -204,7 +300,8 @@ export function matchLinkListingToPoint(
     slug: row.Slug ?? null,
     bedrooms: typeof beds === "number" && !Number.isNaN(beds) ? beds : null,
     baths: typeof bathsRaw === "number" && !Number.isNaN(bathsRaw) ? bathsRaw : null,
-    lotAcres: typeof lot === "number" && !Number.isNaN(lot) && lot > 0 ? lot : null,
+    lotAcres: lotAcresOut,
+    lotSizeSqft: lotSizeSqft != null && lotSizeSqft > 0 ? lotSizeSqft : null,
     waterfront: linkWaterfront(row),
     newConstruction: linkNewConstruction(row),
     propertyType: pt || null,
@@ -214,6 +311,9 @@ export function matchLinkListingToPoint(
     renoHint: linkRenovatedRecent(row),
     townWalkHint: linkTownWalkHint(row),
     hasPool: linkPoolHint(row),
+    yearBuilt,
+    listingDescription: pickLinkDescriptionFromRow(row),
+    listOfficeName: pickListOfficeNameFromRow(row),
   };
 }
 
@@ -248,6 +348,14 @@ export type ParcelMapLinkListingMatch = {
   propertyType: string | null;
   /** MLS bedrooms when present (for deep links to NR search). */
   bedrooms: number | null;
+  /** LINK lot size in sq ft when present on the matched listing (preferred for Parcel Size). */
+  lotSizeSqft: number | null;
+  /** MLS year built when present on the matched listing. */
+  yearBuilt: number | null;
+  livingAreaSqft: number | null;
+  baths: number | null;
+  listingDescription: string | null;
+  listOfficeName: string | null;
   /** Pin / parcel centroid (for map hero framing). */
   longitude?: number | null;
   latitude?: number | null;
@@ -267,6 +375,12 @@ export function parcelMapListingMatchFromMapPoint(p: LinkListingMapPoint): Parce
     mlsArea: p.mlsArea,
     propertyType: p.propertyType ?? null,
     bedrooms: p.bedrooms ?? null,
+    lotSizeSqft: p.lotSizeSqft != null && p.lotSizeSqft > 0 ? p.lotSizeSqft : null,
+    yearBuilt: p.yearBuilt != null && p.yearBuilt > 0 ? p.yearBuilt : null,
+    livingAreaSqft: p.livingAreaSqft != null && p.livingAreaSqft > 0 ? p.livingAreaSqft : null,
+    baths: p.baths != null && !Number.isNaN(p.baths) ? p.baths : null,
+    listingDescription: p.listingDescription?.trim() ? p.listingDescription : null,
+    listOfficeName: p.listOfficeName?.trim() ? p.listOfficeName : null,
     longitude: p.longitude,
     latitude: p.latitude,
   };
@@ -287,6 +401,12 @@ function featureToParcelMatch(f: Feature<Point, LinkListingPinProperties>): Parc
     mlsArea: p.mlsArea,
     propertyType: p.propertyType ?? null,
     bedrooms: p.bedrooms ?? null,
+    lotSizeSqft: p.lotSizeSqft != null && p.lotSizeSqft > 0 ? p.lotSizeSqft : null,
+    yearBuilt: p.yearBuilt != null && p.yearBuilt > 0 ? p.yearBuilt : null,
+    livingAreaSqft: p.livingAreaSqft != null && p.livingAreaSqft > 0 ? p.livingAreaSqft : null,
+    baths: p.baths != null && !Number.isNaN(p.baths) ? p.baths : null,
+    listingDescription: p.listingDescription?.trim() ? p.listingDescription : null,
+    listOfficeName: p.listOfficeName?.trim() ? p.listOfficeName : null,
     longitude: p.longitude ?? lng,
     latitude: p.latitude ?? lat,
   };
@@ -366,12 +486,23 @@ export function linkMapPointsToGeoJson(points: LinkListingMapPoint[]): FeatureCo
         listPriceNum: p.listPrice,
         closePrice: p.closePrice != null ? formatMoney(p.closePrice) : "",
         closePriceNum: p.closePrice != null && !Number.isNaN(p.closePrice) ? p.closePrice : 0,
+        priceCompact:
+          p.pool === "sold"
+            ? formatPriceCompactMapPin(
+                p.closePrice != null && !Number.isNaN(p.closePrice) && p.closePrice > 0
+                  ? p.closePrice
+                  : p.listPrice > 0
+                    ? p.listPrice
+                    : null,
+              )
+            : formatPriceCompactMapPin(p.listPrice > 0 ? p.listPrice : null),
         closeDate: p.closeDate ?? "",
         thumbUrl: p.thumbUrl,
         slug: p.slug,
         bedrooms: p.bedrooms,
         baths: p.baths,
         lotAcres: p.lotAcres,
+        lotSizeSqft: p.lotSizeSqft,
         waterfront: p.waterfront,
         newConstruction: p.newConstruction,
         propertyType: p.propertyType,
@@ -381,6 +512,9 @@ export function linkMapPointsToGeoJson(points: LinkListingMapPoint[]): FeatureCo
         renoHint: p.renoHint,
         townWalkHint: p.townWalkHint,
         hasPool: p.hasPool,
+        yearBuilt: p.yearBuilt,
+        listingDescription: p.listingDescription,
+        listOfficeName: p.listOfficeName,
         longitude: p.longitude,
         latitude: p.latitude,
       },

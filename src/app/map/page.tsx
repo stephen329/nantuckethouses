@@ -20,7 +20,7 @@ export default function PropertyMapPage() {
         </section>
       }
     >
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex max-h-[calc(100dvh-4rem)] min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <ZoningLookupClient variant="property-map" />
       </div>
     </Suspense>

@@ -1,5 +1,6 @@
 # Nantucket Tax Parcels - Data Dictionary (v1)
 
+- **Lot size:** Assessor `Shape_Area` is **US square feet** in this export. Older clean builds treated it as square meters and inflated `lot_area_sqft` by ~10.76×; the bundled `nantucket-tax-parcels.clean.geojson` was corrected in-repo from that legacy derivation (`lot_area_sqft ÷ 10.76391041671` → true sq ft, then acres and true m² recomputed).
 - Source: `/Users/stephenmaury/Downloads/GeojsonNantucketParcels.geojson`
 - Features: **14890**
 - Output: `/Users/stephenmaury/dev/nr-workspace/nantuckethouses/src/data/zoning-tool/nantucket-tax-parcels.clean.geojson`
@@ -23,9 +24,9 @@
 - `co_owner_name` (string): Optional secondary owner.
 - `land_class` (string): Land class designation.
 - `utilities` (string): Utility availability/description field.
-- `shape_area_sq_m` (number): Lot size in square meters (geometry area field).
-- `lot_area_sqft` (number): Derived lot size in square feet.
-- `acreage` (number): Derived lot size in acres.
+- `shape_area_sq_m` (number): Lot area in **true** square meters (assessor `Shape_Area` is in US sq ft in this export, then converted).
+- `lot_area_sqft` (number): Lot size in square feet (from assessor `Shape_Area`).
+- `acreage` (number): Lot size in acres (`lot_area_sqft` ÷ 43,560).
 - `assessed_total` (number): Total assessed value.
 - `assessed_building` (number): Building-only assessed amount.
 - `assessed_outbuilding` (number): Outbuilding assessed amount.
