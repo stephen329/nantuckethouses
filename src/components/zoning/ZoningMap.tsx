@@ -386,6 +386,16 @@ export function ZoningMap({
   const onLinkListingPinSelectRef = useRef(onLinkListingPinSelect);
   const showLinkPinsRef = useRef(showLinkPins);
   const reDistrictsGeoJsonRef = useRef(reDistrictsGeoJson);
+  const geojsonRef = useRef(geojson);
+  const onParcelSelectRef = useRef(onParcelSelect);
+
+  useEffect(() => {
+    geojsonRef.current = geojson ?? null;
+  }, [geojson]);
+
+  useEffect(() => {
+    onParcelSelectRef.current = onParcelSelect;
+  }, [onParcelSelect]);
 
   useEffect(() => {
     rentalGeoJsonRef.current = rentalGeoJson ?? null;
@@ -471,7 +481,7 @@ export function ZoningMap({
     map.on("load", () => {
       map.addSource("parcels", {
         type: "geojson",
-        data: geojson ?? { type: "FeatureCollection", features: [] },
+        data: geojsonRef.current ?? { type: "FeatureCollection", features: [] },
         promoteId: "parcel_id",
       });
 
@@ -917,7 +927,7 @@ export function ZoningMap({
           });
         }
 
-        onParcelSelect(feature);
+        onParcelSelectRef.current(feature);
       });
 
       map.on("click", (e) => {
@@ -999,19 +1009,34 @@ export function ZoningMap({
     });
 
     mapRef.current = map;
+    // Mount-once map: do not depend on `geojson` (parcel fetch) or the parcel click handler — that was
+    // destroying the Mapbox instance when parcels loaded, which dropped MLS RE layers without re-running attach.
     return () => {
       moveEndUrlCleanupRef.current?.();
       popupRef.current?.remove();
       map.remove();
       mapRef.current = null;
     };
-  }, [geojson, onParcelSelect]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.getSource("parcels")) return;
-    const source = map.getSource("parcels") as mapboxgl.GeoJSONSource;
-    source.setData(geojson ?? { type: "FeatureCollection", features: [] });
+    if (!map) return;
+    const data = geojson ?? { type: "FeatureCollection", features: [] };
+    const apply = () => {
+      const source = map.getSource("parcels") as mapboxgl.GeoJSONSource | undefined;
+      if (!source) return false;
+      source.setData(data);
+      return true;
+    };
+    if (apply()) return;
+    const onMapLoad = () => {
+      apply();
+    };
+    map.once("load", onMapLoad);
+    return () => {
+      map.off("load", onMapLoad);
+    };
   }, [geojson]);
 
   useEffect(() => {
