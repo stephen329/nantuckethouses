@@ -109,6 +109,21 @@ const RE_DISTRICT_FILL_OPACITY_DEFAULT = 0.62 * RE_DISTRICT_FILL_OPACITY_SCALE;
 const RE_DISTRICT_FILL_OPACITY_HIGHLIGHT = 0.78 * RE_DISTRICT_FILL_OPACITY_SCALE;
 const RE_DISTRICT_FILL_OPACITY_DIM = 0.42 * RE_DISTRICT_FILL_OPACITY_SCALE;
 
+/** Between-MLS-area borders — half the prior zoom-based line widths. */
+const RE_DISTRICT_BOUNDARY_LINE_WIDTH: mapboxgl.ExpressionSpecification = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  10,
+  1,
+  12,
+  1.5,
+  14,
+  2,
+  16,
+  2.75,
+];
+
 function listingOverlayLayerIds(map: mapboxgl.Map): string[] {
   const ids = [
     "rentals-clusters",
@@ -1170,7 +1185,7 @@ export function ZoningMap({
             layout: { visibility: "none" },
             paint: {
               "line-color": "#0f172a",
-              "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 12, 3, 14, 4, 16, 5.5],
+              "line-width": RE_DISTRICT_BOUNDARY_LINE_WIDTH,
               "line-opacity": 0.95,
             },
           },
@@ -1203,7 +1218,7 @@ export function ZoningMap({
               layout: { visibility: "none" },
               paint: {
                 "line-color": "#0f172a",
-                "line-width": ["interpolate", ["linear"], ["zoom"], 10, 2, 12, 3, 14, 4, 16, 5.5],
+                "line-width": RE_DISTRICT_BOUNDARY_LINE_WIDTH,
                 "line-opacity": 0.95,
               },
             },
