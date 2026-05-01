@@ -1001,10 +1001,14 @@ export function ZoningMap({
     const map = mapRef.current;
     if (!map || !reDistrictsGeoJson?.features?.length) return;
 
-    const ensureLayers = () => {
-      if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return;
+    let cancelled = false;
+
+    /** Returns true once MLS district sources/layers are in place (or already were). */
+    const ensureLayers = (): boolean => {
+      if (cancelled) return true;
+      if (!map.isStyleLoaded() || !map.getLayer("parcels-fill")) return false;
       const data = reDistrictsGeoJson;
-      if (!data) return;
+      if (!data) return true;
 
       const boundaryLines = reDistrictPolygonsToBoundaryLines(
         data as FeatureCollection<Geometry, Record<string, unknown>>,
@@ -1081,13 +1085,34 @@ export function ZoningMap({
         if (map.getLayer("re-districts-outline")) map.removeLayer("re-districts-outline");
       }
       syncParcelAndReOverlay(map, { showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv });
+      return true;
     };
 
-    if (map.isStyleLoaded()) ensureLayers();
-    else map.once("load", ensureLayers);
+    /**
+     * RE GeoJSON often finishes loading before the map `load` handler adds `parcels-fill`.
+     * Previously `ensureLayers` no-op'd with no retry, so MLS Areas stayed blank until another
+     * prop tick (e.g. toggling the overlay). Retry on `load` and `idle` until base layers exist.
+     */
+    let attachAttempts = 0;
+    const maxAttachAttempts = 48;
+    const scheduleAttachWhenReady = () => {
+      if (cancelled) return;
+      if (ensureLayers()) return;
+      attachAttempts += 1;
+      if (attachAttempts > maxAttachAttempts) return;
+      if (!map.isStyleLoaded()) {
+        map.once("load", scheduleAttachWhenReady);
+      } else {
+        map.once("idle", scheduleAttachWhenReady);
+      }
+    };
+
+    scheduleAttachWhenReady();
 
     return () => {
-      map.off("load", ensureLayers);
+      cancelled = true;
+      map.off("load", scheduleAttachWhenReady);
+      map.off("idle", scheduleAttachWhenReady);
     };
   }, [reDistrictsGeoJson, showZoningColors, parcelBaseLayer, highlightedReDistrictAbbrv]);
 
