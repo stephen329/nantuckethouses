@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchListings, CncListing, daysBetween } from "@/lib/cnc-api";
+import { formatListingTypeDisplay, listingTypOrPropertyType } from "@/lib/listing-type-labels";
 
 type SimplifiedListing = {
   mlsNumber: string;
@@ -78,6 +79,13 @@ export async function GET(request: Request) {
           if (dom < 0) dom = null;
         }
 
+        const bat =
+          typeof l.BuildingAreaTotal === "number" && l.BuildingAreaTotal > 0
+            ? String(Math.round(l.BuildingAreaTotal))
+            : null;
+        const acres =
+          typeof l.LotSizeAcres === "number" && l.LotSizeAcres > 0 ? l.LotSizeAcres : null;
+
         return {
           mlsNumber: String(l.link_id ?? ""),
           address: addressParts.join(" ") || "Address not available",
@@ -85,11 +93,11 @@ export async function GET(request: Request) {
           listPrice: l.ListPrice,
           bedrooms: l.BedroomsTotal ?? null,
           bathrooms: l.BathroomsTotalDecimal ?? null,
-          sqft: null, // Not available in link-listings-v2 response
-          propertyType: l.PropertyType ?? null,
-          lotAcres: null, // Not available in link-listings-v2 response
+          sqft: bat,
+          propertyType: formatListingTypeDisplay(listingTypOrPropertyType(l)) ?? l.PropertyType ?? null,
+          lotAcres: acres,
           daysOnMarket: dom,
-          photoCount: 0,
+          photoCount: Array.isArray(l.link_images) ? l.link_images.length : 0,
         };
       }
     );

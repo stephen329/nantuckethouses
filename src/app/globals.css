@@ -39,6 +39,12 @@
     background: var(--sandstone);
   }
 
+  /* Listing detail: monospace for numeric vitals (JetBrains Mono via next/font variable on root) */
+  .listing-detail-root .font-listing-mono {
+    font-family: var(--font-listing-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Immersive /map: lock scroll, hide global footer, let main fill viewport */
   html.map-route,
   body.map-route {
@@ -193,40 +199,140 @@
   .no-print {
     display: none !important;
   }
-  
-  /* Optimize page breaks */
-  section {
-    page-break-inside: avoid;
+
+  /* Listing intelligence: print full value context (charts + tables) even if collapsible was closed */
+  [data-printable-listing] [data-slot="collapsible-content"] {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
   }
-  
+
+  [data-printable-listing] .listing-print-hide {
+    display: none !important;
+  }
+
+  body:has([data-printable-listing]) > main {
+    padding-top: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Allow long sections to break across pages (global "avoid" caused huge gaps / clipped PDFs) */
+  section {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
   /* Reset backgrounds for better printing */
   body {
     background: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
-  /* Ensure charts have proper spacing */
-  .recharts-wrapper {
-    page-break-inside: avoid;
-  }
-  
-  /* Header adjustments - preserve dark backgrounds */
+
   [class*="bg-"] {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
-  /* Add page margins */
+
   @page {
-    margin: 0.75in;
+    margin: 0.5in;
+    size: letter;
   }
-  
-  /* Show full URLs for links */
+
+  /* --- Listing property report (save as PDF) --- */
+  [data-printable-listing] {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-shadow: none !important;
+    color: #074059 !important;
+    background: white !important;
+  }
+
+  [data-printable-listing] .shadow-sm,
+  [data-printable-listing] .shadow-\[var\(--elevation-1\)\] {
+    box-shadow: none !important;
+  }
+
+  /* Wide benchmark / comps tables: fit page width */
+  [data-printable-listing] .overflow-x-auto {
+    overflow: visible !important;
+    max-width: 100% !important;
+  }
+
+  [data-printable-listing] table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 9pt !important;
+    table-layout: auto !important;
+  }
+
+  [data-printable-listing] th,
+  [data-printable-listing] td {
+    padding: 0.2rem 0.35rem !important;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  /* Charts may span a page break; avoid clipping */
+  [data-printable-listing] .recharts-responsive-container,
+  [data-printable-listing] .recharts-wrapper {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Readable hero: drop full-bleed dark chrome */
+  [data-printable-listing] .listing-hero-root {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    background: white !important;
+    border: 1px solid #e0e6ef !important;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  [data-printable-listing] .listing-hero-media {
+    min-height: 140px !important;
+    max-height: 200px !important;
+    aspect-ratio: auto !important;
+  }
+
+  [data-printable-listing] .listing-hero-gradient {
+    display: none !important;
+  }
+
+  [data-printable-listing] .listing-hero-copy,
+  [data-printable-listing] .listing-hero-copy h1,
+  [data-printable-listing] .listing-hero-copy dt,
+  [data-printable-listing] .listing-hero-copy dd,
+  [data-printable-listing] .listing-hero-copy p,
+  [data-printable-listing] .listing-hero-copy span {
+    color: #074059 !important;
+    text-shadow: none !important;
+  }
+
+  [data-printable-listing] .listing-hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    background: white !important;
+    padding: 0.75rem 0.75rem 0 !important;
+  }
+
+  /* Show full URLs for external links (other pages); listing report overrides below */
   a[href^="http"]:after {
     content: " (" attr(href) ")";
     font-size: 0.8em;
     opacity: 0.7;
+  }
+
+  [data-printable-listing] a[href^="http"]:after {
+    content: none !important;
   }
 }
 
