@@ -3,6 +3,9 @@ import { fetchListings, CncListing, daysBetween } from "@/lib/cnc-api";
 import { formatListingTypeDisplay, listingTypOrPropertyType } from "@/lib/listing-type-labels";
 
 type SimplifiedListing = {
+  /** Numeric LINK listing id (same as `/listings/[id]`). */
+  id: string;
+  /** @deprecated Same as `id`; kept for older clients. */
   mlsNumber: string;
   address: string;
   area: string;
@@ -86,8 +89,10 @@ export async function GET(request: Request) {
         const acres =
           typeof l.LotSizeAcres === "number" && l.LotSizeAcres > 0 ? l.LotSizeAcres : null;
 
+        const linkId = String(l.link_id ?? "");
         return {
-          mlsNumber: String(l.link_id ?? ""),
+          id: linkId,
+          mlsNumber: linkId,
           address: addressParts.join(" ") || "Address not available",
           area: l.MLSAreaMajor || "Unknown",
           listPrice: l.ListPrice,

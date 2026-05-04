@@ -124,6 +124,15 @@ export type CompRow = {
   distanceMiles: number | null;
 };
 
+/** Human-readable comp-pool rules for this subject (matches `listingsMatchingCompCriteria`). */
+export type CompSetCriterion = { label: string; text: string };
+
+export type CompSetDefinition = {
+  criteria: CompSetCriterion[];
+  /** Ranking, sold window, and how table chips relate to the pool. */
+  methodology: string;
+};
+
 export type ListingDetailPayload = {
   listing: NormalizedListingDetail;
   /** ISO date-only for copy blocks */
@@ -162,6 +171,8 @@ export type ListingDetailPayload = {
   listingAllowableUses: ListingAllowableUsesModule;
   /** Island $/SF value score (same basis as benchmark dashboard) for hero placement. */
   listingValueScore: ListingIslandValueScore | null;
+  /** What “comps” means for this listing (same filters as sold + active peer pools). */
+  compSet: CompSetDefinition;
 };
 
 function statusLabel(l: CncListing): ListingStatusLabel {
@@ -232,26 +243,105 @@ function tierYearStats(
   };
 }
 
+/** Same MLS area (normalized). If subject has no MLS area, area is not enforced. */
+function compSameMlsArea(subject: CncListing, row: CncListing): boolean {
+  const s = subject.MLSAreaMajor?.trim();
+  if (!s) return true;
+  const r = row.MLSAreaMajor?.trim();
+  if (!r) return false;
+  return normalizeNantucketAreaName(s) === normalizeNantucketAreaName(r);
+}
+
+/** Comp bedrooms = subject count or one more (when subject bed count is known). */
+function compBedroomRule(subject: CncListing, row: CncListing): boolean {
+  const b0 = subject.BedroomsTotal;
+  if (b0 == null || b0 < 0) return true;
+  const b = row.BedroomsTotal;
+  if (b == null) return false;
+  return b === b0 || b === b0 + 1;
+}
+
+/** Comp GLA within ±12% of subject GLA (when subject GLA is known). */
+function compLivingAreaBand(subject: CncListing, row: CncListing): boolean {
+  const s = livingSqftFromListing(subject);
+  if (s == null || s <= 0) return true;
+  const g = livingSqftFromListing(row);
+  if (g == null || g <= 0) return false;
+  return g >= s * 0.88 && g <= s * 1.12;
+}
+
+function listingsMatchingCompCriteria(subject: CncListing, pool: CncListing[]): CncListing[] {
+  return pool.filter(
+    (l) => compSameMlsArea(subject, l) && compBedroomRule(subject, l) && compLivingAreaBand(subject, l)
+  );
+}
+
+export function buildCompSetDefinition(subject: CncListing): CompSetDefinition {
+  const criteria: CompSetCriterion[] = [];
+
+  const areaRaw = subject.MLSAreaMajor?.trim();
+  if (areaRaw) {
+    criteria.push({
+      label: "MLS area",
+      text: `Same normalized MLS area as this listing ("${normalizeNantucketAreaName(areaRaw)}"). Comps without an MLS area do not qualify.`,
+    });
+  } else {
+    criteria.push({
+      label: "MLS area",
+      text: "Not restricted - this listing has no MLS area on file, so comps are not filtered by MLS area.",
+    });
+  }
+
+  const beds = subject.BedroomsTotal;
+  if (beds != null && beds >= 0) {
+    criteria.push({
+      label: "Bedrooms",
+      text:
+        beds === 0
+          ? "0 or 1 bedroom (same as this listing or one more)."
+          : `${beds} or ${beds + 1} bedrooms (same as this listing or one more).`,
+    });
+  } else {
+    criteria.push({
+      label: "Bedrooms",
+      text: "Not restricted - bedroom count is missing on this listing.",
+    });
+  }
+
+  const gla = livingSqftFromListing(subject);
+  if (gla != null && gla > 0) {
+    const lo = Math.round(gla * 0.88);
+    const hi = Math.round(gla * 1.12);
+    criteria.push({
+      label: "Living area",
+      text: `${lo.toLocaleString()}-${hi.toLocaleString()} sq ft (±12% around this listing's ${Math.round(gla).toLocaleString()} sq ft). Comps without living SF do not qualify.`,
+    });
+  } else {
+    criteria.push({
+      label: "Living area",
+      text: "Not restricted - living square footage is missing on this listing.",
+    });
+  }
+
+  return {
+    criteria,
+    methodology:
+      "Sold comps are closings from the last 12 months with a sale price. Active peers are other listings marked active with a list price. Both pools use the rules above, then we rank by closest living area, price, and year built (ties: newer close for sold, newer on-market date for active). The chips above the table only narrow what you see; they do not change the server-side pool.",
+  };
+}
+
 function selectComps(subject: CncListing, sold: CncListing[], limit: number): CncListing[] {
-  const nh = subject.MLSAreaMajor
-    ? normalizeNantucketAreaName(subject.MLSAreaMajor)
-    : null;
   const sq = livingSqftFromListing(subject);
   const refPrice =
     priceForListing(subject, statusLabel(subject) === "Sold" ? "close" : "list") ?? subject.ListPrice;
 
   let pool = sold.filter((l) => l.link_id !== subject.link_id && l.ClosePrice && l.ClosePrice > 0);
-  if (nh) {
-    const local = pool.filter(
-      (l) => l.MLSAreaMajor && normalizeNantucketAreaName(l.MLSAreaMajor) === nh
-    );
-    if (local.length >= 4) pool = local;
-  }
+  pool = listingsMatchingCompCriteria(subject, pool);
 
   const scored = pool.map((l) => {
     const lsq = livingSqftFromListing(l);
     let score = 0;
-    if (sq && lsq) score += Math.abs(lsq - sq) * 2;
+    if (sq && lsq) score += Math.abs(lsq - sq);
     const cp = l.ClosePrice ?? 0;
     if (refPrice && cp) score += Math.abs(cp - refPrice) / 50_000;
     const yb = l.YearBuilt;
@@ -260,7 +350,12 @@ function selectComps(subject: CncListing, sold: CncListing[], limit: number): Cn
     return { l, score };
   });
 
-  scored.sort((a, b) => a.score - b.score);
+  scored.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    const ta = Date.parse(a.l.CloseDate?.trim() || "") || 0;
+    const tb = Date.parse(b.l.CloseDate?.trim() || "") || 0;
+    return tb - ta;
+  });
   return scored.slice(0, limit).map((x) => x.l);
 }
 
@@ -311,24 +406,18 @@ function activePeerSimilarityScore(subject: CncListing, c: CncListing): number {
 }
 
 function selectActivePeers(subject: CncListing, active: CncListing[], limit: number): CncListing[] {
-  const nh = subject.MLSAreaMajor ? normalizeNantucketAreaName(subject.MLSAreaMajor) : null;
   const sq = livingSqftFromListing(subject);
   const refPrice = priceForListing(subject, "list") ?? subject.ListPrice;
 
   let pool = active.filter(
     (l) => l.link_id !== subject.link_id && typeof l.ListPrice === "number" && l.ListPrice > 0
   );
-  if (nh) {
-    const local = pool.filter(
-      (l) => l.MLSAreaMajor && normalizeNantucketAreaName(l.MLSAreaMajor) === nh
-    );
-    if (local.length >= 3) pool = local;
-  }
+  pool = listingsMatchingCompCriteria(subject, pool);
 
   const scored = pool.map((l) => {
     const lsq = livingSqftFromListing(l);
     let score = 0;
-    if (sq && lsq) score += Math.abs(lsq - sq) * 2;
+    if (sq && lsq) score += Math.abs(lsq - sq);
     const lp = l.ListPrice ?? 0;
     if (refPrice && lp) score += Math.abs(lp - refPrice) / 50_000;
     const yb = l.YearBuilt;
@@ -336,7 +425,12 @@ function selectActivePeers(subject: CncListing, active: CncListing[], limit: num
     if (yb && sy) score += Math.abs(yb - sy) * 3;
     return { l, score };
   });
-  scored.sort((a, b) => a.score - b.score);
+  scored.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    const ta = Date.parse(a.l.OnMarketDate?.trim() || "") || 0;
+    const tb = Date.parse(b.l.OnMarketDate?.trim() || "") || 0;
+    return tb - ta;
+  });
   return scored.slice(0, limit).map((x) => x.l);
 }
 
@@ -749,10 +843,8 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
   const linkId = parseInt(linkIdStr, 10);
   if (!Number.isFinite(linkId) || linkId <= 0) return null;
 
-  const [active, sold12] = await Promise.all([
-    fetchAllListings({ status: "A" }),
-    fetchAllListings({ status: "S", close_date: 365 }),
-  ]);
+  const active = await fetchAllListings({ status: "A" });
+  const sold12 = await fetchAllListings({ status: "S", close_date: 365 });
 
   const raw =
     active.find((l) => l.link_id === linkId) ??
@@ -809,7 +901,7 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
     dom: listingDomDays(raw),
     photos,
     propertyType: formatListingTypeDisplay(listingTypOrPropertyType(raw)) ?? raw.PropertyType ?? null,
-    views: raw.View ?? [],
+    views: feedTokens((raw as Record<string, unknown>).View),
     taxAnnual: typeof raw.TaxAnnualAmount === "number" ? raw.TaxAnnualAmount : null,
     taxYear: typeof raw.TaxYear === "number" ? raw.TaxYear : null,
     taxAssessedValue: taxAssessedFromListing(raw),
@@ -976,9 +1068,11 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
   const nhPpsfPercentileNote = buildNhPpsfPercentileNote(listing, nh, nhName);
 
   const { legend: zoningUseLegend, chartSource: zoningUseChartSource } = zoningUseChartLegendAndSource();
-  const assessorParcelMatch = await matchAssessorParcelByListingAddress(listing.addressLine);
-  const listingAllowableUses: ListingAllowableUsesModule = assessorParcelMatch
-    ? {
+  let listingAllowableUses: ListingAllowableUsesModule = { matched: false };
+  try {
+    const assessorParcelMatch = await matchAssessorParcelByListingAddress(listing.addressLine);
+    if (assessorParcelMatch) {
+      listingAllowableUses = {
         matched: true,
         zoningCode: assessorParcelMatch.zoningCode,
         districtName: getDistrictRule(assessorParcelMatch.zoningCode)?.name ?? null,
@@ -989,8 +1083,11 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
         rows: buildZoningUseRowsForDistrict(assessorParcelMatch.zoningCode),
         legend: zoningUseLegend,
         chartSource: zoningUseChartSource,
-      }
-    : { matched: false };
+      };
+    }
+  } catch (e) {
+    console.error("listing allowable uses / parcel match:", e instanceof Error ? e.message : e);
+  }
 
   const listingValueScore = computeIslandValueScoreSnapshot(
     listing.status === "Sold"
@@ -999,6 +1096,8 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
     island.avgSoldPpsf,
     island.avgActivePpsf,
   );
+
+  const compSet = buildCompSetDefinition(raw);
 
   return {
     listing,
@@ -1027,6 +1126,7 @@ export async function getListingDetailPayload(linkIdStr: string): Promise<Listin
     nhPpsfPercentileNote,
     listingAllowableUses,
     listingValueScore,
+    compSet,
   };
 }
 

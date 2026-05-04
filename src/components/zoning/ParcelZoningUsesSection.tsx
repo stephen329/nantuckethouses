@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, ChevronDown, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/components/ui/utils";
+import type { ZoningUseRow } from "@/lib/zoning-allowable-uses";
 
-export type ZoningUseRow = { category: string; useName: string; value: string; allowed: boolean };
+export type { ZoningUseRow };
 
 /** Top-level keys in `zoning-use-chart.json` (excluding `metadata`). */
 export type UseChartCategoryChip =
@@ -27,7 +28,7 @@ function filterUseRows(rows: ZoningUseRow[], filterText: string, category: UseCh
   const q = filterText.trim().toLowerCase();
   return rows.filter((row) => {
     if (category != null && row.category !== category) return false;
-    if (q && !row.useName.toLowerCase().includes(q)) return false;
+    if (q && !String(row.useName ?? "").toLowerCase().includes(q)) return false;
     return true;
   });
 }
@@ -36,7 +37,8 @@ type RowStatus = "allowed" | "limited" | "prohibited";
 
 function rowStatus(row: ZoningUseRow): RowStatus {
   if (!row.allowed) return "prohibited";
-  if (row.value.includes("SP")) return "limited";
+  const v = String(row.value ?? "");
+  if (v.includes("SP")) return "limited";
   return "allowed";
 }
 
@@ -148,7 +150,8 @@ export function ParcelZoningUsesSection({ zoningUseRows, legend, chartSource }: 
               <div className="grid grid-cols-2 gap-3">
                 {sortedRows.map((row) => {
                   const status = rowStatus(row);
-                  const note = (legend[row.value] ?? row.value).trim();
+                  const rawNote = legend[row.value] ?? row.value ?? "";
+                  const note = String(rawNote).trim();
                   const longNote = note.length > 72;
 
                   return (

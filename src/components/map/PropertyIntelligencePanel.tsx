@@ -10,6 +10,9 @@ import type { ParcelProperties } from "@/components/zoning/ZoningMap";
 import type { LinkListingPinProperties, ParcelMapLinkListingMatch } from "@/lib/link-listings-parcel-match";
 import type { NrMapRentalResult } from "@/lib/nr-map-rentals";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
+import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
+import { propertyBaseSlugFromStreetKey } from "@/lib/property-address-slug";
+import { listingDetailPath, propertyBasePath } from "@/lib/property-routes";
 import { formatLinkMlsDateDisplay } from "@/lib/link-listing-date-format";
 import {
   nantucketRentalsComparableSearchUrlFromListingBedrooms,
@@ -269,6 +272,17 @@ function ZoningCheatSheet({
   );
 }
 
+/** Assessor `location` → public `/property/{slug}` segment (client-safe; mirrors parcel slug index rules). */
+function assessorLocationToPropertySlug(location: string | null | undefined): string | null {
+  if (!location?.trim()) return null;
+  const stem = listingAddressStem(location);
+  if (!stem || !looksLikeStreetAddress(stem)) return null;
+  const key = streetMatchKey(stem);
+  if (!key) return null;
+  const slug = propertyBaseSlugFromStreetKey(key);
+  return slug || null;
+}
+
 function buildDeepAnalysisMailto(opts: {
   parcelId: string;
   title: string;
@@ -372,6 +386,44 @@ export function PropertyIntelligencePanel({
       ),
     [selectedLink?.bedrooms, parcelLinkListingMatch?.bedrooms, selectedRental?.totalBedrooms],
   );
+
+  /** Mobile drawer sticky strip — must run before any early return (Rules of Hooks). */
+  const slideUpAddressLine = useMemo(() => {
+    if (!propertyMapSlideUpNav) return "";
+    const panelTitle =
+      selectedLink?.address ??
+      (selectedParcel?.location && selectedRental != null
+        ? selectedParcel.location
+        : selectedRental?.streetAddress ?? selectedRental?.headline ?? selectedParcel?.location ?? "Property");
+    const addr = panelTitle.trim();
+    const mls = (parcelLinkListingMatch?.mlsArea ?? selectedLink?.mlsArea ?? "").trim();
+    const zoneRaw = (selectedParcel?.zoning ?? zoningLabel).trim();
+    const parts: string[] = [];
+    if (addr) parts.push(addr);
+    if (mls) parts.push(mls);
+    if (zoneRaw && zoneRaw !== "Unknown") parts.push(zoneRaw);
+    return parts.join(" | ");
+  }, [
+    propertyMapSlideUpNav,
+    selectedLink?.address,
+    selectedLink?.mlsArea,
+    selectedParcel?.location,
+    selectedParcel?.zoning,
+    selectedRental,
+    parcelLinkListingMatch?.mlsArea,
+    zoningLabel,
+  ]);
+
+  /** Parcel-first `/property/…` page (V3) or MLS instance when we can derive a slug. */
+  let propertyDetailHref: string | null = null;
+  if (selectedLink?.linkId) {
+    propertyDetailHref = listingDetailPath(selectedLink.linkId, selectedLink.address);
+  } else if (parcelLinkListingMatch?.linkId && selectedParcel?.location) {
+    propertyDetailHref = listingDetailPath(parcelLinkListingMatch.linkId, selectedParcel.location);
+  } else if (selectedParcel?.location) {
+    const slug = assessorLocationToPropertySlug(selectedParcel.location);
+    propertyDetailHref = slug ? propertyBasePath(slug) : null;
+  }
 
   if (!has) {
     return (
@@ -484,26 +536,6 @@ export function PropertyIntelligencePanel({
   })();
 
   const sectionScroll = propertyMapSectionScrollClass();
-
-  /** Mobile drawer sticky strip: `Street | MLS area | Zoning` (skip empty middle/end segments). */
-  const slideUpAddressLine = useMemo(() => {
-    if (!propertyMapSlideUpNav) return "";
-    const addr = title.trim();
-    const mls = (parcelLinkListingMatch?.mlsArea ?? selectedLink?.mlsArea ?? "").trim();
-    const zoneRaw = (selectedParcel?.zoning ?? zoningLabel).trim();
-    const parts: string[] = [];
-    if (addr) parts.push(addr);
-    if (mls) parts.push(mls);
-    if (zoneRaw && zoneRaw !== "Unknown") parts.push(zoneRaw);
-    return parts.join(" | ");
-  }, [
-    propertyMapSlideUpNav,
-    title,
-    parcelLinkListingMatch?.mlsArea,
-    selectedLink?.mlsArea,
-    selectedParcel?.zoning,
-    zoningLabel,
-  ]);
 
   const takeColumn = (
     <>
@@ -694,10 +726,22 @@ export function PropertyIntelligencePanel({
         parcelZoning={selectedParcel?.zoning ?? null}
       />
 
+      {!propertyMapSlideUpNav && propertyDetailHref ? (
+        <div className="border-b border-[var(--cedar-shingle)]/15 px-4 py-2">
+          <Link
+            href={propertyDetailHref}
+            className="text-xs font-semibold text-[var(--privet-green)] underline-offset-2 hover:underline"
+          >
+            Full property page (assessor + MLS context) →
+          </Link>
+        </div>
+      ) : null}
+
       {propertyMapSlideUpNav ? (
         <>
           <PropertyMapSlideUpSectionNav
             addressLine={slideUpAddressLine}
+            propertyDetailHref={propertyDetailHref}
             visible={{
               ourTake: true,
               parcelInfo: Boolean(parcelInfoSlot),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { cn } from "@/components/ui/utils";
 
 export const PROPERTY_MAP_SECTION_IDS = {
@@ -52,13 +53,21 @@ type Props = {
   visible: VisibleMap;
   /** Property headline / street address; shown above chips in the same sticky bar. */
   addressLine?: string | null;
+  /** In-app parcel-first property page (`/property/…`) when derivable from MLS or assessor location. */
+  propertyDetailHref?: string | null;
   className?: string;
   /** Fires when the highlighted section changes (scroll spy or chip tap). */
   onActiveSectionChange?: (section: PropertyMapSectionKey) => void;
 };
 
 /** Horizontal chip strip; sticky within the drawer scroll area, below the hero. */
-export function PropertyMapSlideUpSectionNav({ visible, addressLine, className, onActiveSectionChange }: Props) {
+export function PropertyMapSlideUpSectionNav({
+  visible,
+  addressLine,
+  propertyDetailHref = null,
+  className,
+  onActiveSectionChange,
+}: Props) {
   const navRef = useRef<HTMLDivElement>(null);
   const visibleKeys = useMemo(
     () => visibleChipKeys(visible),
@@ -141,6 +150,16 @@ export function PropertyMapSlideUpSectionNav({ visible, addressLine, className, 
         <p className="mb-1.5 line-clamp-2 text-left text-sm font-semibold leading-snug text-[var(--atlantic-navy)]">
           {trimmedAddress}
         </p>
+      ) : null}
+      {propertyDetailHref ? (
+        <div className="mb-2">
+          <Link
+            href={propertyDetailHref}
+            className="text-xs font-semibold text-[var(--privet-green)] underline-offset-2 hover:underline"
+          >
+            Full property page (assessor + MLS context) →
+          </Link>
+        </div>
       ) : null}
       <div
         className="flex flex-wrap justify-start gap-1.5 pb-0.5"

@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fetchAllListings } from "@/lib/cnc-api";
+import { expandListingTypeForFilter } from "@/lib/listing-type-labels";
 import type {
   InventoryHistoryData,
   MonthlyInventorySnapshot,
@@ -58,7 +59,7 @@ export async function writeInventoryHistory(data: InventoryHistoryData): Promise
 }
 
 function classifyPropertyType(type: string | undefined): "residential" | "land" | "commercial" {
-  const value = (type ?? "").toLowerCase();
+  const value = expandListingTypeForFilter(type ?? "").toLowerCase();
   if (value.includes("land") || value.includes("lot")) return "land";
   if (value.includes("commercial")) return "commercial";
   return "residential";
@@ -82,13 +83,13 @@ export async function buildPreviousMonthSnapshot(
   );
 
   const residentialInventory = active.filter(
-    (l) => classifyPropertyType(l.PropertyType) === "residential",
+    (l) => classifyPropertyType(l.listing_typ ?? l.PropertyType) === "residential",
   ).length;
   const landInventory = active.filter(
-    (l) => classifyPropertyType(l.PropertyType) === "land",
+    (l) => classifyPropertyType(l.listing_typ ?? l.PropertyType) === "land",
   ).length;
   const commercialInventory = active.filter(
-    (l) => classifyPropertyType(l.PropertyType) === "commercial",
+    (l) => classifyPropertyType(l.listing_typ ?? l.PropertyType) === "commercial",
   ).length;
 
   const endingInventory = active.length;

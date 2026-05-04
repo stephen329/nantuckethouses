@@ -2,13 +2,20 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import type { ActivePeerRow, CompRow, NormalizedListingDetail } from "@/lib/get-listing-detail";
+import type {
+  ActivePeerRow,
+  CompRow,
+  CompSetDefinition,
+  NormalizedListingDetail,
+} from "@/lib/get-listing-detail";
 import { formatMoneyFull } from "@/lib/listing-detail-math";
+import { listingDetailPath } from "@/lib/property-routes";
 
 type Props = {
   comps: CompRow[];
   activePeerComps: ActivePeerRow[];
   listing: NormalizedListingDetail;
+  compSet: CompSetDefinition;
 };
 
 type Band = "all" | "nh" | "band" | "ppsf";
@@ -28,7 +35,7 @@ function formatDistance(mi: number | null): string {
   return `${mi} mi`;
 }
 
-export function ListingCompsTable({ comps, activePeerComps, listing }: Props) {
+export function ListingCompsTable({ comps, activePeerComps, listing, compSet }: Props) {
   const [band, setBand] = useState<Band>("all");
   const [dataset, setDataset] = useState<Dataset>("sold");
 
@@ -84,10 +91,8 @@ export function ListingCompsTable({ comps, activePeerComps, listing }: Props) {
         <div>
           <h2 className="text-lg font-semibold text-[var(--atlantic-navy)]">Comparable properties</h2>
           <p className="mt-1 text-sm text-[var(--nantucket-gray)]">
-            <span className="font-medium text-[var(--atlantic-navy)]">Sold</span>: 12-month closes, similarity-ranked.
-            <span className="font-medium text-[var(--atlantic-navy)]"> Active peers</span>: on-market LINK rows in the
-            same similarity pool (not pending / under agreement in this view). Distance is straight-line when
-            coordinates exist in the feed; otherwise omitted.
+            Sold comps and active peers use the same eligibility rules. Distance in the table is straight-line miles when
+            coordinates exist in LINK; otherwise omitted.
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
@@ -127,6 +132,22 @@ export function ListingCompsTable({ comps, activePeerComps, listing }: Props) {
           </div>
         </div>
       </div>
+
+      <div className="mt-4 rounded-lg border border-[#e0e6ef] bg-[#f7f9fc] p-4 sm:p-5">
+        <h3 className="text-sm font-semibold text-[var(--atlantic-navy)]">Comp set for this listing</h3>
+        <dl className="mt-3 space-y-2.5 text-sm">
+          {compSet.criteria.map((row) => (
+            <div key={row.label} className="grid gap-0.5 sm:grid-cols-[8.5rem_1fr] sm:gap-x-3">
+              <dt className="font-medium text-[var(--atlantic-navy)]">{row.label}</dt>
+              <dd className="text-[var(--nantucket-gray)]">{row.text}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 border-t border-[#e4eaf2] pt-3 text-xs leading-relaxed text-[var(--nantucket-gray)]">
+          {compSet.methodology}
+        </p>
+      </div>
+
       <div className="mt-4 overflow-x-auto -mx-1 px-1 sm:mx-0 sm:px-0">
         {dataset === "sold" ? (
           <table className="w-full min-w-[920px] text-sm">
@@ -148,7 +169,7 @@ export function ListingCompsTable({ comps, activePeerComps, listing }: Props) {
                 <tr key={c.linkId} className="border-b border-[#eef2f7] last:border-0">
                   <td className="py-2 pr-2">
                     <Link
-                      href={`/listings/${c.linkId}`}
+                      href={listingDetailPath(c.linkId, c.address)}
                       className="font-semibold text-[var(--privet-green)] hover:underline"
                     >
                       {c.address}
@@ -198,7 +219,7 @@ export function ListingCompsTable({ comps, activePeerComps, listing }: Props) {
                 <tr key={c.linkId} className="border-b border-[#eef2f7] last:border-0">
                   <td className="py-2 pr-2">
                     <Link
-                      href={`/listings/${c.linkId}`}
+                      href={listingDetailPath(c.linkId, c.address)}
                       className="font-semibold text-[var(--privet-green)] hover:underline"
                     >
                       {c.address}

@@ -87,6 +87,30 @@ type CncListingsResponse = {
   results: CncListing[];
 };
 
+/** Status codes where a short retry often succeeds (gateway / upstream overload). */
+const CNC_RETRYABLE_HTTP = new Set([429, 500, 502, 503, 504]);
+
+const CNC_FETCH_MAX_ATTEMPTS = Math.max(
+  1,
+  Math.min(8, parseInt(process.env.CNC_FETCH_MAX_ATTEMPTS || "4", 10) || 4)
+);
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function backoffMsForAttempt(attempt: number): number {
+  const base = 400 * 2 ** attempt;
+  const jitter = Math.floor(Math.random() * 250);
+  return base + jitter;
+}
+
+function truncateCncErrorBody(text: string, max = 280): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max)}...`;
+}
+
 /**
  * Normalize a CNC listing row so `link_id` is always the public MLS / LINK listing id.
  * Full `link-listings` uses `ListingId`; `link-listings-v2` may send `link_id` instead.
@@ -129,19 +153,45 @@ export async function fetchListings(
     url.searchParams.append(key, String(value));
   });
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
+  const urlStr = url.toString();
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`CNC API request failed (${res.status}): ${text}`);
+  for (let attempt = 0; attempt < CNC_FETCH_MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(urlStr, { cache: "no-store" });
+
+      if (!res.ok) {
+        const text = await res.text();
+        const retry = CNC_RETRYABLE_HTTP.has(res.status) && attempt < CNC_FETCH_MAX_ATTEMPTS - 1;
+        if (retry) {
+          await sleep(backoffMsForAttempt(attempt));
+          continue;
+        }
+        throw new Error(
+          `CNC API request failed (${res.status}): ${truncateCncErrorBody(text)}`
+        );
+      }
+
+      const data = (await res.json()) as { count: number; results?: unknown[] };
+      const rows = Array.isArray(data.results) ? data.results : [];
+      return {
+        count: data.count,
+        results: rows.map(normalizeCncListingRow),
+      };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.startsWith("CNC API request failed")) throw e;
+
+      lastError = e instanceof Error ? e : new Error(String(e));
+      if (attempt < CNC_FETCH_MAX_ATTEMPTS - 1) {
+        await sleep(backoffMsForAttempt(attempt));
+        continue;
+      }
+      throw lastError;
+    }
   }
 
-  const data = (await res.json()) as { count: number; results?: unknown[] };
-  const rows = Array.isArray(data.results) ? data.results : [];
-  return {
-    count: data.count,
-    results: rows.map(normalizeCncListingRow),
-  };
+  throw lastError ?? new Error("CNC API: fetch failed after retries");
 }
 
 /**
@@ -156,19 +206,13 @@ export async function fetchAllListings(
   const all = [...first.results];
   const total = first.count;
 
-  // Fetch remaining pages in parallel
-  if (total > pageSize) {
-    const pages = Math.ceil(total / pageSize);
-    const fetches = [];
-    for (let i = 1; i < pages; i++) {
-      fetches.push(
-        fetchListings({ ...params, limit: pageSize, offset: i * pageSize })
-      );
-    }
-    const results = await Promise.all(fetches);
-    for (const r of results) {
-      all.push(...r.results);
-    }
+  // One page at a time: parallel pagination plus concurrent `fetchAllListings` calls
+  // (e.g. Property V3) was overwhelming the CNC gateway and producing 504s.
+  let offset = pageSize;
+  while (offset < total) {
+    const page = await fetchListings({ ...params, limit: pageSize, offset });
+    all.push(...page.results);
+    offset += pageSize;
   }
 
   return all;

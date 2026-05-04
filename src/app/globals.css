@@ -39,8 +39,9 @@
     background: var(--sandstone);
   }
 
-  /* Listing detail: monospace for numeric vitals (JetBrains Mono via next/font variable on root) */
-  .listing-detail-root .font-listing-mono {
+  /* Listing / parcel profiles: monospace for numeric vitals (JetBrains Mono via next/font variable on root) */
+  .listing-detail-root .font-listing-mono,
+  .parcel-detail-root .font-listing-mono {
     font-family: var(--font-listing-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     font-variant-numeric: tabular-nums;
   }

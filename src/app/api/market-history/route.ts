@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchAllListings, median, average, daysBetween } from "@/lib/cnc-api";
+import { fetchAllListings, median, average, daysBetween, type CncListing } from "@/lib/cnc-api";
+import { expandListingTypeForFilter } from "@/lib/listing-type-labels";
 
 type MonthlyData = {
   month: string;
@@ -37,10 +38,14 @@ export async function GET(request: Request) {
     });
 
     const filteredSoldListings = soldListings.filter((listing) => {
+      const l = listing as CncListing;
+      const typeRaw = l.listing_typ ?? l.PropertyType ?? "";
+      const typeExpanded = expandListingTypeForFilter(typeRaw).toLowerCase();
       const propertyOk =
         !propertyType ||
         propertyType === "all" ||
-        (listing.PropertyType ?? "").toLowerCase().includes(propertyType.toLowerCase());
+        typeExpanded.includes(propertyType.toLowerCase()) ||
+        typeRaw.toLowerCase().includes(propertyType.toLowerCase());
       const neighborhoodOk =
         !neighborhood ||
         neighborhood === "all" ||
