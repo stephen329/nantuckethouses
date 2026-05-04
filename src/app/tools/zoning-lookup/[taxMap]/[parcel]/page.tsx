@@ -15,6 +15,7 @@ import {
 } from "@/lib/parcel-data";
 import recentSoldParcels from "@/data/recent-sold-parcels.json";
 import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
+import { parcelDetailPath } from "@/lib/property-routes";
 
 type Params = {
   taxMap: string;
@@ -238,6 +239,9 @@ export default async function ParcelDetailPage({
               <p className="mb-2 text-sm font-medium text-[var(--atlantic-navy)]">Quick Actions</p>
               <div className="space-y-2">
                 <SaveParcelButton parcelKey={parcelKey} />
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={parcelDetailPath(record.taxMap, record.parcel)}>Parcel profile (shareable)</Link>
+                </Button>
                 {linkListingId ? (
                   <Button asChild variant="outline" className="w-full">
                     <a href={nantucketLinkListingUrl(linkListingId)} target="_blank" rel="noopener noreferrer">

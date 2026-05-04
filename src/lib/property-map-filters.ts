@@ -1,5 +1,6 @@
 import type { FeatureCollection, Point } from "geojson";
 import type { LinkListingPinProperties } from "@/lib/link-listings-parcel-match";
+import { expandListingTypeForFilter } from "@/lib/listing-type-labels";
 import type { NrMapRentalResult } from "@/lib/nr-map-rentals";
 
 export type PropertyMapMode = "rent" | "sale" | "sold" | "all";
@@ -142,7 +143,7 @@ export function linkMatchesPropertyTypes(propertyType: string | null, keys: Link
   if (!keys.length) return true;
   const raw = propertyType ?? "";
   if (!raw.trim()) return false;
-  const low = raw.toLowerCase();
+  const low = expandListingTypeForFilter(raw).toLowerCase();
   return keys.some((k) => {
     switch (k) {
       case "land":

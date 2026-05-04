@@ -1,6 +1,8 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { Feature, Geometry } from "geojson";
 import zoningData from "@/data/zoning-districts.json";
+import { findParcelFeatureByListingAddress } from "@/lib/link-pin-parcel-resolve";
 
 type RawFeature = {
   geometry: GeoJSON.Geometry;
@@ -29,6 +31,14 @@ export type ParcelRecord = {
   primaryUse: string;
   owner: string;
   geometry: GeoJSON.Geometry;
+};
+
+/** Assessor parcel row matched from a listing street address (same index as the Property Map). */
+export type AssessorParcelMatch = {
+  zoningCode: string;
+  taxMap: string;
+  parcel: string;
+  parcelId: string;
 };
 
 export type DistrictRule = {
@@ -106,6 +116,32 @@ function toParcelRecord(feature: RawFeature): ParcelRecord {
     primaryUse: toStringValue(p.use) || toStringValue(p.primary_use) || "Unknown",
     owner: toStringValue(p.owner_name) || "Unknown",
     geometry: feature.geometry,
+  };
+}
+
+/**
+ * Match a LINK-style street line to the assessor parcel GeoJSON (centroid street-key index).
+ * Returns zoning + parcel ids for deep links and allowable-use charts.
+ */
+export async function matchAssessorParcelByListingAddress(
+  addressLine: string,
+): Promise<AssessorParcelMatch | null> {
+  const line = addressLine.trim();
+  if (!line) return null;
+  const collection = await loadParcelCollection();
+  const hit = findParcelFeatureByListingAddress(
+    line,
+    collection.features as Feature<Geometry, { parcel_id?: string | null }>[],
+  );
+  if (!hit?.properties) return null;
+  const p = hit.properties as Record<string, unknown>;
+  const zoningCode = toStringValue(p.zoning);
+  if (!zoningCode) return null;
+  return {
+    zoningCode,
+    taxMap: toStringValue(p.tax_map),
+    parcel: toStringValue(p.parcel),
+    parcelId: toStringValue(p.parcel_id),
   };
 }
 

@@ -1,6 +1,7 @@
 import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import { centroidFromGeometry } from "@/lib/geo-centroid";
 import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
+import { formatListingTypeDisplay, listingTypOrPropertyType } from "@/lib/listing-type-labels";
 
 export type ParcelProps = {
   parcel_id?: string | null;
@@ -30,6 +31,7 @@ export type LinkListingRow = {
   BedroomsTotal?: number;
   BathroomsTotalDecimal?: number;
   PropertyType?: string;
+  listing_typ?: string;
   PublicRemarks?: string;
   LINK_descr?: string;
   TitleTag?: string;
@@ -192,10 +194,10 @@ function linkPoolHint(row: LinkListingRow): boolean {
 }
 
 function pickLivingAreaSqft(row: LinkListingRow): number | null {
-  const la = row.LivingArea;
-  if (typeof la === "number" && !Number.isNaN(la) && la > 0) return la;
   const bt = row.BuildingAreaTotal;
   if (typeof bt === "number" && !Number.isNaN(bt) && bt > 0) return bt;
+  const la = row.LivingArea;
+  if (typeof la === "number" && !Number.isNaN(la) && la > 0) return la;
   return null;
 }
 
@@ -283,7 +285,8 @@ export function matchLinkListingToPoint(
       : typeof lotRaw === "number" && !Number.isNaN(lotRaw) && lotRaw > 0
         ? lotRaw
         : null;
-  const pt = String(row.PropertyType ?? "").trim();
+  const pt =
+    formatListingTypeDisplay(listingTypOrPropertyType(row)) ?? String(row.PropertyType ?? "").trim();
   const area = String(row.MLSAreaMajor ?? "").trim();
   const yearBuilt = pickLinkYearBuiltFromRow(row);
   return {
