@@ -1,6 +1,9 @@
 import { cache } from "react";
 import type { CncListing } from "@/lib/cnc-api";
-import { fetchAllListings } from "@/lib/cnc-api";
+import {
+  getCachedActiveListingsAll,
+  getCachedSoldListingsByCloseDays,
+} from "@/lib/cnc-api";
 import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
 import { haversineMiles } from "@/lib/geo-haversine";
 import {
@@ -11,7 +14,13 @@ import { nantucketLinkListingUrl } from "@/lib/link-listing-url";
 import { formatListingTypeDisplay, listingTypOrPropertyType } from "@/lib/listing-type-labels";
 import { normalizeNantucketAreaName } from "@/lib/nantucket-area-normalize";
 import { parseTrailingLinkIdFromPropertySlug } from "@/lib/property-address-slug";
-import { listingLatLon, type PropertyV3IntelActive, type PropertyV3IntelParcel, type PropertyV3IntelSold } from "@/lib/property-v3-market-intel";
+import {
+  INTEL_COHORT_RADIUS_MI,
+  listingLatLon,
+  type PropertyV3IntelActive,
+  type PropertyV3IntelParcel,
+  type PropertyV3IntelSold,
+} from "@/lib/property-v3-market-intel";
 import { propertyBasePath, propertyInstancePath } from "@/lib/property-routes";
 import {
   bboxForMlsArea,
@@ -28,10 +37,34 @@ import {
   pickParcelForSlug,
   type AssessorParcelFeature,
 } from "@/lib/property-v3-parcel-cache";
-import { livingSqftFromListing, lotSqftFromListing } from "@/lib/listing-detail-math";
+import {
+  buildingAreaTotalFromListing,
+  livingSqftFromListing,
+  lotSizeSquareFeetRawFromListing,
+  lotSqftFromListing,
+  taxAssessedPlusOtherAnnualFromListing,
+  taxAssessedValueFromListing,
+  taxOtherAnnualAssessmentAmountFromListing,
+} from "@/lib/listing-detail-math";
 
 const SOLD_HISTORY_DAYS = 1095;
 const SOLD_RANKING_DAYS = 730;
+
+/** Match CNC `close_date: N` semantics locally (sold row in the last N days). */
+function soldClosedWithinPastDays(row: CncListing, days: number): boolean {
+  const raw = row.CloseDate?.trim();
+  if (!raw) return false;
+  const ymd = raw.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return false;
+  const closeMs = Date.parse(ymdToIsoMidnightUtc(ymd));
+  if (Number.isNaN(closeMs)) return false;
+  const cutoff = Date.now() - days * 86_400_000;
+  return closeMs >= cutoff;
+}
+
+function ymdToIsoMidnightUtc(ymd: string): string {
+  return `${ymd}T12:00:00.000Z`;
+}
 
 function sameMlsArea(a: string | null | undefined, b: string | null | undefined): boolean {
   if (!a?.trim() || !b?.trim()) return false;
@@ -79,10 +112,10 @@ function closeToAssessedForSoldRow(row: LinkListingRow): number | null {
 }
 
 async function findListingByLinkId(linkId: number): Promise<CncListing | null> {
-  const active = await fetchAllListings({ status: "A" });
+  const active = await getCachedActiveListingsAll();
   const a = active.find((l) => l.link_id === linkId);
   if (a) return a;
-  const sold = await fetchAllListings({ status: "S", close_date: SOLD_HISTORY_DAYS });
+  const sold = await getCachedSoldListingsByCloseDays(SOLD_HISTORY_DAYS);
   return sold.find((l) => l.link_id === linkId) ?? null;
 }
 
@@ -119,6 +152,12 @@ export type PropertyV3RankingsSnapshot = {
   subjectAssessed: number | null;
   subjectActivePpsf: number | null;
   subjectSoldPpsf: number | null;
+  /** MLS `BuildingAreaTotal` only (comparison grid). */
+  subjectBuildingAreaTotal: number | null;
+  /** MLS `LotSizeSquareFeet` (and aliases) only — no acres-derived value. */
+  subjectLotSizeSquareFeet: number | null;
+  /** MLS `TaxAssessedValue` (+ aliases) + `TaxOtherAnnualAssessmentAmount`; else assessor parcel total. */
+  subjectTaxAssessedValue: number | null;
 };
 
 export type PropertyV3Payload = {
@@ -271,6 +310,24 @@ function bestLotSqftFromHistory(history: CncListing[]): number | null {
   return best;
 }
 
+function bestBuildingAreaTotalFromHistory(history: CncListing[]): number | null {
+  let best: number | null = null;
+  for (const row of history) {
+    const v = buildingAreaTotalFromListing(row);
+    if (v != null && (best == null || v > best)) best = v;
+  }
+  return best;
+}
+
+function bestLotSizeSquareFeetRawFromHistory(history: CncListing[]): number | null {
+  let best: number | null = null;
+  for (const row of history) {
+    const v = lotSizeSquareFeetRawFromListing(row);
+    if (v != null && (best == null || v > best)) best = v;
+  }
+  return best;
+}
+
 function rowStreetKeyFromListing(row: CncListing): string | null {
   const stem = listingAddressStem(formatAddress(row));
   if (!stem || !looksLikeStreetAddress(stem)) return null;
@@ -339,10 +396,13 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
   const canonicalPath = propertyBasePath(canonicalAddressSlug);
 
   const parcelId = String(parcelFeat.properties?.parcel_id ?? "").trim();
-  // Run sequentially: three concurrent full pulls was tripping CNC/nginx (504).
-  const active = await fetchAllListings({ status: "A" });
-  const soldLong = await fetchAllListings({ status: "S", close_date: SOLD_HISTORY_DAYS });
-  const soldRank = await fetchAllListings({ status: "S", close_date: SOLD_RANKING_DAYS });
+  // Two pulls only: ranking cohort is a subset of the longer sold window (avoids a third full pagination).
+  // Run in parallel; three concurrent pulls was tripping CNC — two is typically fine.
+  const [active, soldLong] = await Promise.all([
+    getCachedActiveListingsAll(),
+    getCachedSoldListingsByCloseDays(SOLD_HISTORY_DAYS),
+  ]);
+  const soldRank = soldLong.filter((r) => soldClosedWithinPastDays(r, SOLD_RANKING_DAYS));
 
   const onParcelSold = soldLong.filter((r) => rowMatchesParcel(r, parcelId, "sold"));
   const onParcelActive = active.filter((r) => rowMatchesParcel(r, parcelId, "active"));
@@ -382,7 +442,7 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
     const zRow = listingZoningKey(r, pool);
     const sameZ = subjectZoningKey != null && zRow != null && zRow === subjectZoningKey;
     if (sameM || sameS || sameZ) return true;
-    if (dist != null && dist <= 1.08) return true;
+    if (dist != null && dist <= INTEL_COHORT_RADIUS_MI) return true;
     return false;
   }
 
@@ -409,6 +469,9 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
       sameMls: sameM,
       mlsArea: r.MLSAreaMajor ?? null,
       gla: g,
+      buildingAreaTotal: buildingAreaTotalFromListing(r),
+      lotSizeSquareFeet: lotSizeSquareFeetRawFromListing(r),
+      taxAssessedValue: taxAssessedPlusOtherAnnualFromListing(r),
       beds: r.BedroomsTotal ?? null,
       baths: r.BathroomsTotalDecimal ?? null,
       yearBuilt: r.YearBuilt ?? null,
@@ -446,6 +509,11 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
       sameMls: sameM,
       mlsArea: r.MLSAreaMajor ?? null,
       gla: g,
+      buildingAreaTotal: buildingAreaTotalFromListing(r),
+      lotSizeSquareFeet: lotSizeSquareFeetRawFromListing(r),
+      taxAssessedValue: taxAssessedPlusOtherAnnualFromListing(r),
+      taxAssessedBase: taxAssessedValueFromListing(r),
+      taxOtherAnnualAmount: taxOtherAnnualAssessmentAmountFromListing(r),
       beds: r.BedroomsTotal ?? null,
       baths: r.BathroomsTotalDecimal ?? null,
       yearBuilt: r.YearBuilt ?? null,
@@ -526,6 +594,46 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
   })();
 
   const subjectAssessed = assessedTotal(parcelFeat);
+
+  const subjectBuildingAreaTotal = (() => {
+    if (listingInstanceId != null && instanceListing) {
+      const v = buildingAreaTotalFromListing(instanceListing);
+      if (v != null && v > 0) return v;
+    }
+    if (cur) {
+      const v = buildingAreaTotalFromListing(cur);
+      if (v != null && v > 0) return v;
+    }
+    return bestBuildingAreaTotalFromHistory(onParcelAll);
+  })();
+
+  const subjectLotSizeSquareFeet = (() => {
+    if (listingInstanceId != null && instanceListing) {
+      const v = lotSizeSquareFeetRawFromListing(instanceListing);
+      if (v != null && v > 0) return v;
+    }
+    if (cur) {
+      const v = lotSizeSquareFeetRawFromListing(cur);
+      if (v != null && v > 0) return v;
+    }
+    return bestLotSizeSquareFeetRawFromHistory(onParcelAll);
+  })();
+
+  const subjectTaxAssessedValue = (() => {
+    if (listingInstanceId != null && instanceListing) {
+      const v = taxAssessedPlusOtherAnnualFromListing(instanceListing);
+      if (v != null && v > 0) return v;
+    }
+    if (cur) {
+      const v = taxAssessedPlusOtherAnnualFromListing(cur);
+      if (v != null && v > 0) return v;
+    }
+    for (const row of onParcelAll) {
+      const v = taxAssessedPlusOtherAnnualFromListing(row);
+      if (v != null && v > 0) return v;
+    }
+    return subjectAssessed;
+  })();
 
   let subjectActivePpsf: number | null = null;
   if (listingInstanceId != null && instanceListing && listingPool(instanceListing) === "active") {
@@ -613,6 +721,9 @@ async function loadPropertyV3Payload(fullSlug: string): Promise<PropertyV3Payloa
       subjectAssessed,
       subjectActivePpsf,
       subjectSoldPpsf,
+      subjectBuildingAreaTotal,
+      subjectLotSizeSquareFeet,
+      subjectTaxAssessedValue,
     },
   };
 }

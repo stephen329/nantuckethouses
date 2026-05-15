@@ -46,6 +46,12 @@ export type PropertyV3IntelSold = {
   sameMls: boolean;
   mlsArea: string | null;
   gla: number | null;
+  /** MLS `BuildingAreaTotal` only. */
+  buildingAreaTotal: number | null;
+  /** MLS lot sqft fields only (no acres-derived). */
+  lotSizeSquareFeet: number | null;
+  /** MLS `TaxAssessedValue` (+ aliases) + `TaxOtherAnnualAssessmentAmount` (comparison grid row 5). */
+  taxAssessedValue: number | null;
   beds: number | null;
   baths: number | null;
   yearBuilt: number | null;
@@ -73,6 +79,13 @@ export type PropertyV3IntelActive = {
   sameMls: boolean;
   mlsArea: string | null;
   gla: number | null;
+  buildingAreaTotal: number | null;
+  lotSizeSquareFeet: number | null;
+  /** MLS `TaxAssessedValue` (+ aliases) + `TaxOtherAnnualAssessmentAmount` (comparison grid row 5). */
+  taxAssessedValue: number | null;
+  /** For active cohort mean(row 5) = mean(base) + mean(other annual). */
+  taxAssessedBase: number | null;
+  taxOtherAnnualAmount: number | null;
   beds: number | null;
   baths: number | null;
   yearBuilt: number | null;
@@ -112,16 +125,33 @@ export function listingLatLon(row: {
   return null;
 }
 
+/** Shared with `listingInIntelUniverse` in `property-v3-data.ts` (distance gate for MLS listing cohort). */
+export const INTEL_COHORT_RADIUS_MI = 1.08;
+
 function passesGeo(
-  row: { sameMls: boolean; zoningKey: string | null },
+  row: {
+    sameMls: boolean;
+    sameStreet: boolean;
+    zoningKey: string | null;
+    distMi: number | null;
+  },
   mode: GeoMode,
   subjectZoningKey: string | null,
-  /** When null/empty, intel rows were admitted without same-MLS (street / zoning / radius); do not drop them in MLS mode. */
+  /**
+   * When set, MLS mode keeps each row the server already admitted to `intel*` (same MLS, same street,
+   * same assessor zoning as subject parcel, or within `INTEL_COHORT_RADIUS_MI`). Requiring `sameMls`
+   * alone dropped street / zoning / radius comps and could empty the sold set.
+   */
   mlsAreaPrimary: string | null
 ): boolean {
   if (mode === "mls") {
-    if (mlsAreaPrimary?.trim()) return row.sameMls;
-    return true;
+    if (!mlsAreaPrimary?.trim()) return true;
+    if (row.sameMls || row.sameStreet) return true;
+    if (subjectZoningKey != null && row.zoningKey != null && row.zoningKey === subjectZoningKey) {
+      return true;
+    }
+    if (row.distMi != null && row.distMi <= INTEL_COHORT_RADIUS_MI) return true;
+    return false;
   }
   if (!subjectZoningKey) return false;
   return row.zoningKey != null && row.zoningKey === subjectZoningKey;

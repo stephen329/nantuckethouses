@@ -3,6 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { GoogleTagManager, GoogleTagManagerNoscript } from "@/components/GoogleTagManager";
 import { MetaPixel } from "@/components/MetaPixel";
+import { IntercomBoot } from "@/components/IntercomBoot";
 import { StructuredData } from "@/components/StructuredData";
 import Script from "next/script";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className="antialiased">
         <GoogleTagManager />
         <GoogleTagManagerNoscript />
+        <IntercomBoot />
         <MetaPixel />
         <StructuredData />
         <Navigation />

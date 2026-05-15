@@ -23,6 +23,72 @@ export function livingSqftFromListing(l: CncListing): number | null {
   return typeof la === "number" && la > 0 ? Math.round(la) : null;
 }
 
+/** MLS `BuildingAreaTotal` only (no `LivingArea` fallback). */
+export function buildingAreaTotalFromListing(l: CncListing): number | null {
+  const bat = l.BuildingAreaTotal;
+  return typeof bat === "number" && bat > 0 ? Math.round(bat) : null;
+}
+
+/**
+ * MLS lot size fields only (`LotSizeSquareFeet` and common aliases).
+ * Does not derive from acres — comparison grid uses this for an apples-to-MLS-field row.
+ */
+export function lotSizeSquareFeetRawFromListing(l: CncListing): number | null {
+  const ext = l as CncListing & {
+    lot_size_square_feet?: number;
+    Lot_Size_Square_Feet?: number;
+  };
+  const raw = l.LotSizeSquareFeet ?? ext.lot_size_square_feet ?? ext.Lot_Size_Square_Feet;
+  return typeof raw === "number" && raw > 0 ? Math.round(raw) : null;
+}
+
+export function taxAssessedValueFromListing(l: CncListing): number | null {
+  const ext = l as CncListing & {
+    TaxAssessedTotalValue?: number;
+    AssessedValue?: number;
+  };
+  const v = l.TaxAssessedValue ?? ext.TaxAssessedTotalValue ?? ext.AssessedValue;
+  return typeof v === "number" && v > 0 ? Math.round(v) : null;
+}
+
+/**
+ * Property V3 comparison grid row 5: `TaxAssessedValue` (and common MLS aliases) +
+ * `TaxOtherAnnualAssessmentAmount` (and snake_case variants). Both parts default to 0 when missing;
+ * returns null only when the sum is not positive.
+ */
+/** MLS `TaxOtherAnnualAssessmentAmount` only (and common key variants). */
+export function taxOtherAnnualAssessmentAmountFromListing(l: CncListing): number | null {
+  const ext = l as CncListing & {
+    tax_other_annual_assessment_amount?: number;
+    Tax_Other_Annual_Assessment_Amount?: number;
+  };
+  const v =
+    l.TaxOtherAnnualAssessmentAmount ??
+    ext.tax_other_annual_assessment_amount ??
+    ext.Tax_Other_Annual_Assessment_Amount;
+  if (typeof v !== "number" || !Number.isFinite(v) || v < 0) return null;
+  return Math.round(v);
+}
+
+export function taxAssessedPlusOtherAnnualFromListing(l: CncListing): number | null {
+  const ext = l as CncListing & {
+    TaxAssessedTotalValue?: number;
+    AssessedValue?: number;
+    tax_other_annual_assessment_amount?: number;
+    Tax_Other_Annual_Assessment_Amount?: number;
+  };
+  const baseRaw = l.TaxAssessedValue ?? ext.TaxAssessedTotalValue ?? ext.AssessedValue;
+  const otherRaw =
+    l.TaxOtherAnnualAssessmentAmount ??
+    ext.tax_other_annual_assessment_amount ??
+    ext.Tax_Other_Annual_Assessment_Amount;
+
+  const base = typeof baseRaw === "number" && Number.isFinite(baseRaw) ? baseRaw : 0;
+  const other = typeof otherRaw === "number" && Number.isFinite(otherRaw) ? otherRaw : 0;
+  const sum = base + other;
+  return sum > 0 ? Math.round(sum) : null;
+}
+
 export function priceForListing(l: CncListing, mode: "list" | "close"): number | null {
   if (mode === "close") {
     const c = l.ClosePrice;
