@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Geometry, Point } from "geojson";
 import { centroidFromGeometry } from "@/lib/geo-centroid";
-import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
+import { listingAddressStem, looksLikeStreetAddress, streetIndexLookupKeys, streetMatchKey } from "@/lib/address-street-key";
 import { formatListingTypeDisplay, listingTypOrPropertyType } from "@/lib/listing-type-labels";
 
 export type ParcelProps = {
@@ -266,9 +266,14 @@ export function matchLinkListingToPoint(
   if (id == null) return null;
   const stem = listingAddressStem(row.Address, row.StreetNumber, row.StreetName);
   if (!stem) return null;
-  const key = streetMatchKey(stem);
-  if (!key) return null;
-  const hit = index.get(key);
+  let hit: { lng: number; lat: number; parcel_id: string } | null = null;
+  for (const key of streetIndexLookupKeys(stem)) {
+    const h = index.get(key);
+    if (h) {
+      hit = h;
+      break;
+    }
+  }
   if (!hit) return null;
   const req = requireParcelId?.trim();
   if (req && String(hit.parcel_id).trim() !== req) return null;

@@ -123,6 +123,60 @@ export function streetMatchKey(raw: string): string {
   return stripOptionalTrailingRoadTypes(key);
 }
 
+/** Long-form suffixes to try when the user omits road/street type (e.g. "28 rugged" vs assessor "28 RUGGED RD" → "28 rugged road"). */
+const INDEX_SUFFIX_TRIES = [
+  "road",
+  "street",
+  "lane",
+  "drive",
+  "way",
+  "avenue",
+  "circle",
+  "terrace",
+  "path",
+  "place",
+  "court",
+  "highway",
+  "boulevard",
+] as const;
+
+/**
+ * Street keys to try against `buildParcelStreetCentroidIndex` (order matters).
+ * Parcel rows use full `streetMatchKey(location)`; user or MLS lines often drop
+ * the trailing road/street word when it is only one street-name token long.
+ */
+export function streetIndexLookupKeys(raw: string): string[] {
+  const primary = streetMatchKey(raw.trim());
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  const push = (k: string) => {
+    const t = k.trim().toLowerCase().split(/\s+/).join(" ");
+    if (!t || seen.has(t)) return;
+    seen.add(t);
+    ordered.push(t);
+  };
+
+  push(primary);
+  if (!primary) return ordered;
+
+  const parts = primary.split(/\s+/).filter(Boolean);
+  const m = /^(\d+)([a-z])?$/i.exec(parts[0] ?? "");
+  if (!m) return ordered;
+
+  const num = m[1];
+  const restParts = parts.slice(1);
+  if (restParts.length === 0) return ordered;
+
+  const last = tokenNorm(restParts[restParts.length - 1] ?? "");
+  if (ROAD_TYPE_TOKENS.has(last)) return ordered;
+
+  const rest = restParts.join(" ");
+  for (const suf of INDEX_SUFFIX_TRIES) {
+    push(`${num} ${rest} ${suf}`);
+  }
+  return ordered;
+}
+
 export function looksLikeStreetAddress(loc: string): boolean {
   return /\d/.test(loc);
 }
