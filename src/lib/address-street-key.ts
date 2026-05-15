@@ -39,6 +39,70 @@ export function expandStreetAbbrevs(s: string): string {
   return t.split(/\s+/).join(" ");
 }
 
+/** Lowercased road-type tokens (incl. abbrev forms) after expandStreetAbbrevs. */
+const ROAD_TYPE_TOKENS = new Set([
+  "road",
+  "rd",
+  "street",
+  "st",
+  "avenue",
+  "ave",
+  "lane",
+  "ln",
+  "drive",
+  "dr",
+  "way",
+  "wy",
+  "circle",
+  "cir",
+  "terrace",
+  "ter",
+  "highway",
+  "hwy",
+  "boulevard",
+  "blvd",
+  "place",
+  "pl",
+  "court",
+  "ct",
+  "path",
+]);
+
+function tokenNorm(w: string): string {
+  return w.toLowerCase().replace(/\./g, "");
+}
+
+/**
+ * Remove trailing road-type words so "106 old south road" (assessor) and
+ * "106 old south" (user / Fin) share the same key. Only strips when at least
+ * two street-name tokens would remain after removal, so "10 water street"
+ * does not become "10 water".
+ */
+function stripOptionalTrailingRoadTypes(key: string): string {
+  const parts = key.split(/\s+/).filter(Boolean);
+  if (parts.length < 3) return key;
+
+  const m = /^(\d+)([a-z])?$/i.exec(parts[0] ?? "");
+  if (m) {
+    const num = m[1];
+    let rest = parts.slice(1);
+    while (rest.length >= 3) {
+      const last = tokenNorm(rest[rest.length - 1] ?? "");
+      if (!ROAD_TYPE_TOKENS.has(last)) break;
+      rest = rest.slice(0, -1);
+    }
+    return rest.length ? `${num} ${rest.join(" ")}` : num;
+  }
+
+  let out = [...parts];
+  while (out.length >= 3) {
+    const last = tokenNorm(out[out.length - 1] ?? "");
+    if (!ROAD_TYPE_TOKENS.has(last)) break;
+    out = out.slice(0, -1);
+  }
+  return out.join(" ");
+}
+
 /** Comparable key for listing address vs parcel `location`. */
 export function streetMatchKey(raw: string): string {
   let s = expandStreetAbbrevs(raw.trim());
@@ -48,12 +112,15 @@ export function streetMatchKey(raw: string): string {
   const parts = s.split(/\s+/);
   const first = parts[0] ?? "";
   const m = /^(\d+)([a-z])?$/i.exec(first);
+  let key: string;
   if (m) {
     const num = m[1];
     const rest = parts.slice(1).join(" ").trim();
-    return rest ? `${num} ${rest}` : num;
+    key = rest ? `${num} ${rest}` : num;
+  } else {
+    key = s;
   }
-  return s;
+  return stripOptionalTrailingRoadTypes(key);
 }
 
 export function looksLikeStreetAddress(loc: string): boolean {
