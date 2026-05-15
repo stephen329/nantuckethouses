@@ -5,7 +5,7 @@ import type { Feature, Geometry } from "geojson";
 import { fetchListings, type CncListing } from "@/lib/cnc-api";
 import { centroidFromGeometry } from "@/lib/geo-centroid";
 import { MAP_NEIGHBORHOOD_BOUNDS } from "@/lib/map-neighborhood-bounds";
-import { listingAddressStem, looksLikeStreetAddress, streetMatchKey } from "@/lib/address-street-key";
+import { listingAddressStem, looksLikeStreetAddress, streetIndexLookupKeys } from "@/lib/address-street-key";
 import type {
   OmniboxActiveListing,
   OmniboxCategories,
@@ -148,10 +148,11 @@ function parcelIdFromStreetLine(
 ): string | null {
   const stem = listingAddressStem(streetLine);
   if (!stem || !looksLikeStreetAddress(stem)) return null;
-  const key = streetMatchKey(stem);
-  if (!key) return null;
-  const hit = streetIndex.get(key);
-  return hit ? String(hit.parcel_id).trim() : null;
+  for (const key of streetIndexLookupKeys(stem)) {
+    const hit = streetIndex.get(key);
+    if (hit) return String(hit.parcel_id).trim();
+  }
+  return null;
 }
 
 const LISTING_KIND_RANK: Record<OmniboxParcelListingMatch["kind"], number> = {

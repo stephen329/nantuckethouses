@@ -15,7 +15,6 @@ import {
   filterSoldIntel,
   medianActivePpsfFromIntel,
   medianCloseToAssessedFromIntel,
-  medianGlaSoldFromIntel,
   medianSoldListPriceFromIntel,
   medianSoldPpsfFromIntel,
   percentileInSorted,
@@ -31,6 +30,35 @@ function medianNums(values: number[]): number | null {
   return s.length % 2 ? s[m]! : (s[m - 1]! + s[m]!) / 2;
 }
 
+function meanNums(values: number[]): number | null {
+  if (!values.length) return null;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function medianListDividedByBuildingArea<
+  R extends { listPrice: number | null; buildingAreaTotal: number | null },
+>(rows: R[]): number | null {
+  const ratios: number[] = [];
+  for (const r of rows) {
+    const lp = r.listPrice;
+    const bat = r.buildingAreaTotal;
+    if (lp != null && lp > 0 && bat != null && bat > 0) ratios.push(lp / bat);
+  }
+  return medianNums(ratios);
+}
+
+function medianListDividedByTaxAssessed<
+  R extends { listPrice: number | null; taxAssessedValue: number | null },
+>(rows: R[]): number | null {
+  const ratios: number[] = [];
+  for (const r of rows) {
+    const lp = r.listPrice;
+    const t = r.taxAssessedValue;
+    if (lp != null && lp > 0 && t != null && t > 0) ratios.push(lp / t);
+  }
+  return medianNums(ratios);
+}
+
 function fmtMoney(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
   return n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -40,12 +68,11 @@ function daysAgoCutoff(days: number): number {
   return Date.now() - days * 86400000;
 }
 
-function Bar({ label, value, max }: { label: string; value: number; max: number }) {
+function Bar({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-xs text-[var(--nantucket-gray)]">
-        <span>{label}</span>
+      <div className="flex justify-end text-xs font-normal">
         <span className="tabular-nums text-[var(--atlantic-navy)]">{value.toLocaleString()}</span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-[#e8edf4]">
@@ -122,9 +149,12 @@ function domActiveDays(onMarket: string | null | undefined): number | null {
   return Math.max(0, Math.round((Date.now() - t) / 86_400_000));
 }
 
-function fmtPpsf(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return `$${Math.round(n).toLocaleString()}/SF`;
+/** Comparison grid data cells: digits only (no units, currency symbols, or labels). */
+function gridCell(n: number | null | undefined, kind: "int" | "ratio"): ReactNode {
+  if (n == null || !Number.isFinite(n)) return null;
+  const cls = "tabular-nums text-[13px] font-semibold sm:text-sm";
+  if (kind === "ratio") return <span className={cls}>{n.toFixed(2)}</span>;
+  return <span className={cls}>{Math.round(n).toLocaleString("en-US")}</span>;
 }
 
 type ComparisonTone = "good" | "bad" | "neutral" | "na";
@@ -178,18 +208,18 @@ function ComparisonGridCell({
   tone: ComparisonTone;
   tab: "active" | "sold" | "parcels";
   onJump: (t: "active" | "sold" | "parcels") => void;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={() => onJump(tab)}
       className={cn(
-        "w-full min-h-[4.25rem] rounded-lg border px-2.5 py-2 text-left text-[11px] leading-snug shadow-sm transition-colors sm:min-h-[4.75rem] sm:px-3 sm:py-2.5 sm:text-[13px]",
+        "w-full min-h-[4.25rem] rounded-lg border px-[3px] py-[3px] text-left text-[11px] leading-snug shadow-sm transition-colors sm:min-h-[4.75rem] sm:text-[13px]",
         toneClass(tone)
       )}
     >
-      {children}
+      {children ?? null}
     </button>
   );
 }
@@ -199,7 +229,7 @@ function ComparisonGridSubjectCell({ children }: { children: ReactNode }) {
   return (
     <div
       className={cn(
-        "w-full min-h-[4.25rem] rounded-lg border border-[var(--atlantic-navy)]/20 bg-[#f2f8fb] px-2.5 py-2 text-left text-[11px] leading-snug shadow-sm sm:min-h-[4.75rem] sm:px-3 sm:py-2.5 sm:text-[13px] text-[var(--atlantic-navy)]"
+        "w-full min-h-[4.25rem] rounded-lg border border-[var(--atlantic-navy)]/20 bg-[#f2f8fb] px-[3px] py-[3px] text-left text-[11px] leading-snug shadow-sm sm:min-h-[4.75rem] sm:text-[13px] text-[var(--atlantic-navy)]"
       )}
     >
       {children}
@@ -385,7 +415,6 @@ export function PropertyV3View({ data }: Props) {
   }, [filteredSold, soldMonths]);
 
   const clientMedianSoldPpsf = useMemo(() => medianSoldPpsfFromIntel(soldWindowRows), [soldWindowRows]);
-  const clientMedianSoldGla = useMemo(() => medianGlaSoldFromIntel(soldWindowRows), [soldWindowRows]);
   const clientMedianActivePpsf = useMemo(() => medianActivePpsfFromIntel(filteredActive), [filteredActive]);
 
   const subjectListPriceForGrid = useMemo(() => {
@@ -398,48 +427,107 @@ export function PropertyV3View({ data }: Props) {
     return null;
   }, [data.currentActive?.listPrice, data.focusListing?.listPrice]);
 
-  const clientMedianActiveListPrice = useMemo(() => {
+  /** Active comp set: arithmetic mean list price (row 1). */
+  const meanActiveListPrice = useMemo(() => {
     const prices = filteredActive.map((r) => r.listPrice).filter((p): p is number => p != null && p > 0);
-    return medianNums(prices);
+    return meanNums(prices);
   }, [filteredActive]);
-
-  /** Subject list price ÷ cohort median list (active). */
-  const activeListPriceSubjectOverCohortMedian = useMemo(() => {
-    const s = subjectListPriceForGrid;
-    const m = clientMedianActiveListPrice;
-    if (s == null || !Number.isFinite(s) || m == null || !Number.isFinite(m) || m <= 0) return null;
-    return s / m;
-  }, [subjectListPriceForGrid, clientMedianActiveListPrice]);
 
   const clientMedianSoldListPrice = useMemo(
     () => medianSoldListPriceFromIntel(soldWindowRows),
     [soldWindowRows]
   );
 
-  const soldListPriceSubjectOverCohortMedian = useMemo(() => {
-    const s = subjectListPriceForGrid;
-    const m = clientMedianSoldListPrice;
-    if (s == null || !Number.isFinite(s) || m == null || !Number.isFinite(m) || m <= 0) return null;
-    return s / m;
-  }, [subjectListPriceForGrid, clientMedianSoldListPrice]);
+  const subjectBuildingAreaTotal = data.rankings.subjectBuildingAreaTotal;
+  const subjectLotSizeSquareFeet = data.rankings.subjectLotSizeSquareFeet;
+  const subjectTaxAssessedValue = data.rankings.subjectTaxAssessedValue;
 
-  /** Subject $/SF ÷ cohort median $/SF. Active: list ÷ GLA vs median ask $/SF in filtered active cohort. */
-  const activePpsfSubjectOverCohortMedian = useMemo(() => {
-    const s = data.rankings.subjectActivePpsf;
-    const m = clientMedianActivePpsf;
-    if (s == null || !Number.isFinite(s) || m == null || !Number.isFinite(m) || m <= 0) return null;
-    return s / m;
-  }, [data.rankings.subjectActivePpsf, clientMedianActivePpsf]);
+  const subjectListPerBuildingArea = useMemo(() => {
+    const lp = subjectListPriceForGrid;
+    const bat = subjectBuildingAreaTotal;
+    if (lp == null || !Number.isFinite(lp) || bat == null || bat <= 0) return null;
+    return lp / bat;
+  }, [subjectListPriceForGrid, subjectBuildingAreaTotal]);
 
-  /** Subject last-sale $/SF ÷ cohort median closed $/SF (sold window). */
-  const soldPpsfSubjectOverCohortMedian = useMemo(() => {
-    const s = data.rankings.subjectSoldPpsf;
-    const m = clientMedianSoldPpsf;
-    if (s == null || !Number.isFinite(s) || m == null || !Number.isFinite(m) || m <= 0) return null;
-    return s / m;
-  }, [data.rankings.subjectSoldPpsf, clientMedianSoldPpsf]);
+  const subjectListPerTaxAssessed = useMemo(() => {
+    const lp = subjectListPriceForGrid;
+    const t = subjectTaxAssessedValue;
+    if (lp == null || !Number.isFinite(lp) || t == null || t <= 0) return null;
+    return lp / t;
+  }, [subjectListPriceForGrid, subjectTaxAssessedValue]);
 
-  const { median: saleToAssessedMultiplier, sample: saleToAssessedSample } = useMemo(
+  const meanActiveBuildingAreaTotal = useMemo(
+    () => meanNums(sortedPositive(filteredActive.map((r) => r.buildingAreaTotal))),
+    [filteredActive]
+  );
+  const medianSoldBuildingAreaTotal = useMemo(
+    () => medianNums(sortedPositive(soldWindowRows.map((r) => r.buildingAreaTotal))),
+    [soldWindowRows]
+  );
+  const meanActiveLotSizeSqftMls = useMemo(
+    () => meanNums(sortedPositive(filteredActive.map((r) => r.lotSizeSquareFeet))),
+    [filteredActive]
+  );
+  const medianSoldLotSizeSqftMls = useMemo(
+    () => medianNums(sortedPositive(soldWindowRows.map((r) => r.lotSizeSquareFeet))),
+    [soldWindowRows]
+  );
+  const meanActiveTaxAssessedBase = useMemo(() => {
+    const vals = filteredActive
+      .map((r) => r.taxAssessedBase)
+      .filter((x): x is number => x != null && x > 0);
+    return meanNums(vals);
+  }, [filteredActive]);
+
+  const meanActiveTaxOtherAnnual = useMemo(() => {
+    const vals = filteredActive
+      .map((r) => r.taxOtherAnnualAmount)
+      .filter((x): x is number => x != null && Number.isFinite(x));
+    return meanNums(vals);
+  }, [filteredActive]);
+
+  /** Active row 5: mean(TaxAssessedValue) + mean(TaxOtherAnnualAssessmentAmount). */
+  const meanActiveTaxRow5 = useMemo(() => {
+    const b = meanActiveTaxAssessedBase;
+    const o = meanActiveTaxOtherAnnual;
+    if (b == null && o == null) return null;
+    return (b ?? 0) + (o ?? 0);
+  }, [meanActiveTaxAssessedBase, meanActiveTaxOtherAnnual]);
+
+  const medianSoldTaxAssessedMls = useMemo(
+    () => medianNums(sortedPositive(soldWindowRows.map((r) => r.taxAssessedValue))),
+    [soldWindowRows]
+  );
+  /** Active row 3: mean list ÷ mean BuildingAreaTotal. */
+  const meanActiveListPerBat = useMemo(() => {
+    const lp = meanActiveListPrice;
+    const bat = meanActiveBuildingAreaTotal;
+    if (lp == null || !Number.isFinite(lp) || bat == null || bat <= 0) return null;
+    return lp / bat;
+  }, [meanActiveListPrice, meanActiveBuildingAreaTotal]);
+
+  const medianSoldListPerBat = useMemo(
+    () => medianListDividedByBuildingArea(soldWindowRows),
+    [soldWindowRows]
+  );
+  /** Active row 6: mean list ÷ row 5. */
+  const meanActiveListPerTax = useMemo(() => {
+    const lp = meanActiveListPrice;
+    const t = meanActiveTaxRow5;
+    if (lp == null || !Number.isFinite(lp) || t == null || t <= 0) return null;
+    return lp / t;
+  }, [meanActiveListPrice, meanActiveTaxRow5]);
+
+  const medianSoldListPerTax = useMemo(
+    () => medianListDividedByTaxAssessed(soldWindowRows),
+    [soldWindowRows]
+  );
+  const medianParcelLotSqftAssessor = useMemo(
+    () => medianNums(sortedPositive(filteredParcels.map((p) => p.lotSqft))),
+    [filteredParcels]
+  );
+
+  const { median: saleToAssessedMultiplier } = useMemo(
     () => medianCloseToAssessedFromIntel(soldWindowRows),
     [soldWindowRows]
   );
@@ -470,14 +558,6 @@ export function PropertyV3View({ data }: Props) {
     });
   }, [subjectGla, subjectAssessed, filteredSold, filteredActive, soldMonths]);
 
-  const subjectSaleToAssessed = useMemo(() => {
-    if (!subjectAssessed || subjectAssessed <= 0) return null;
-    const c = data.focusListing?.closePrice;
-    if (c != null && c > 0) return c / subjectAssessed;
-    const h = data.history.find((x) => x.closePrice != null && x.closePrice > 0);
-    if (h?.closePrice) return h.closePrice / subjectAssessed;
-    return null;
-  }, [subjectAssessed, data.focusListing?.closePrice, data.history]);
 
   const subjectActiveDom = useMemo(() => {
     const id = data.currentActive?.linkId;
@@ -499,36 +579,9 @@ export function PropertyV3View({ data }: Props) {
   );
   const medianParcelAssessed = useMemo(() => medianNums(parcelAssessedSorted), [parcelAssessedSorted]);
 
-  const activeGlaSorted = useMemo(() => sortedPositive(filteredActive.map((r) => r.gla)), [filteredActive]);
-  const soldGlaSorted = useMemo(() => sortedPositive(soldWindowRows.map((r) => r.gla)), [soldWindowRows]);
-  const activeLotSorted = useMemo(() => sortedPositive(filteredActive.map((r) => r.lotSqft)), [filteredActive]);
-  const soldLotSorted = useMemo(() => sortedPositive(soldWindowRows.map((r) => r.lotSqft)), [soldWindowRows]);
-
-  const pctGlaActive = useMemo(
-    () => (subjectGla != null && subjectGla > 0 ? percentileInSorted(activeGlaSorted, subjectGla) : null),
-    [subjectGla, activeGlaSorted]
-  );
-  const pctGlaSold = useMemo(
-    () => (subjectGla != null && subjectGla > 0 ? percentileInSorted(soldGlaSorted, subjectGla) : null),
-    [subjectGla, soldGlaSorted]
-  );
-
-  const pctLotActive = useMemo(
-    () =>
-      subjectLotSqft != null && subjectLotSqft > 0
-        ? percentileInSorted(activeLotSorted, subjectLotSqft)
-        : null,
-    [subjectLotSqft, activeLotSorted]
-  );
-  const pctLotSold = useMemo(
-    () =>
-      subjectLotSqft != null && subjectLotSqft > 0 ? percentileInSorted(soldLotSorted, subjectLotSqft) : null,
-    [subjectLotSqft, soldLotSorted]
-  );
-
-  const medianActiveDom = useMemo(() => {
+  const meanActiveDom = useMemo(() => {
     const vals = filteredActive.map((r) => domActiveDays(r.onMarketDate)).filter((x): x is number => x != null);
-    return medianNums(vals);
+    return meanNums(vals);
   }, [filteredActive]);
 
   const medianSoldDom = useMemo(() => {
@@ -865,27 +918,18 @@ export function PropertyV3View({ data }: Props) {
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--nantucket-gray)]">
               Cohort snapshot
             </p>
-            <p className="mt-1 text-xs text-[var(--nantucket-gray)]">
-              Live counts from your selections — updates immediately when any option changes.
-            </p>
             <div className="mt-4 rounded-xl bg-[var(--atlantic-navy)] px-4 py-4 text-white shadow-inner sm:px-5 sm:py-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-4 sm:gap-y-1">
-                <span className="text-xl font-bold tabular-nums sm:text-2xl">
-                  {filteredActive.length.toLocaleString()}{" "}
-                  <span className="text-sm font-semibold text-white/80 sm:text-base">active</span>
+                <span className="text-xl font-normal tabular-nums sm:text-2xl">
+                  {filteredActive.length.toLocaleString()}
                 </span>
                 <span className="hidden text-white/35 sm:inline">·</span>
-                <span className="text-xl font-bold tabular-nums sm:text-2xl">
-                  {soldWindowRows.length.toLocaleString()}{" "}
-                  <span className="text-sm font-semibold text-white/80 sm:text-base">sold ({soldMonths} mo)</span>
+                <span className="text-xl font-normal tabular-nums sm:text-2xl">
+                  {soldWindowRows.length.toLocaleString()}
                 </span>
                 <span className="hidden text-white/35 sm:inline">·</span>
-                <span
-                  className="text-xl font-bold tabular-nums sm:text-2xl"
-                  title="Assessor parcels outside the MLS-area map bbox (same geography & lot band when applicable)"
-                >
-                  {filteredNonMlsParcels.length.toLocaleString()}{" "}
-                  <span className="text-sm font-semibold text-white/80 sm:text-base">non-MLS parcels</span>
+                <span className="text-xl font-normal tabular-nums sm:text-2xl">
+                  {filteredNonMlsParcels.length.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -1004,328 +1048,131 @@ export function PropertyV3View({ data }: Props) {
         <div className="mt-6 rounded-xl border border-[#cfe0ea] bg-gradient-to-b from-white to-[#f7fbfd] p-4 shadow-sm sm:p-5">
           <h3 className="text-base font-semibold text-[var(--atlantic-navy)]">Property Comparison Grid</h3>
           <p className="mt-1 text-xs leading-relaxed text-[var(--nantucket-gray)] sm:text-sm">
-            Subject property vs. current comparison set (update filters above to change the cohorts)
+            Subject property vs. current comparison set (update filters above to change the cohorts). The Active column
+            uses arithmetic means over the active comp set (current listing excluded). Sold and Parcels columns use
+            medians where labeled.
           </p>
 
           <div className="mt-4 -mx-1 overflow-x-auto px-1 sm:mx-0 sm:px-0">
             <table className="w-full min-w-[36rem] border-separate border-spacing-y-1.5 text-left sm:min-w-[48rem]">
               <thead>
                 <tr className="text-[10px] font-bold uppercase tracking-wide text-[var(--nantucket-gray)] sm:text-xs">
-                  <th className="min-w-[7.5rem] pb-2 pr-2 align-bottom sm:min-w-[9rem]">Metric</th>
-                  <th className="min-w-[8rem] max-w-[10.5rem] pb-2 px-1 align-top pt-1 font-semibold normal-case leading-tight tracking-normal text-[var(--atlantic-navy)] sm:min-w-[9rem] sm:max-w-[12rem] sm:text-[11px]">
+                  <th className="min-w-[7.5rem] p-[3px] align-bottom sm:min-w-[9rem]">Metric</th>
+                  <th className="min-w-[8rem] max-w-[10.5rem] p-[3px] align-top font-semibold normal-case leading-tight tracking-normal text-[var(--atlantic-navy)] sm:min-w-[9rem] sm:max-w-[12rem] sm:text-[11px]">
                     <div>{data.parcel.location}</div>
-                    <div className="mt-1.5 text-[10px] font-semibold tabular-nums tracking-normal text-[var(--atlantic-navy)] sm:text-[11px]">
-                      {subjectGla != null ? `${subjectGla.toLocaleString()} SQFT` : "—"}
-                    </div>
                   </th>
-                  <th className="px-1 pb-2 align-bottom">Active</th>
-                  <th className="px-1 pb-2 align-bottom">Sold</th>
-                  <th className="pl-1 pb-2 align-bottom">All Parcels</th>
+                  <th className="p-[3px] align-bottom">Active</th>
+                  <th className="p-[3px] align-bottom">Sold</th>
+                  <th className="p-[3px] align-bottom">All Parcels</th>
                 </tr>
               </thead>
               <tbody className="align-top">
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">List price</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {subjectListPriceForGrid != null ? (
-                        <span className="text-base font-bold tabular-nums sm:text-lg">{fmtMoney(subjectListPriceForGrid)}</span>
-                      ) : (
-                        <span className="text-[11px] text-[var(--nantucket-gray)]">—</span>
-                      )}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">List Price</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectListPriceForGrid, "int")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="active" onJump={jumpToTabDepth}>
-                      {clientMedianActiveListPrice != null ? (
-                        <>
-                          <div className="tabular-nums text-[13px] font-semibold sm:text-sm">
-                            {fmtMoney(clientMedianActiveListPrice)}
-                          </div>
-                          <div className="mt-1 text-[10px] leading-snug text-[var(--nantucket-gray)] sm:text-[11px]">
-                            {activeListPriceSubjectOverCohortMedian != null ? (
-                              <>
-                                Subject ÷ this price:{" "}
-                                <span className="font-semibold tabular-nums text-[var(--atlantic-navy)]">
-                                  {activeListPriceSubjectOverCohortMedian.toFixed(2)}×
-                                </span>
-                                {" "}
-                                <span className="opacity-90">
-                                  ({activeListPriceSubjectOverCohortMedian >= 1 ? "at or above" : "below"})
-                                </span>
-                              </>
-                            ) : (
-                              "—"
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(meanActiveListPrice, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="sold" onJump={jumpToTabDepth}>
-                      {clientMedianSoldListPrice != null ? (
-                        <>
-                          <div className="tabular-nums text-[13px] font-semibold sm:text-sm">
-                            {fmtMoney(clientMedianSoldListPrice)}
-                          </div>
-                          <div className="mt-1 text-[10px] leading-snug text-[var(--nantucket-gray)] sm:text-[11px]">
-                            {soldListPriceSubjectOverCohortMedian != null ? (
-                              <>
-                                Subject ÷ this price:{" "}
-                                <span className="font-semibold tabular-nums text-[var(--atlantic-navy)]">
-                                  {soldListPriceSubjectOverCohortMedian.toFixed(2)}×
-                                </span>
-                                {" "}
-                                <span className="opacity-90">
-                                  ({soldListPriceSubjectOverCohortMedian >= 1 ? "at or above" : "below"})
-                                </span>
-                              </>
-                            ) : (
-                              "—"
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(clientMedianSoldListPrice, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth}>
-                      —
-                    </ComparisonGridCell>
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth} />
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Living Area (SQFT)</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {subjectGla != null ? (
-                        <span className="tabular-nums font-semibold">{subjectGla.toLocaleString()} SQFT</span>
-                      ) : (
-                        "—"
-                      )}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Living Area SqFt</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectBuildingAreaTotal, "int")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="active" onJump={jumpToTabDepth}>
-                      {pctGlaActive != null && subjectGla != null ? (
-                        <>
-                          <span className="tabular-nums font-semibold">{pctGlaActive}th</span> percentile · subject{" "}
-                          <strong className="tabular-nums">{subjectGla.toLocaleString()} SQFT</strong>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(meanActiveBuildingAreaTotal, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="sold" onJump={jumpToTabDepth}>
-                      {pctGlaSold != null && subjectGla != null ? (
-                        <>
-                          <span className="tabular-nums font-semibold">{pctGlaSold}th</span> percentile · subject{" "}
-                          <strong className="tabular-nums">{subjectGla.toLocaleString()} SQFT</strong>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianSoldBuildingAreaTotal, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth}>
-                      —
-                    </ComparisonGridCell>
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth} />
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Price / SF (living)</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {data.currentActive?.listPrice != null &&
-                      data.currentActive.listPrice > 0 &&
-                      subjectGla != null &&
-                      subjectGla > 0 ? (
-                        <>
-                          <div className="text-base font-bold tabular-nums leading-tight text-[var(--atlantic-navy)] sm:text-lg">
-                            {fmtPpsf(data.currentActive.listPrice / subjectGla)}
-                          </div>
-                          <div className="mt-1.5 text-[10px] font-normal leading-snug text-[var(--nantucket-gray)] sm:text-[11px]">
-                            <span className="font-semibold text-[var(--atlantic-navy)]/90">
-                              {fmtMoney(data.currentActive.listPrice)}
-                            </span>{" "}
-                            list price ÷{" "}
-                            <span className="font-semibold tabular-nums text-[var(--atlantic-navy)]/90">
-                              {subjectGla.toLocaleString()} SF
-                            </span>{" "}
-                            living area
-                          </div>
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Price per Sq Ft</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectListPerBuildingArea, "int")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell
-                      tone={ppsfTone(data.rankings.subjectActivePpsf, clientMedianActivePpsf)}
+                      tone={ppsfTone(subjectListPerBuildingArea, meanActiveListPerBat)}
                       tab="active"
                       onJump={jumpToTabDepth}
                     >
-                      {clientMedianActivePpsf != null ? (
-                        <>
-                          Median <span className="tabular-nums font-semibold">{fmtPpsf(clientMedianActivePpsf)}</span>
-                          {data.rankings.subjectActivePpsf != null ? (
-                            <>
-                              {" "}
-                              · subject{" "}
-                              <strong className="tabular-nums">{fmtPpsf(data.rankings.subjectActivePpsf)}</strong>
-                            </>
-                          ) : (
-                            " · subject —"
-                          )}
-                          {activePpsfSubjectOverCohortMedian != null ? (
-                            <span className="mt-1 block text-[10px] leading-snug text-[var(--nantucket-gray)] sm:text-[11px]">
-                              Ratio (subject ask ÷ cohort median ask):{" "}
-                              <span className="font-semibold tabular-nums text-[var(--atlantic-navy)]">
-                                {activePpsfSubjectOverCohortMedian.toFixed(2)}×
-                              </span>
-                              {" "}
-                              <span className="opacity-90">
-                                ({activePpsfSubjectOverCohortMedian >= 1 ? "at or above" : "below"} median)
-                              </span>
-                            </span>
-                          ) : null}
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(meanActiveListPerBat, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell
-                      tone={ppsfTone(data.rankings.subjectSoldPpsf, clientMedianSoldPpsf)}
+                      tone={ppsfTone(subjectListPerBuildingArea, medianSoldListPerBat)}
                       tab="sold"
                       onJump={jumpToTabDepth}
                     >
-                      {clientMedianSoldPpsf != null ? (
-                        <>
-                          Median <span className="tabular-nums font-semibold">{fmtPpsf(clientMedianSoldPpsf)}</span>
-                          {data.rankings.subjectSoldPpsf != null ? (
-                            <>
-                              {" "}
-                              · subject{" "}
-                              <strong className="tabular-nums">{fmtPpsf(data.rankings.subjectSoldPpsf)}</strong>
-                            </>
-                          ) : (
-                            " · subject —"
-                          )}
-                          {soldPpsfSubjectOverCohortMedian != null ? (
-                            <span className="mt-1 block text-[10px] leading-snug text-[var(--nantucket-gray)] sm:text-[11px]">
-                              Ratio (subject sale ÷ cohort median):{" "}
-                              <span className="font-semibold tabular-nums text-[var(--atlantic-navy)]">
-                                {soldPpsfSubjectOverCohortMedian.toFixed(2)}×
-                              </span>
-                              {" "}
-                              <span className="opacity-90">
-                                ({soldPpsfSubjectOverCohortMedian >= 1 ? "at or above" : "below"} median)
-                              </span>
-                            </span>
-                          ) : null}
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianSoldListPerBat, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth}>
-                      —
-                    </ComparisonGridCell>
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth} />
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Lot size</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {subjectLotSqft != null ? (
-                        <div className="tabular-nums font-semibold">{subjectLotSqft.toLocaleString()} SF</div>
-                      ) : null}
-                      {subjectAcres > 0 ? (
-                        <div className={cn("tabular-nums font-semibold", subjectLotSqft != null && "mt-0.5")}>
-                          {subjectAcres} ac
-                        </div>
-                      ) : null}
-                      {subjectLotSqft == null && subjectAcres <= 0 ? "—" : null}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Lot Size Sq Ft</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectLotSizeSquareFeet, "int")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="active" onJump={jumpToTabDepth}>
-                      {pctLotActive != null ? (
-                        <>
-                          <span className="tabular-nums font-semibold">{pctLotActive}th</span> percentile (MLS lot) ·
-                          subject{" "}
-                          <strong className="tabular-nums">
-                            {subjectLotSqft != null ? `${subjectLotSqft.toLocaleString()} SF` : "—"}
-                          </strong>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(meanActiveLotSizeSqftMls, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="sold" onJump={jumpToTabDepth}>
-                      {pctLotSold != null ? (
-                        <>
-                          <span className="tabular-nums font-semibold">{pctLotSold}th</span> percentile (MLS lot) ·
-                          subject{" "}
-                          <strong className="tabular-nums">
-                            {subjectLotSqft != null ? `${subjectLotSqft.toLocaleString()} SF` : "—"}
-                          </strong>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianSoldLotSizeSqftMls, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="parcels" onJump={jumpToTabDepth}>
-                      {clientLandPercentile != null && subjectAcres > 0 ? (
-                        <>
-                          <span className="tabular-nums font-semibold">{clientLandPercentile}th</span> percentile (acres)
-                          · subject <strong className="tabular-nums">{subjectAcres} ac</strong>
-                        </>
-                      ) : (
-                        "—"
+                      {gridCell(
+                        medianParcelLotSqftAssessor ??
+                          (data.parcel.lotSqft != null && data.parcel.lotSqft > 0 ? data.parcel.lotSqft : null),
+                        "int"
                       )}
                     </ComparisonGridCell>
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Assessed value</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {subjectAssessed != null ? (
-                        <span className="font-semibold tabular-nums">{fmtMoney(subjectAssessed)}</span>
-                      ) : (
-                        "—"
-                      )}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Assessed Value</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectTaxAssessedValue, "int")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="active" onJump={jumpToTabDepth}>
-                      —
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="neutral" tab="active" onJump={jumpToTabDepth}>
+                      {gridCell(meanActiveTaxRow5, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="sold" onJump={jumpToTabDepth}>
-                      —
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="neutral" tab="sold" onJump={jumpToTabDepth}>
+                      {gridCell(medianSoldTaxAssessedMls, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell
                       tone={
                         medianParcelAssessed != null && subjectAssessed != null && subjectAssessed > 0
@@ -1335,148 +1182,65 @@ export function PropertyV3View({ data }: Props) {
                       tab="parcels"
                       onJump={jumpToTabDepth}
                     >
-                      {medianParcelAssessed != null && subjectAssessed != null ? (
-                        <>
-                          Median <span className="font-semibold tabular-nums">{fmtMoney(medianParcelAssessed)}</span> ·
-                          subject <strong className="tabular-nums">{fmtMoney(subjectAssessed)}</strong>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianParcelAssessed ?? subjectAssessed, "int")}
                     </ComparisonGridCell>
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Price to Assessed</td>
-                  <td className="p-1">
-                    <ComparisonGridSubjectCell>
-                      {subjectSaleToAssessed != null ? (
-                        <>
-                          <span className="font-semibold tabular-nums">{subjectSaleToAssessed.toFixed(2)}×</span>
-                          <span className="mt-1 block text-[10px] font-normal text-[var(--nantucket-gray)]">
-                            Close price ÷ assessed total
-                          </span>
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </ComparisonGridSubjectCell>
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Price to Assessment</td>
+                  <td className="p-[3px]">
+                    <ComparisonGridSubjectCell>{gridCell(subjectListPerTaxAssessed, "ratio")}</ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="active" onJump={jumpToTabDepth}>
-                      —
+                  <td className="p-[3px]">
+                    <ComparisonGridCell
+                      tone={saleToAssessedTone(subjectListPerTaxAssessed, meanActiveListPerTax)}
+                      tab="active"
+                      onJump={jumpToTabDepth}
+                    >
+                      {gridCell(meanActiveListPerTax, "ratio")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell
-                      tone={saleToAssessedTone(subjectSaleToAssessed, saleToAssessedMultiplier)}
+                      tone={saleToAssessedTone(subjectListPerTaxAssessed, medianSoldListPerTax)}
                       tab="sold"
                       onJump={jumpToTabDepth}
                     >
-                      {saleToAssessedMultiplier != null ? (
-                        <>
-                          Median <span className="font-semibold tabular-nums">{saleToAssessedMultiplier.toFixed(2)}×</span>
-                          {subjectSaleToAssessed != null ? (
-                            <>
-                              {" "}
-                              · subject{" "}
-                              <strong className="tabular-nums">{subjectSaleToAssessed.toFixed(2)}×</strong>
-                            </>
-                          ) : (
-                            " · subject —"
-                          )}
-                          <span className="mt-0.5 block text-[10px] text-[var(--nantucket-gray)]">
-                            MLS closings with assessor match · {soldMonths} mo window
-                          </span>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianSoldListPerTax, "ratio")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth}>
-                      —
-                    </ComparisonGridCell>
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth} />
                   </td>
                 </tr>
                 <tr>
-                  <td className="pr-2 font-medium text-[var(--atlantic-navy)]">Days on market</td>
-                  <td className="p-1">
+                  <td className="p-[3px] font-medium text-[var(--atlantic-navy)]">Days on Market</td>
+                  <td className="p-[3px]">
                     <ComparisonGridSubjectCell>
-                      {subjectActiveDom != null ? (
-                        <>
-                          <span className="font-semibold tabular-nums">{subjectActiveDom}</span> days
-                          <span className="mt-0.5 block text-[10px] text-[var(--nantucket-gray)]">Current active</span>
-                        </>
-                      ) : subjectSoldDom != null ? (
-                        <>
-                          <span className="font-semibold tabular-nums">{subjectSoldDom}</span> days
-                          <span className="mt-0.5 block text-[10px] text-[var(--nantucket-gray)]">Last sale (list→close)</span>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(subjectActiveDom ?? subjectSoldDom, "int")}
                     </ComparisonGridSubjectCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell tone="neutral" tab="active" onJump={jumpToTabDepth}>
-                      {medianActiveDom != null ? (
-                        <>
-                          Median <span className="font-semibold tabular-nums">{Math.round(medianActiveDom)}</span> days
-                          {subjectActiveDom != null ? (
-                            <>
-                              {" "}
-                              · subject <strong className="tabular-nums">{subjectActiveDom}</strong>
-                            </>
-                          ) : (
-                            " · subject —"
-                          )}
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(meanActiveDom, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
+                  <td className="p-[3px]">
                     <ComparisonGridCell
                       tone={domSoldTone(subjectSoldDom, medianSoldDom)}
                       tab="sold"
                       onJump={jumpToTabDepth}
                     >
-                      {medianSoldDom != null ? (
-                        <>
-                          Median <span className="font-semibold tabular-nums">{Math.round(medianSoldDom)}</span> days
-                          {subjectSoldDom != null ? (
-                            <>
-                              {" "}
-                              · subject <strong className="tabular-nums">{subjectSoldDom}</strong>
-                            </>
-                          ) : (
-                            " · subject —"
-                          )}
-                          <span className="mt-0.5 block text-[10px] text-[var(--nantucket-gray)]">
-                            Sold · {soldMonths} mo window
-                          </span>
-                        </>
-                      ) : (
-                        "—"
-                      )}
+                      {gridCell(medianSoldDom, "int")}
                     </ComparisonGridCell>
                   </td>
-                  <td className="p-1">
-                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth}>
-                      —
-                    </ComparisonGridCell>
+                  <td className="p-[3px]">
+                    <ComparisonGridCell tone="na" tab="parcels" onJump={jumpToTabDepth} />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-[10px] text-[var(--nantucket-gray)] sm:text-xs">
-            Tap a cell to open the matching tab below. Green highlights suggest relatively stronger value vs the cohort;
-            red suggests relatively higher pricing or longer time on market (sold).
-          </p>
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-6">
@@ -1493,28 +1257,19 @@ export function PropertyV3View({ data }: Props) {
           </TabsList>
 
           <TabsContent value="active" id="pv3-depth-active" className="scroll-mt-28 mt-4 space-y-4">
-            <p className="text-xs text-[var(--nantucket-gray)]">
-              Active cohort count is shown in the summary bar above; charts use the same filtered set.
-            </p>
             {data.rankings.subjectActivePpsf != null && clientMedianActivePpsf != null ? (
               <Bar
-                label="This property $/SF (vs MLS GLA) vs median active in cohort"
                 value={Math.round(data.rankings.subjectActivePpsf)}
                 max={Math.max(data.rankings.subjectActivePpsf, clientMedianActivePpsf) * 1.05}
               />
             ) : (
-              <p className="text-sm tabular-nums text-[var(--atlantic-navy)]">—</p>
+              <p className="text-sm font-normal tabular-nums text-[var(--atlantic-navy)]">—</p>
             )}
           </TabsContent>
 
           <TabsContent value="sold" id="pv3-depth-sold" className="scroll-mt-28 mt-4 space-y-4">
-            <p className="text-xs text-[var(--nantucket-gray)]">
-              Sold counts and window match the summary bar; medians and projections use closings in the last{" "}
-              {soldMonths} months within your filters.
-            </p>
             {data.rankings.subjectSoldPpsf != null && clientMedianSoldPpsf != null ? (
               <Bar
-                label="This property last sold $/SF vs window median"
                 value={Math.round(data.rankings.subjectSoldPpsf)}
                 max={Math.max(data.rankings.subjectSoldPpsf, clientMedianSoldPpsf) * 1.05}
               />
@@ -1522,49 +1277,32 @@ export function PropertyV3View({ data }: Props) {
           </TabsContent>
 
           <TabsContent value="parcels" id="pv3-depth-parcels" className="scroll-mt-28 mt-4 space-y-4">
-            <p className="text-xs text-[var(--nantucket-gray)]">
-              Parcel count follows geography and, in Lot mode, the same ±% lot band as MLS rows. Server payload caps
-              parcel rows.
-            </p>
             {subjectAcres > 0 && clientMedianLandAcres != null ? (
               <Bar
-                label="This parcel land vs median acres (cohort)"
                 value={Math.round(subjectAcres * 1000) / 1000}
                 max={Math.max(subjectAcres, clientMedianLandAcres) * 1.1}
               />
             ) : null}
-            <p className="text-xs text-[var(--nantucket-gray)]">
-              GLA on assessor export is not modeled in this GeoJSON — GLA uses MLS living area when present.
-            </p>
           </TabsContent>
         </Tabs>
 
         <div className="mt-6 grid gap-4 border-t border-[#eef2f7] pt-6 sm:grid-cols-2">
           <div>
             <h3 className="text-sm font-semibold text-[var(--atlantic-navy)]">Gross living area (GLA)</h3>
-            <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--atlantic-navy)]">
+            <p className="mt-1 text-2xl font-normal tabular-nums text-[var(--atlantic-navy)]">
               {subjectGla != null ? `${subjectGla.toLocaleString()} SF` : "—"}
             </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-[var(--atlantic-navy)]">Land percentile (cohort)</h3>
-            <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--privet-green)]">
+            <p className="mt-1 text-2xl font-normal tabular-nums text-[var(--privet-green)]">
               {clientLandPercentile != null ? `${clientLandPercentile}th` : "—"}
             </p>
-            <p className="text-xs text-[var(--nantucket-gray)]">Percentile of lot acres vs assessor parcels in cohort</p>
           </div>
           <div className="sm:col-span-2">
             <h3 className="text-sm font-semibold text-[var(--atlantic-navy)]">Assessed value context</h3>
-            <p className="mt-1 text-sm text-[var(--atlantic-navy)]/90">
-              {saleToAssessedMultiplier != null ? (
-                <>
-                  Sold closings in cohort with MLS↔assessor matches imply a median price-to-assessed multiple of about{" "}
-                  <span className="font-semibold">{saleToAssessedMultiplier.toFixed(2)}×</span> (n={saleToAssessedSample}
-                  in {soldMonths} mo window).
-                </>
-              ) : (
-                "—"
-              )}
+            <p className="mt-1 text-2xl font-normal tabular-nums text-[var(--atlantic-navy)]">
+              {saleToAssessedMultiplier != null ? `${saleToAssessedMultiplier.toFixed(2)}×` : "—"}
             </p>
           </div>
         </div>
@@ -1575,25 +1313,20 @@ export function PropertyV3View({ data }: Props) {
             <dl className="mt-3 grid gap-3 sm:grid-cols-2 text-sm">
               <div>
                 <dt className="text-[var(--nantucket-gray)]">Projected listing range</dt>
-                <dd className="text-lg font-semibold tabular-nums text-[var(--atlantic-navy)]">
+                <dd className="text-lg font-normal tabular-nums text-[var(--atlantic-navy)]">
                   {fmtMoney(projection.listLow)} – {fmtMoney(projection.listHigh)}
                 </dd>
               </div>
               <div>
                 <dt className="text-[var(--nantucket-gray)]">Projected sale range</dt>
-                <dd className="text-lg font-semibold tabular-nums text-[var(--atlantic-navy)]">
+                <dd className="text-lg font-normal tabular-nums text-[var(--atlantic-navy)]">
                   {fmtMoney(projection.saleLow)} – {fmtMoney(projection.saleHigh)}
                 </dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-2 text-sm text-[var(--nantucket-gray)]">Need assessed value, GLA, and sold comps to project.</p>
+            <p className="mt-2 text-sm font-normal text-[var(--nantucket-gray)]">Need assessed value, GLA, and sold comps to project.</p>
           )}
-          <p className="mt-3 text-xs leading-relaxed text-[var(--nantucket-gray)]">
-            Basis: subject GLA and assessed total, median sold $/SF in the selected {soldMonths}-month window within
-            geography + comp filters, and median price-to-assessed from the same window. Not an appraisal — for discussion
-            only.
-          </p>
         </div>
       </section>
 
@@ -1627,11 +1360,11 @@ export function PropertyV3View({ data }: Props) {
           <table className="w-full min-w-[32rem] text-left text-sm">
             <thead>
               <tr className="border-b border-[#e8edf4] text-xs font-semibold uppercase tracking-wide text-[var(--nantucket-gray)]">
-                <th className="py-2 pr-2">MLS number</th>
-                <th className="py-2 pr-2">Status</th>
-                <th className="py-2 pr-2">Dates</th>
-                <th className="py-2 pr-2">Price</th>
-                <th className="py-2">Brokerage</th>
+                <th className="p-[3px]">MLS number</th>
+                <th className="p-[3px]">Status</th>
+                <th className="p-[3px]">Dates</th>
+                <th className="p-[3px]">Price</th>
+                <th className="p-[3px]">Brokerage</th>
               </tr>
             </thead>
             <tbody>
@@ -1643,7 +1376,7 @@ export function PropertyV3View({ data }: Props) {
                     data.currentActive?.linkId === h.linkId && "bg-[var(--sandstone)]/50"
                   )}
                 >
-                  <td className="py-2 pr-2 font-mono tabular-nums">
+                  <td className="p-[3px] font-mono tabular-nums">
                     <a
                       href={h.linkUrl}
                       target="_blank"
@@ -1653,14 +1386,14 @@ export function PropertyV3View({ data }: Props) {
                       {h.linkId}
                     </a>
                   </td>
-                  <td className="py-2 pr-2">{h.mlsStatus}</td>
-                  <td className="py-2 pr-2 text-xs text-[var(--nantucket-gray)]">
+                  <td className="p-[3px]">{h.mlsStatus}</td>
+                  <td className="p-[3px] text-xs text-[var(--nantucket-gray)]">
                     {h.closeDate || h.onMarketDate || "—"}
                   </td>
-                  <td className="py-2 pr-2 font-medium tabular-nums">
+                  <td className="p-[3px] font-medium tabular-nums">
                     {h.closePrice != null ? fmtMoney(h.closePrice) : h.listPrice != null ? fmtMoney(h.listPrice) : "—"}
                   </td>
-                  <td className="max-w-[14rem] py-2 text-[var(--atlantic-navy)]/90">
+                  <td className="max-w-[14rem] p-[3px] text-[var(--atlantic-navy)]/90">
                     {h.brokerage ?? "—"}
                   </td>
                 </tr>

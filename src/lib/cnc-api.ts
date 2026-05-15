@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.congdonandcoleman.com";
 
 /**
@@ -80,6 +82,8 @@ export type CncListing = {
   Longitude?: number;
   /** RESO assessed value when the feed includes it (sparse). */
   TaxAssessedValue?: number;
+  /** RESO other annual tax assessment; summed with `TaxAssessedValue` for comparison grid row 5. */
+  TaxOtherAnnualAssessmentAmount?: number;
 };
 
 type CncListingsResponse = {
@@ -217,6 +221,19 @@ export async function fetchAllListings(
 
   return all;
 }
+
+/**
+ * Per-request memoized full active inventory pull. Duplicate calls in the same
+ * RSC request (e.g. resolve listing + property payload) share one CNC round-trip.
+ */
+export const getCachedActiveListingsAll = cache(async () => fetchAllListings({ status: "A" }));
+
+/**
+ * Per-request memoized sold pull for a given `close_date` window (days).
+ */
+export const getCachedSoldListingsByCloseDays = cache(async (closeDays: number) =>
+  fetchAllListings({ status: "S", close_date: closeDays })
+);
 
 /** Compute the median of a sorted-ascending numeric array. */
 export function median(values: number[]): number | null {

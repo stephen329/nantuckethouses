@@ -1,7 +1,7 @@
 import type { Feature, Geometry } from "geojson";
 import type { LinkListingPinProperties } from "@/lib/link-listings-parcel-match";
 import { buildParcelStreetCentroidIndex, type ParcelProps } from "@/lib/link-listings-parcel-match";
-import { listingAddressStem, streetMatchKey } from "@/lib/address-street-key";
+import { listingAddressStem, streetIndexLookupKeys } from "@/lib/address-street-key";
 
 /**
  * Resolve a LINK listing address (MLS / pin `address`) to a tax parcel feature
@@ -15,9 +15,14 @@ export function findParcelFeatureByListingAddress<G extends { parcel_id?: string
   const index = buildParcelStreetCentroidIndex(features as Feature<Geometry, ParcelProps>[]);
   const stem = listingAddressStem(address);
   if (!stem) return null;
-  const key = streetMatchKey(stem);
-  if (!key) return null;
-  const hit = index.get(key);
+  let hit: { lng: number; lat: number; parcel_id: string } | null = null;
+  for (const key of streetIndexLookupKeys(stem)) {
+    const h = index.get(key);
+    if (h) {
+      hit = h;
+      break;
+    }
+  }
   if (!hit) return null;
   const pid = hit.parcel_id.trim();
   return features.find((f) => String(f.properties?.parcel_id ?? "").trim() === pid) ?? null;
