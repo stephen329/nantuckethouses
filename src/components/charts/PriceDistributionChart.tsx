@@ -18,13 +18,13 @@ type Props = {
 
 // Nantucket-appropriate colors for luxury market segments
 const SEGMENT_COLORS: Record<string, string> = {
-  "Entry": "#6B8CAE",        // Slate blue
-  "Core": "#1A2A3A",         // Navy
-  "High-End": "#D4AF37",     // Brand gold
-  "Ultra-Luxury": "#8B7355", // Bronze
+  "Entry": "#8D99AE",        // Slate blue
+  "Core": "#1B263B",         // Navy
+  "High-End": "#2D4635",     // Brand gold
+  "Ultra-Luxury": "#6B5E51", // Bronze
 };
 
-const DEFAULT_COLORS = ["#D4AF37", "#1A2A3A", "#6B8CAE", "#8B7355"];
+const DEFAULT_COLORS = ["#2D4635", "#1B263B", "#8D99AE", "#6B5E51"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderActiveShape = (props: any) => {
@@ -43,13 +43,13 @@ const renderActiveShape = (props: any) => {
         stroke="#fff"
         strokeWidth={2}
       />
-      <text x={cx} y={cy - 10} textAnchor="middle" fill="#1A2A3A" fontSize={14} fontWeight={600}>
+      <text x={cx} y={cy - 10} textAnchor="middle" fill="#1B263B" fontSize={14} fontWeight={600}>
         {payload.range}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" fill="#1A2A3A" fontSize={20} fontWeight={700}>
+      <text x={cx} y={cy + 10} textAnchor="middle" fill="#1B263B" fontSize={20} fontWeight={700}>
         {(percent * 100).toFixed(0)}%
       </text>
-      <text x={cx} y={cy + 28} textAnchor="middle" fill="#1A2A3A80" fontSize={11}>
+      <text x={cx} y={cy + 28} textAnchor="middle" fill="#1B263B80" fontSize={11}>
         {payload.count} properties
       </text>
     </g>
@@ -61,7 +61,7 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
 
   if (isLoading) {
     return (
-      <div className="h-[380px] bg-white rounded-sm border border-[#D6C8B0] p-6 animate-pulse">
+      <div className="h-[380px] bg-white rounded-sm border border-[#6B5E51] p-6 animate-pulse">
         <div className="h-4 bg-[#E8E8E8] rounded w-1/3 mb-4"></div>
         <div className="h-[300px] bg-[#E8E8E8] rounded-full mx-auto w-[250px]"></div>
       </div>
@@ -71,10 +71,10 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
   // Handle empty data state
   if (!data || data.length === 0 || data.every(d => d.count === 0)) {
     return (
-      <div className="h-[380px] bg-white rounded-sm border border-[#D6C8B0] p-6">
-        <h3 className="text-[#1A2A3A] text-lg font-medium mb-4">Price Distribution</h3>
-        <div className="h-[300px] flex items-center justify-center bg-[#FAF8F5] rounded border border-dashed border-[#D6C8B0]">
-          <p className="text-[#1A2A3A]/50 text-sm">Insufficient data for distribution</p>
+      <div className="h-[380px] bg-white rounded-sm border border-[#6B5E51] p-6">
+        <h3 className="text-[#1B263B] text-lg font-medium mb-4">Price Distribution</h3>
+        <div className="h-[300px] flex items-center justify-center bg-[#F1F1E6] rounded border border-dashed border-[#6B5E51]">
+          <p className="text-[#1B263B]/50 text-sm">Insufficient data for distribution</p>
         </div>
       </div>
     );
@@ -105,10 +105,10 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
   };
 
   return (
-    <div className="bg-white rounded-sm border border-[#D6C8B0] p-6">
+    <div className="bg-white rounded-sm border border-[#6B5E51] p-6">
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-[#1A2A3A] text-lg font-medium">Price Distribution</h3>
-        <span className="text-xs text-[#1A2A3A]/50 bg-[#FAF8F5] px-2 py-1 rounded">
+        <h3 className="text-[#1B263B] text-lg font-medium">Price Distribution</h3>
+        <span className="text-xs text-[#1B263B]/50 bg-[#F1F1E6] px-2 py-1 rounded">
           {totalListings} properties
         </span>
       </div>
@@ -147,7 +147,7 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
               }}
               contentStyle={{ 
                 backgroundColor: "white", 
-                border: "1px solid #D6C8B0",
+                border: "1px solid #6B5E51",
                 borderRadius: "4px",
                 fontSize: 12,
               }}
@@ -161,13 +161,13 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
             <div className="text-center">
               {formattedVolume ? (
                 <>
-                  <p className="text-2xl font-bold text-[#1A2A3A]">{formattedVolume}</p>
-                  <p className="text-xs text-[#1A2A3A]/50">Total Volume</p>
+                  <p className="text-2xl font-bold text-[#1B263B]">{formattedVolume}</p>
+                  <p className="text-xs text-[#1B263B]/50">Total Volume</p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-bold text-[#1A2A3A]">{totalListings}</p>
-                  <p className="text-xs text-[#1A2A3A]/50">Properties</p>
+                  <p className="text-2xl font-bold text-[#1B263B]">{totalListings}</p>
+                  <p className="text-xs text-[#1B263B]/50">Properties</p>
                 </>
               )}
             </div>
@@ -188,7 +188,7 @@ export function PriceDistributionChart({ data, isLoading, totalVolume }: Props) 
               className="w-3 h-3 rounded-sm" 
               style={{ backgroundColor: getColor(entry.range, index) }}
             />
-            <span className="text-[#1A2A3A]">{entry.range}</span>
+            <span className="text-[#1B263B]">{entry.range}</span>
           </div>
         ))}
       </div>

@@ -1,76 +1,152 @@
 export type NavItem = {
   label: string;
-  href: string;
+  path?: string;
   description?: string;
+  isFeatured?: boolean;
+  badge?: "Popular" | "New";
 };
 
-export type NavPillar = {
+export type NavColumn = {
   label: string;
   items: NavItem[];
 };
 
-// ─── 4-Pillar Structure ─────────────────────────────────────
-export const navPillars: NavPillar[] = [
-  {
+export type NavEntry = {
+  key: string;
+  label: string;
+  path: string;
+  description?: string;
+  children?: NavItem[];
+  megaMenuColumns?: NavColumn[];
+};
+
+type NavLink = {
+  label: string;
+  href: string;
+  description?: string;
+};
+
+export const NAV_STRUCTURE: Record<string, NavEntry> = {
+  marketPulse: {
+    key: "marketPulse",
     label: "Market Pulse",
-    items: [
-      { label: "Market Dashboard", href: "/market-pulse", description: "Live charts, inventory trends, absorption rates" },
-      { label: "Whale Watch", href: "/market-pulse/whale-watch", description: "Top luxury sales YTD + Stephen's Take" },
-      { label: "Price Trends", href: "/market-pulse/price-trends", description: "Interactive charts and analysis" },
-      { label: "Inventory Tracker", href: "/market-pulse/inventory", description: "Historical inventory views" },
-      { label: "Market Reports", href: "/market-pulse/reports", description: "Downloadable monthly/quarterly PDFs" },
+    path: "/market-pulse",
+    children: [
+      { label: "Market Dashboard", path: "/market-pulse", description: "Live charts, inventory trends, absorption rates" },
+      { label: "Whale Watch", path: "/market-pulse/whale-watch", description: "Top luxury sales YTD" },
+      { label: "Price Trends", path: "/market-pulse/price-trends", description: "Interactive charts and analysis" },
+      { label: "Inventory Tracker", path: "/market-pulse/inventory", description: "Historical inventory views" },
+      { label: "Market Reports", path: "/market-pulse/reports", description: "Downloadable monthly/quarterly PDFs" },
     ],
   },
-  {
-    label: "Regulatory Hub",
-    items: [
-      { label: "Overview", href: "/regulatory", description: "Meeting calendars and quick links" },
-      { label: "HDC Morning After", href: "/regulatory/hdc-morning-after", description: "Weekly 2-minute recaps" },
-      { label: "Planning Board", href: "/regulatory/planning-board", description: "Summaries and highlights" },
-      { label: "Zoning Board", href: "/regulatory/zoning-board", description: "Appeals and decisions" },
-      { label: "Interactive Zoning Map", href: "/regulatory/zoning-map", description: "Clickable district overlay" },
-      { label: "Zoning Lookup", href: "/regulatory/zoning-lookup", description: "Zoning by address tool" },
-      { label: "Cheat Sheets", href: "/regulatory/cheat-sheets", description: "Downloadable HDC & zoning guides" },
-    ],
-  },
-  {
-    label: "Build & Renovate",
-    items: [
-      { label: "Cost Calculator", href: "/build-renovate/cost-calculator", description: "Instant Nantucket-specific estimate" },
-      { label: "Building Costs", href: "/build-renovate/building-costs", description: "2026 cost guides and analysis" },
-      { label: "Case Studies", href: "/build-renovate/case-studies", description: "Before/after project examples" },
-      { label: "Vendor Rate Sheet", href: "/build-renovate/vendor-rate-sheet", description: "Premium contractor rates (gated)" },
-    ],
-  },
-  {
+  neighborhoods: {
+    key: "neighborhoods",
     label: "Neighborhoods",
-    items: [
-      { label: "Overview", href: "/neighborhoods", description: "Interactive map of all areas" },
-      { label: "'Sconset", href: "/neighborhoods/sconset" },
-      { label: "Cliff", href: "/neighborhoods/cliff" },
-      { label: "Town", href: "/neighborhoods/town" },
-      { label: "Surfside", href: "/neighborhoods/surfside" },
-      { label: "Madaket", href: "/neighborhoods/madaket" },
-      { label: "Dionis", href: "/neighborhoods/dionis" },
-      { label: "Mid-Island", href: "/neighborhoods/mid-island" },
-      { label: "Cisco", href: "/neighborhoods/cisco" },
-      { label: "Brant Point", href: "/neighborhoods/brant-point" },
-      { label: "Monomoy", href: "/neighborhoods/monomoy" },
-      { label: "Polpis", href: "/neighborhoods/polpis" },
-      { label: "Tom Nevers", href: "/neighborhoods/tom-nevers" },
+    path: "/neighborhoods",
+    description: "Dreaming and discovery",
+  },
+  propertyMap: {
+    key: "propertyMap",
+    label: "Property Map",
+    path: "/map",
+    description: "Live rentals, sales, comps, and zoning",
+  },
+  resources: {
+    key: "resources",
+    label: "Resources",
+    path: "/resources",
+    description: "Regulatory and construction command center",
+    children: [
+      { label: "Regulatory Updates", path: "/regulatory" },
+      { label: "Zoning & Planning Tools", path: "/map" },
+      { label: "Affordable & Workforce Housing", path: "/affordable-housing" },
+      { label: "Build & Renovate", path: "/build-renovate" },
     ],
+    megaMenuColumns: [
+      {
+        label: "Regulatory Updates",
+        items: [
+          { label: "Latest HDC Morning After", path: "/regulatory/hdc-morning-after", badge: "New" },
+          { label: "Planning Board Updates", path: "/regulatory/planning-board" },
+          { label: "Zoning Board Updates", path: "/regulatory/zoning-board" },
+        ],
+      },
+      {
+        label: "Zoning & Planning Tools",
+        items: [
+          { label: "Property Map", path: "/map", description: "Rentals, parcels, and zoning — live map", isFeatured: true },
+          { label: "Regulatory Cheat Sheets", path: "/regulatory/cheat-sheets", badge: "Popular" },
+          { label: "Local Case Studies", path: "/build-renovate", description: "Build and planning examples" },
+        ],
+      },
+      {
+        label: "Affordable & Workforce Housing",
+        items: [
+          { label: "Affordable & Workforce Home Ownership", path: "/affordable-housing/home-ownership" },
+          { label: "Year-Round Rentals", path: "/affordable-housing/year-round-rentals" },
+          { label: "Accessory Dwelling Units (ADUs)", path: "/affordable-housing/adus" },
+        ],
+      },
+      {
+        label: "Build & Renovate",
+        items: [
+          { label: "Cost Calculator (Coming Soon)", description: "Coming soon", badge: "Popular" },
+          { label: "Building Costs & Guides", path: "/build-renovate" },
+        ],
+      },
+    ],
+  },
+  about: {
+    key: "about",
+    label: "About",
+    path: "/about",
+    description: "Trust and authority",
+  },
+};
+
+export const primaryNavItems: NavEntry[] = [
+  NAV_STRUCTURE.marketPulse,
+  NAV_STRUCTURE.neighborhoods,
+  NAV_STRUCTURE.resources,
+  NAV_STRUCTURE.about,
+];
+
+/** Primary header CTA (desktop + mobile). Opportunity desk routes stay live under /opportunities for deep links. */
+export const navCta = {
+  label: "Property Map",
+  path: "/map",
+};
+
+// Compatibility exports for existing footer/sitemap consumers.
+export const navPillars: { label: string; items: NavLink[] }[] = [
+  {
+    label: NAV_STRUCTURE.marketPulse.label,
+    items:
+      NAV_STRUCTURE.marketPulse.children
+        ?.filter((item): item is NavItem & { path: string } => Boolean(item.path))
+        .map((item) => ({
+          label: item.label,
+          href: item.path,
+          description: item.description,
+        })) ?? [],
+  },
+  {
+    label: NAV_STRUCTURE.neighborhoods.label,
+    items: [{ label: NAV_STRUCTURE.neighborhoods.label, href: NAV_STRUCTURE.neighborhoods.path }],
+  },
+  {
+    label: NAV_STRUCTURE.resources.label,
+    items: [{ label: NAV_STRUCTURE.resources.label, href: NAV_STRUCTURE.resources.path }],
   },
 ];
 
-// Standalone links (not in pillars)
-export const standaloneNavItems: NavItem[] = [
-  { label: "Articles", href: "/articles" },
-  { label: "About", href: "/about" },
+export const standaloneNavItems: NavLink[] = [
+  { label: NAV_STRUCTURE.about.label, href: NAV_STRUCTURE.about.path },
 ];
 
-// Flat list of all nav items (for footer, sitemap, etc.)
-export const allNavItems: NavItem[] = [
+export const allNavItems: NavLink[] = [
   { label: "Home", href: "/" },
   ...navPillars.flatMap((p) => p.items),
   ...standaloneNavItems,
+  { label: navCta.label, href: navCta.path },
 ];

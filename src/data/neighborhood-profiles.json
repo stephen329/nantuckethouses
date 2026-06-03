@@ -1,0 +1,203 @@
+{
+  "brant-point": {
+    "slug": "brant-point",
+    "name": "Brant Point",
+    "description": "The harbor's front porch. Walking distance to town with iconic lighthouse views and some of the island's most coveted waterfront.",
+    "highlights": [
+      "Walking distance to Main Street and ferries",
+      "Iconic Brant Point Lighthouse",
+      "Protected harbor beaches",
+      "R-1 zoning — smaller lots, higher density"
+    ],
+    "shoreline": {
+      "status": "Stable",
+      "concerns": "Harbor-side erosion minimal. Jetties Beach renourishment ongoing. Flood zone considerations for waterfront parcels.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Several high-end renovations in progress. Two new construction applications pending with HDC.",
+    "zoningDistrict": "R-1"
+  },
+  "sconset": {
+    "slug": "sconset",
+    "name": "'Sconset",
+    "description": "The village at the end of the island. Rose-covered cottages, dramatic bluff views, and a fiercely independent character that makes it Nantucket's most coveted address.",
+    "highlights": [
+      "Historic rose-covered cottages",
+      "Dramatic Atlantic bluff views",
+      "Sconset Beach and Casino",
+      "Tight inventory — bidding wars common"
+    ],
+    "shoreline": {
+      "status": "Critical",
+      "concerns": "Bluff erosion remains the defining issue. Geotube installations ongoing. Several properties have lost significant setback in recent years. Flood insurance costs rising.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Multiple renovation applications in process. Commission watching bluff setback compliance closely. Inventory near historic lows.",
+    "zoningDistrict": "R-2"
+  },
+  "madaket": {
+    "slug": "madaket",
+    "name": "Madaket",
+    "description": "The sunset side. Remote, windswept, and deeply local. Madaket rewards those who want distance from town and proximity to some of the island's most dramatic coastline.",
+    "highlights": [
+      "Famous sunset views over Madaket Harbor",
+      "Remote western location — 6 miles from town",
+      "Active surf beach community",
+      "Larger lots, more affordable entry points"
+    ],
+    "shoreline": {
+      "status": "Active",
+      "concerns": "Smith's Point erosion continues. Beach migration shifting sand patterns. Dredging projects in Hither Creek area. Some parcels facing long-term viability questions.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Erosion conversations are cooling demand slightly in exposed areas, but protected harbor-side lots remain strong.",
+    "zoningDistrict": "LUG-1"
+  },
+  "mid-island": {
+    "slug": "mid-island",
+    "name": "Mid-Island",
+    "description": "The island's practical center. Schools, hospital, and daily services are here. Larger lots and more permissive zoning make it the focus of workforce housing and development discussions.",
+    "highlights": [
+      "Largest lots and most permissive zoning (LUG-2)",
+      "Proximity to schools, hospital, airport",
+      "Active workforce housing development debates",
+      "Best buyer leverage on the island currently"
+    ],
+    "whatsHappening": "Planning Board reviewing workforce housing subdivision proposals. Zoning density debates ongoing. Ground cover calculation changes under review.",
+    "zoningDistrict": "LUG-2"
+  },
+  "town": {
+    "slug": "town",
+    "name": "Town",
+    "description": "The historic heart. Cobblestone streets, whaling-era architecture, and the strictest HDC oversight on the island. Every renovation is a conversation with history.",
+    "highlights": [
+      "Nantucket's historic core — ROH zoning (strictest)",
+      "Cobblestone Main Street, harbor access",
+      "Walking distance to everything",
+      "Very high HDC scrutiny — 4-8 month permit timeline"
+    ],
+    "whatsHappening": "Steady renovation activity. Historic homes trading at full ask. Limited turnover means low inventory despite strong demand.",
+    "zoningDistrict": "ROH"
+  },
+  "cliff": {
+    "slug": "cliff",
+    "name": "Cliff",
+    "description": "Trophy territory. The Cliff neighborhood commands the island's highest per-transaction prices with sweeping Sound views, established estates, and a quiet remove from town.",
+    "highlights": [
+      "Highest average sale prices on the island",
+      "Sweeping Nantucket Sound views",
+      "Large estate properties",
+      "Pre-market activity intense — many trades happen off-MLS"
+    ],
+    "shoreline": {
+      "status": "Moderate",
+      "concerns": "Bluff stability varies by parcel. North-facing properties generally stable. Steps Beach access subject to seasonal conditions.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Trophy properties moving in days, not weeks. Pre-market activity is intense in the $10M+ segment.",
+    "zoningDistrict": "R-2"
+  },
+  "surfside": {
+    "slug": "surfside",
+    "name": "Surfside",
+    "description": "South shore energy. Popular beach, accessible location, and a mix of established homes and new construction. Surfside balances beach lifestyle with relative proximity to town.",
+    "highlights": [
+      "Popular Surfside Beach — walkable for many properties",
+      "Mix of established homes and new construction",
+      "Moderate HDC oversight (R-2 district)",
+      "Strong seasonal buyer interest"
+    ],
+    "shoreline": {
+      "status": "Active",
+      "concerns": "South shore exposure means ongoing beach dynamics. Surfside Beach stable but sand movement varies year to year. Flood zone mapping affects insurance costs for beachfront parcels.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Seasonal buyers arriving early this year. Beach access lots are the prize. Several new construction approvals in pipeline.",
+    "zoningDistrict": "R-2"
+  },
+  "cisco": {
+    "slug": "cisco",
+    "name": "Cisco",
+    "description": "The south shore's quieter neighbor. Cisco and the Hummock Pond area offer larger lots, brewery culture, and a laid-back energy that attracts a different kind of buyer.",
+    "highlights": [
+      "Cisco Brewers and vineyard culture",
+      "Larger lots (LUG-1 zoning)",
+      "Hummock Pond access and nature trails",
+      "Good value for patient buyers"
+    ],
+    "shoreline": {
+      "status": "Moderate",
+      "concerns": "Hummock Pond breach dynamics affect nearby properties periodically. South shore exposure similar to Surfside but less developed.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Waiting for summer momentum. Good value window for buyers right now.",
+    "zoningDistrict": "LUG-1"
+  },
+  "dionis": {
+    "slug": "dionis",
+    "name": "Dionis",
+    "description": "North shore serenity. Calm beaches, spectacular water views, and a family-friendly atmosphere. Dionis waterfront is generating serious interest from development-minded buyers.",
+    "highlights": [
+      "Calm north shore beaches — ideal for families",
+      "R-5 zoning — larger lots with moderate oversight",
+      "Spectacular harbor and Sound views",
+      "Waterfront parcels generating development interest"
+    ],
+    "shoreline": {
+      "status": "Stable",
+      "concerns": "North shore generally more protected than south. Dionis Beach access well-maintained. Minimal erosion concerns for most parcels.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Waterfront parcels generating serious interest from development-minded buyers. Several lot inquiries in the last quarter.",
+    "zoningDistrict": "R-5"
+  },
+  "polpis": {
+    "slug": "polpis",
+    "name": "Polpis",
+    "description": "The quiet corridor. Polpis Road connects Town to the eastern end of the island, winding through conservation land, harbor views, and some of Nantucket's most private estates.",
+    "highlights": [
+      "Conservation land and natural beauty",
+      "Private estate properties",
+      "Polpis Harbor access",
+      "R-5 zoning — large lots, moderate HDC"
+    ],
+    "whatsHappening": "Limited turnover. Properties trade privately. Conservation easements shape development potential significantly.",
+    "zoningDistrict": "R-5"
+  },
+  "monomoy": {
+    "slug": "monomoy",
+    "name": "Monomoy",
+    "description": "The quiet prestige. Tucked between Town and Brant Point, Monomoy offers waterfront living with harbor views and easy access to town — without the foot traffic.",
+    "highlights": [
+      "Harbor waterfront with Town proximity",
+      "Quieter alternative to Brant Point",
+      "R-5 zoning — larger lots",
+      "Premium pricing for waterfront parcels"
+    ],
+    "shoreline": {
+      "status": "Stable",
+      "concerns": "Harbor-side location provides good protection. Minimal erosion concerns. Flood zone considerations for lowest-lying parcels.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Pool house and accessory structure applications trending. Ground cover limits being tested on several parcels.",
+    "zoningDistrict": "R-5"
+  },
+  "madequecham": {
+    "slug": "madequecham",
+    "name": "Madequecham",
+    "description": "The south shore's hidden stretch. Between Surfside and Cisco, Madequecham offers dramatic bluff-top properties with some of the island's most powerful ocean views.",
+    "highlights": [
+      "Dramatic ocean bluff properties",
+      "Less developed than Surfside or Cisco",
+      "Powerful south shore views",
+      "LUG-1 zoning — larger lots"
+    ],
+    "shoreline": {
+      "status": "Active",
+      "concerns": "Bluff erosion is the primary concern. Several properties have lost setback distance over the past decade. Geotube and dune restoration projects ongoing. Long-term viability assessment recommended for bluff-edge parcels.",
+      "lastUpdated": "2026-03"
+    },
+    "whatsHappening": "Erosion mitigation projects in progress. Buyers with long-term vision see opportunity; cautious buyers are steering inland.",
+    "zoningDistrict": "LUG-1"
+  }
+}

@@ -1,14 +1,14 @@
 {
   "weekOf": "2026-04-06",
   "neighborhoods": [
-    { "neighborhood": "'Sconset", "status": "Steamy", "trend": "up", "note": "Inventory remains non-existent; expect multiple offers on anything under $5M." },
-    { "neighborhood": "Cliff", "status": "Steamy", "trend": "up", "note": "Trophy properties moving in days, not weeks. Pre-market activity is intense." },
-    { "neighborhood": "Town", "status": "Warm", "trend": "flat", "note": "Steady demand with limited turnover. Historic homes trading at full ask." },
-    { "neighborhood": "Surfside", "status": "Warm", "trend": "up", "note": "Seasonal buyers arriving early this year. Beach access lots are the prize." },
-    { "neighborhood": "Madaket", "status": "Steady", "trend": "flat", "note": "Erosion conversations are cooling demand slightly, but sunset views still command a premium." },
-    { "neighborhood": "Mid-Island", "status": "Chilly", "trend": "down", "note": "Buyers are hesitant as zoning density debates continue at the Planning Board." },
-    { "neighborhood": "Dionis", "status": "Warm", "trend": "up", "note": "Waterfront parcels generating serious interest from development-minded buyers." },
-    { "neighborhood": "Cisco", "status": "Steady", "trend": "flat", "note": "Waiting for summer momentum. Good value for patient buyers right now." }
+    { "neighborhood": "'Sconset", "trend": "up", "note": "Inventory remains non-existent; expect multiple offers on anything under $5M." },
+    { "neighborhood": "Cliff", "trend": "up", "note": "Trophy properties moving in days, not weeks. Pre-market activity is intense." },
+    { "neighborhood": "Town", "trend": "flat", "note": "Steady demand with limited turnover. Historic homes trading at full ask." },
+    { "neighborhood": "Surfside", "trend": "up", "note": "Seasonal buyers arriving early this year. Beach access lots are the prize." },
+    { "neighborhood": "Madaket", "trend": "flat", "note": "Erosion conversations are cooling demand slightly, but sunset views still command a premium." },
+    { "neighborhood": "Mid-Island", "trend": "down", "note": "Buyers are hesitant as zoning density debates continue at the Planning Board." },
+    { "neighborhood": "Dionis", "trend": "up", "note": "Waterfront parcels generating serious interest from development-minded buyers." },
+    { "neighborhood": "Cisco", "trend": "flat", "note": "Waiting for summer momentum. Good value for patient buyers right now." }
   ],
   "stephenNote": "The premium coastal neighborhoods are firmly in seller territory. Interior locations — particularly Mid-Island — offer the best negotiating leverage for buyers this spring."
 }

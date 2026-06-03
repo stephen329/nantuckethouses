@@ -109,7 +109,7 @@ export function NewsletterSignup() {
 
         {status === "error" && (
           <p className="mt-3 text-xs text-red-400">
-            Something went wrong. Please try again or email stephen@nantuckethouses.com directly.
+            Something went wrong. Please try again or email stephen@maury.net directly.
           </p>
         )}
       </div>

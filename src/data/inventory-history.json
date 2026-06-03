@@ -1,0 +1,749 @@
+{
+  "updatedAt": "2026-04-28T00:00:00.000Z",
+  "snapshots": [
+    {
+      "monthKey": "2024-04",
+      "label": "April 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 0,
+        "endingInventory": 142,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-05",
+      "label": "May 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 142,
+        "endingInventory": 176,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-06",
+      "label": "June 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 176,
+        "endingInventory": 214,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-07",
+      "label": "July 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 214,
+        "endingInventory": 223,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-08",
+      "label": "August 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 223,
+        "endingInventory": 244,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-09",
+      "label": "September 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 244,
+        "endingInventory": 248,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-10",
+      "label": "October 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 248,
+        "endingInventory": 225,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-11",
+      "label": "November 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 225,
+        "endingInventory": 189,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2024-12",
+      "label": "December 2024",
+      "source": "chart-backfill",
+      "activity": {
+        "startingInventory": 189,
+        "endingInventory": 172,
+        "newListings": 0,
+        "returnToMarket": 0,
+        "priceChanges": 0,
+        "offMarket": 0,
+        "offerToPurchase": 0,
+        "pAndS": 0,
+        "sold": 0,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "land": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        },
+        "commercial": {
+          "absorptionMonths": null,
+          "inventoryCount": 0
+        }
+      }
+    },
+    {
+      "monthKey": "2025-01",
+      "label": "January 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 127,
+        "endingInventory": 120,
+        "newListings": 20,
+        "returnToMarket": 7,
+        "priceChanges": 13,
+        "offMarket": 12,
+        "offerToPurchase": 6,
+        "pAndS": 8,
+        "sold": 29,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 3,
+          "inventoryCount": 95
+        },
+        "land": {
+          "absorptionMonths": 5,
+          "inventoryCount": 16
+        },
+        "commercial": {
+          "absorptionMonths": 4,
+          "inventoryCount": 4
+        }
+      }
+    },
+    {
+      "monthKey": "2025-02",
+      "label": "February 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 120,
+        "endingInventory": 122,
+        "newListings": 22,
+        "returnToMarket": 8,
+        "priceChanges": 5,
+        "offMarket": 12,
+        "offerToPurchase": 3,
+        "pAndS": 14,
+        "sold": 24,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 3,
+          "inventoryCount": 95
+        },
+        "land": {
+          "absorptionMonths": 5,
+          "inventoryCount": 17
+        },
+        "commercial": {
+          "absorptionMonths": 6,
+          "inventoryCount": 6
+        }
+      }
+    },
+    {
+      "monthKey": "2025-03",
+      "label": "March 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 122,
+        "endingInventory": 135,
+        "newListings": 39,
+        "returnToMarket": 8,
+        "priceChanges": 12,
+        "offMarket": 12,
+        "offerToPurchase": 1,
+        "pAndS": 20,
+        "sold": 20,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 4,
+          "inventoryCount": 105
+        },
+        "land": {
+          "absorptionMonths": 5,
+          "inventoryCount": 16
+        },
+        "commercial": {
+          "absorptionMonths": 6,
+          "inventoryCount": 6
+        }
+      }
+    },
+    {
+      "monthKey": "2025-04",
+      "label": "April 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 134,
+        "endingInventory": 180,
+        "newListings": 64,
+        "returnToMarket": 13,
+        "priceChanges": 20,
+        "offMarket": 14,
+        "offerToPurchase": 3,
+        "pAndS": 11,
+        "sold": 31,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 6,
+          "inventoryCount": 146
+        },
+        "land": {
+          "absorptionMonths": 6,
+          "inventoryCount": 20
+        },
+        "commercial": {
+          "absorptionMonths": 3,
+          "inventoryCount": 7
+        }
+      }
+    },
+    {
+      "monthKey": "2025-05",
+      "label": "May 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 180,
+        "endingInventory": 211,
+        "newListings": 54,
+        "returnToMarket": 7,
+        "priceChanges": 11,
+        "offMarket": 7,
+        "offerToPurchase": 2,
+        "pAndS": 13,
+        "sold": 20,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 9,
+          "inventoryCount": 176
+        },
+        "land": {
+          "absorptionMonths": 8,
+          "inventoryCount": 24
+        },
+        "commercial": {
+          "absorptionMonths": 4,
+          "inventoryCount": 9
+        }
+      }
+    },
+    {
+      "monthKey": "2025-06",
+      "label": "June 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 213,
+        "endingInventory": 249,
+        "newListings": 69,
+        "returnToMarket": 4,
+        "priceChanges": 32,
+        "offMarket": 8,
+        "offerToPurchase": 7,
+        "pAndS": 18,
+        "sold": 27,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 11,
+          "inventoryCount": 208
+        },
+        "land": {
+          "absorptionMonths": 6,
+          "inventoryCount": 26
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 10
+        }
+      }
+    },
+    {
+      "monthKey": "2025-07",
+      "label": "July 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 249,
+        "endingInventory": 224,
+        "newListings": 45,
+        "returnToMarket": 3,
+        "priceChanges": 52,
+        "offMarket": 18,
+        "offerToPurchase": 7,
+        "pAndS": 38,
+        "sold": 38,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 10,
+          "inventoryCount": 194
+        },
+        "land": {
+          "absorptionMonths": 4,
+          "inventoryCount": 22
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 10
+        }
+      }
+    },
+    {
+      "monthKey": "2025-08",
+      "label": "August 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 224,
+        "endingInventory": 212,
+        "newListings": 56,
+        "returnToMarket": 4,
+        "priceChanges": 60,
+        "offMarket": 16,
+        "offerToPurchase": 13,
+        "pAndS": 38,
+        "sold": 31,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 8,
+          "inventoryCount": 177
+        },
+        "land": {
+          "absorptionMonths": 4,
+          "inventoryCount": 22
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 10
+        }
+      }
+    },
+    {
+      "monthKey": "2025-09",
+      "label": "September 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 212,
+        "endingInventory": 180,
+        "newListings": 33,
+        "returnToMarket": 6,
+        "priceChanges": 35,
+        "offMarket": 22,
+        "offerToPurchase": 9,
+        "pAndS": 38,
+        "sold": 62,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 5,
+          "inventoryCount": 154
+        },
+        "land": {
+          "absorptionMonths": 4,
+          "inventoryCount": 22
+        },
+        "commercial": {
+          "absorptionMonths": 3,
+          "inventoryCount": 6
+        }
+      }
+    },
+    {
+      "monthKey": "2025-10",
+      "label": "October 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 180,
+        "endingInventory": 147,
+        "newListings": 24,
+        "returnToMarket": 3,
+        "priceChanges": 21,
+        "offMarket": 27,
+        "offerToPurchase": 5,
+        "pAndS": 26,
+        "sold": 64,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 3,
+          "inventoryCount": 125
+        },
+        "land": {
+          "absorptionMonths": 3,
+          "inventoryCount": 19
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 5
+        }
+      }
+    },
+    {
+      "monthKey": "2025-11",
+      "label": "November 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 147,
+        "endingInventory": 149,
+        "newListings": 25,
+        "returnToMarket": 6,
+        "priceChanges": 10,
+        "offMarket": 11,
+        "offerToPurchase": 3,
+        "pAndS": 14,
+        "sold": 33,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 3,
+          "inventoryCount": 119
+        },
+        "land": {
+          "absorptionMonths": 4,
+          "inventoryCount": 23
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 5
+        }
+      }
+    },
+    {
+      "monthKey": "2025-12",
+      "label": "December 2025",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 148,
+        "endingInventory": 93,
+        "newListings": 12,
+        "returnToMarket": 1,
+        "priceChanges": 4,
+        "offMarket": 49,
+        "offerToPurchase": 5,
+        "pAndS": 10,
+        "sold": 43,
+        "foreclosures": 1
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 1,
+          "inventoryCount": 73
+        },
+        "land": {
+          "absorptionMonths": 3,
+          "inventoryCount": 16
+        },
+        "commercial": {
+          "absorptionMonths": 4,
+          "inventoryCount": 4
+        }
+      }
+    },
+    {
+      "monthKey": "2026-01",
+      "label": "January 2026",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 93,
+        "endingInventory": 82,
+        "newListings": 9,
+        "returnToMarket": 4,
+        "priceChanges": 4,
+        "offMarket": 19,
+        "offerToPurchase": 0,
+        "pAndS": 7,
+        "sold": 25,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 1,
+          "inventoryCount": 61
+        },
+        "land": {
+          "absorptionMonths": 3,
+          "inventoryCount": 15
+        },
+        "commercial": {
+          "absorptionMonths": 5,
+          "inventoryCount": 5
+        }
+      }
+    },
+    {
+      "monthKey": "2026-02",
+      "label": "February 2026",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 82,
+        "endingInventory": 81,
+        "newListings": 8,
+        "returnToMarket": 5,
+        "priceChanges": 1,
+        "offMarket": 6,
+        "offerToPurchase": 3,
+        "pAndS": 5,
+        "sold": 14,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 1,
+          "inventoryCount": 63
+        },
+        "land": {
+          "absorptionMonths": 3,
+          "inventoryCount": 13
+        },
+        "commercial": {
+          "absorptionMonths": 4,
+          "inventoryCount": 4
+        }
+      }
+    },
+    {
+      "monthKey": "2026-03",
+      "label": "March 2026",
+      "source": "pdf-seed",
+      "activity": {
+        "startingInventory": 80,
+        "endingInventory": 105,
+        "newListings": 21,
+        "returnToMarket": 15,
+        "priceChanges": 9,
+        "offMarket": 5,
+        "offerToPurchase": 3,
+        "pAndS": 2,
+        "sold": 17,
+        "foreclosures": 0
+      },
+      "segments": {
+        "residential": {
+          "absorptionMonths": 3,
+          "inventoryCount": 83
+        },
+        "land": {
+          "absorptionMonths": 5,
+          "inventoryCount": 15
+        },
+        "commercial": {
+          "absorptionMonths": 4,
+          "inventoryCount": 4
+        }
+      }
+    }
+  ]
+}

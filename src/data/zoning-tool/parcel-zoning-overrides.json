@@ -1,0 +1,10 @@
+{
+  "overrides": [
+    {
+      "parcel_id": "67 477",
+      "location": "12 APPLETON RD",
+      "zoning": "R5",
+      "reason": "Assessor export lists RC2; lot is in Town R-5 per GIS / zoning determination (manual correction)."
+    }
+  ]
+}

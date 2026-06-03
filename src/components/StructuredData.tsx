@@ -25,8 +25,8 @@ export function StructuredData() {
       postalCode: "02554",
       addressCountry: "US",
     },
-    telephone: "+1-508-560-1575",
-    email: "stephen@nantuckethouses.com",
+    telephone: "+1-508-451-0191",
+    email: "stephen@maury.net",
     areaServed: {
       "@type": "City",
       name: "Nantucket",

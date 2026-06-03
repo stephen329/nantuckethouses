@@ -1,0 +1,35 @@
+[
+  {
+    "id": "hfhn",
+    "name": "Habitat for Humanity Nantucket",
+    "tagline": "Building Affordable Homes on Nantucket Since 2003",
+    "description": "Habitat for Humanity Nantucket (HFHN) partners with families to build strength, stability, and self-reliance through affordable homeownership. With 12 homes completed on Wake Drive and more in the pipeline, HFHN is one of the island's most impactful housing organizations.",
+    "ctaText": "View HFHN Projects",
+    "ctaLink": "/affordable-housing/hfhn-projects",
+    "externalUrl": "https://habitatnantucket.org",
+    "featured": true,
+    "category": "housing",
+    "stephenNote": "As President of HFHN, I see firsthand how homeownership transforms families and strengthens our community. Every home we build keeps another Nantucket family here year-round.",
+    "image": "https://static.wixstatic.com/media/8060e5_9c7a3dde87e3458eaefdea721a086132~mv2.jpg/v1/fill/w_979,h_158,al_c,lg_1,q_80,enc_avif,quality_auto/8060e5_9c7a3dde87e3458eaefdea721a086132~mv2.jpg"
+  },
+  {
+    "id": "congdon-coleman",
+    "name": "Congdon & Coleman Real Estate",
+    "tagline": "Nantucket's trusted local brokerage since 1931",
+    "description": "Stephen Maury and the Congdon & Coleman team provide expert representation for buyers, sellers, and developers across the island.",
+    "ctaText": "Browse Current Listings",
+    "ctaLink": "https://congdonandcoleman.com",
+    "featured": true,
+    "category": "real-estate"
+  },
+  {
+    "id": "maury-development",
+    "name": "Maury Development",
+    "tagline": "Thoughtful, context-sensitive new homes and renovations",
+    "description": "Creating homes that respect Nantucket's historic character while meeting modern needs.",
+    "ctaText": "View Recent Projects",
+    "ctaLink": "/build-renovate",
+    "featured": false,
+    "category": "development"
+  }
+]

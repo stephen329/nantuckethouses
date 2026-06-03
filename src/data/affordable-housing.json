@@ -1,0 +1,80 @@
+{
+  "updatedAt": "2026-04-07",
+  "safeHarbor": {
+    "status": "Protected",
+    "expiresDate": "December 10, 2027",
+    "currentShi": "8%",
+    "previousShi": "7%",
+    "keyProjects": "Ticcoma Green (64 units) and The Meadows",
+    "stephensTake": "Safe Harbor means the Town now has a 'shield' against unfriendly 40B developments. For developers, this means 'Friendly 40B' projects — those that align with the Town's Strategic Plan — are the only viable path forward for the next two years."
+  },
+  "covenantProgram": {
+    "year": 2026,
+    "medianFamilyIncome": 163500,
+    "maxSalesPrice": 854171,
+    "householdIncomeLimit": 245250,
+    "assetLimit": 427085,
+    "note": "Up significantly due to 2026 interest rate adjustments."
+  },
+  "leaseToLocals": {
+    "lastUpdated": "February 2026",
+    "maxIncentive": 27000,
+    "unitType": "2BR+",
+    "rentCaps": {
+      "1BR": 2700,
+      "2BR": 3500,
+      "3BR+": 4000
+    }
+  },
+  "projectPipeline": [
+    { "project": "Ticcoma Green", "type": "Rental", "units": 64, "status": "Under Construction (Occ. 2027)" },
+    { "project": "Sandpiper Place", "type": "Lottery", "units": "15+", "status": "Active Lottery Applications" },
+    { "project": "Habitat (Wake Dr)", "type": "Ownership", "units": 12, "status": "Families moving in" }
+  ],
+  "amiTable": {
+    "fiscalYear": "FY 2025",
+    "medianFamilyIncome": 163500,
+    "bedroomAssumptions": ["Studio", "1BR", "2BR", "3BR", "4BR", "4BR"],
+    "householdSizes": [1, 2, 3, 4, 5, 6],
+    "tiers": [
+      {
+        "level": "50% AMI",
+        "label": "Very Low",
+        "incomes": [58000, 66250, 74550, 82800, 89450, 96050],
+        "rents": [1450, 1656, 1864, 2070, 2236, 2401]
+      },
+      {
+        "level": "60% AMI",
+        "label": "Low*",
+        "incomes": [62888, 71850, 80850, 89813, 107340, 115260],
+        "rents": [1572, 1796, 2021, 2245, 2684, 2882]
+      },
+      {
+        "level": "80% AMI",
+        "label": "Low",
+        "incomes": [83850, 95800, 107800, 119750, 129350, 138950],
+        "rents": [2096, 2395, 2695, 2994, 3234, 3474]
+      },
+      {
+        "level": "100% AMI",
+        "label": "Median*",
+        "incomes": [104813, 119750, 134750, 149688, 178900, 192100],
+        "rents": [2620, 2994, 3369, 3742, 4473, 4803]
+      },
+      {
+        "level": "110% AMI",
+        "label": "Moderate*",
+        "incomes": [115294, 131725, 148225, 164656, 196790, 211310],
+        "rents": [2882, 3293, 3706, 4116, 4920, 5283]
+      },
+      {
+        "level": "150% AMI",
+        "label": "Covenant*",
+        "incomes": [157219, 179625, 202125, 224531, 268350, 288150],
+        "rents": [3930, 4491, 5053, 5613, 6709, 7204]
+      }
+    ],
+    "marketRents": [null, 3200, 4000, 5500, null, null],
+    "footnote": "* Adjusted per Nantucket Housing Authority guidelines. Market rent based on broker insight."
+  }
+}

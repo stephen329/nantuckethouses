@@ -1,0 +1,10442 @@
+{
+  "metadata": {
+    "legend": {
+      "A": "Accessory Use as defined in \u00a7 139-15",
+      "FBED": "Formula Business Exclusion District",
+      "N": "No",
+      "SP": "Special Permit issued by Zoning Board of Appeals, unless the Planning Board is designated as the special permit granting authority pursuant to another section of this chapter.",
+      "Y": "Yes"
+    },
+    "notes": [
+      "Imported from CSV provided by user.",
+      "Allowed is true when value is not exactly N."
+    ],
+    "districts_order": [
+      "R-1",
+      "SR-1",
+      "ROH",
+      "SOH",
+      "R-5",
+      "R-5L",
+      "R-10",
+      "R-10L",
+      "SR-10",
+      "R-20",
+      "SR-20",
+      "R-40",
+      "CDT",
+      "CMI",
+      "CN",
+      "CTEC",
+      "CI",
+      "RC",
+      "RC-2",
+      "V-R",
+      "LUG-1",
+      "LUG-2",
+      "LUG-3",
+      "MMD",
+      "VN",
+      "VTEC"
+    ],
+    "source": "Use Chart - September 2024 - Sheet1.csv"
+  },
+  "Residential": {
+    "Primary Dwelling": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "T",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "T",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Secondary dwelling": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Accessory dwelling": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Tertiary Dwelling": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Apartment": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Apartment building": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Tiny house unit": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Garage apartment": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Duplex": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Workforce rental community": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Elder housing facilities": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Studio": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "A",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "A",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Garage - residential": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "A",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A/SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "A/SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A/SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "A",
+        "allowed": true
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Shed": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "A",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A/SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "A",
+        "allowed": true
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Outbuildings - other": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "A",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A/SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "A",
+        "allowed": true
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Hot tub/spa": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Small swimming pool": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Large swimming pool": {
+      "R-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "A",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "A",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Home occupations": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Keeping of pets": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    }
+  },
+  "Commercial": {
+    "Retail sales": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Convenience store": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Alcohol sales": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Bakery": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A/SP",
+        "allowed": true
+      }
+    },
+    "Open-air market": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Pharmacy": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Supermarket": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Restaurants (up to 70 seats)": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Restaurants (71 to 200 seats)": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Take-out food establishment": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Drive-through take-out food": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Tavern/bar": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Formula businesses - Retail": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP/N in NBED",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Formula businesses - Supermarket": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Formula businesses - Restaurant (up to 70 seats)": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP/N in NBED",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Formula businesses - Restaurant (71 to 200 seats)": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP/N in NBED",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Formula businesses - Take-out food": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP/N in NBED",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Formula businesses - Tavern/bar": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP/N in NBED",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Offices": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Theaters, auditoriums and other places of assembly": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A/SP",
+        "allowed": true
+      }
+    },
+    "Personal services": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Print shop": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Laundromat or dry-cleaning establishment": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Bank": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Automated teller machine": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y/A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y/A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Arcade": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Art gallery": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Museum": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Catering": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Crematorium": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Funeral home": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Health spa": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Medical clinic": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Adult on-site marijuana social consumption": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Marijuana membership club": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Marijuana establishment, recreational and marijuana treatment center, medical": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Hospital": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Hotel or inn": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Rooming, lodging or guest house": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Time-sharing/Interval dwelling units": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    }
+  },
+  "Commercial Industrial": {
+    "Contractor shop": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Lumberyard": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Bulk merchandise retail": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Landscape contractor": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Light manufacturing": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP/A",
+        "allowed": true
+      }
+    },
+    "Food processing": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Shed - commercial": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "A",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Storage container": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Interior or exterior storage or warehousing": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP/A",
+        "allowed": true
+      }
+    },
+    "Motor vehicle sales": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Motor vehicle rental": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Motor vehicle repair or painting": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Motor vehicle service station": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    }
+  },
+  "Industrial": {
+    "Adult uses": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Asphalt/batching plant": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Licensed junkyard": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Transfer station": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Petroleum product storage or distribution facility": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Utility production/distribution": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Mining": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Truck/Bus terminal": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Boat-related storage": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    }
+  },
+  "Other": {
+    "Preservation of a lot in its natural condition": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Care and propagation of fish and shellfish": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "All agricultural uses allowed by Ch 590 of the Acts of 1989": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Cemeteries": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Municipal uses (any)": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Tents": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Day-care center": {
+      "R-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "Y",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "Y",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "Y",
+        "allowed": true
+      }
+    },
+    "Kennel": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Animal hospital": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Animal shelter": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Public stable": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Employer dormitory": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "N",
+        "allowed": false
+      },
+      "CN": {
+        "value": "N",
+        "allowed": false
+      },
+      "CTEC": {
+        "value": "N",
+        "allowed": false
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Neighborhood employee housing": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-2": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-3": {
+        "value": "N",
+        "allowed": false
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "N",
+        "allowed": false
+      },
+      "VTEC": {
+        "value": "N",
+        "allowed": false
+      }
+    },
+    "Swimming pool - commercial": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10L": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-10": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-20": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-40": {
+        "value": "N",
+        "allowed": false
+      },
+      "CDT": {
+        "value": "N",
+        "allowed": false
+      },
+      "CMI": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "A",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP/A",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "A",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "A",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "A",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "A",
+        "allowed": true
+      }
+    },
+    "Recreation facilities": {
+      "R-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "ROH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SOH": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-5L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CI": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC": {
+        "value": "SP",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    },
+    "Club": {
+      "R-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "SR-1": {
+        "value": "N",
+        "allowed": false
+      },
+      "ROH": {
+        "value": "N",
+        "allowed": false
+      },
+      "SOH": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-5L": {
+        "value": "N",
+        "allowed": false
+      },
+      "R-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-10L": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-10": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "SR-20": {
+        "value": "SP",
+        "allowed": true
+      },
+      "R-40": {
+        "value": "SP",
+        "allowed": true
+      },
+      "CDT": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CMI": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CN": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CTEC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "CI": {
+        "value": "N",
+        "allowed": false
+      },
+      "RC": {
+        "value": "Y",
+        "allowed": true
+      },
+      "RC-2": {
+        "value": "Y",
+        "allowed": true
+      },
+      "V-R": {
+        "value": "N",
+        "allowed": false
+      },
+      "LUG-1": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-2": {
+        "value": "SP",
+        "allowed": true
+      },
+      "LUG-3": {
+        "value": "SP",
+        "allowed": true
+      },
+      "MMD": {
+        "value": "N",
+        "allowed": false
+      },
+      "VN": {
+        "value": "SP",
+        "allowed": true
+      },
+      "VTEC": {
+        "value": "SP",
+        "allowed": true
+      }
+    }
+  }
+}
