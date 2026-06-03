@@ -1,0 +1,43 @@
+{
+  "lastUpdated": "2026-06-02",
+  "description": "Compiled median sale prices for Nantucket real estate. Sources: Local broker reports including Bernadette Meyer, Island Properties RE, Fisher Nantucket, Great Point Properties, JPFCO. Note: Small sample sizes per quarter lead to volatility in medians based on property mix. For use in nantuckethouses.com market intelligence hub, dashboards, or Odin features. Property types vary by source (e.g., homes vs all residential).",
+  "data": [
+    {
+      "period": "2023 Annual",
+      "medianUSD": 3180000,
+      "formatted": "$3.18M",
+      "note": "Derived from 19% YoY increase reported for 2024 median of $3.78M (residential sales) - Bernadette Meyer 2024 Market Review"
+    },
+    {
+      "period": "2024 Annual",
+      "medianUSD": 3780000,
+      "formatted": "$3.78M",
+      "note": "Residential sales median - Bernadette Meyer; single-family reports around $3.385M - Great Point Properties"
+    },
+    {
+      "period": "Q1 2025",
+      "medianUSD": 2850000,
+      "formatted": "$2.85M",
+      "note": "Homes - Island Properties Real Estate Q1 2025 Report; down ~33% from 2024 annual median of ~$3.5M"
+    },
+    {
+      "period": "2025 Annual",
+      "medianUSD": 3500000,
+      "formatted": "$3.50M",
+      "note": "Median home sale price / value as of year-end 2025 - Fisher Nantucket"
+    },
+    {
+      "period": "Q1 2026",
+      "medianUSD": 3700000,
+      "formatted": "$3.70M",
+      "note": "All property types (56 sales, $258.5M volume) - Bernadette Meyer Q1 2026 Report. Higher than prior Q1 partly due to shift in sales mix toward higher-value properties"
+    },
+    {
+      "period": "2026 YTD (Jan - early Jun)",
+      "medianUSD": 3005000,
+      "formatted": "$3.005M",
+      "note": "JPFCO / local market stats; up ~25% YoY in some reports"
+    }
+  ],
+  "recommendations": "Integrate this JSON into Next.js data fetching or static generation for a 'Historical Median Prices' section or interactive chart on nantuckethouses.com. Cross-reference with your MLS/assessor data pipelines and Cursor CMA generator for more granular quarterly breakdowns from raw sold data. This positions nantuckethouses.com as the authoritative source for transparent, fact-based Nantucket market intelligence."
+}
