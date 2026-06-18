@@ -36,6 +36,7 @@ DEFAULT_ZONING_COLOR = "#546E7A"
 FIELD_PRIORITY = {
     "parcel_id": ["MAP_PAR_ID", "Parcel_Id", "MA_MAP_PAR_ID"],
     "alt_parcel_id": ["Alt_Parcel_ID"],
+    "internal_id": ["Internal_ID"],
     "zoning": ["Land_Class", "Zoning"],
     "use": ["Use"],
     "primary_use": ["Primary_Use"],
@@ -229,6 +230,7 @@ def main() -> None:
         "",
         "- `parcel_id` (string): Parcel identifier used for lookup and joins.",
         "- `alt_parcel_id` (string): Alternate parcel identifier from assessor export.",
+        "- `internal_id` (number|string): Assessor internal account identifier (`Internal_ID`).",
         "- `tax_map` (string): Parsed map component from `MAP_PAR_ID` (example: `42.3.4`).",
         "- `parcel` (string): Parsed parcel component from `MAP_PAR_ID` (example: `152`).",
         "- `zoning` (string): Normalized zoning district code (uppercased), sourced from `Land_Class` first then `Zoning`.",
